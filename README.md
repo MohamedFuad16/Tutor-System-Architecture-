@@ -10,6 +10,12 @@
   </picture>
 
   <p>
+    <a href="https://tutor-system-architecture.vercel.app/">
+      <img src="https://img.shields.io/badge/Live_Demo-tutor--system--architecture.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+    </a>
+  </p>
+
+  <p>
     <a href="https://github.com/MohamedFuad16/Tutor-System/blob/main/LICENSE">
       <img src="https://img.shields.io/badge/License-MIT-3B82F6?style=for-the-badge&logo=github&logoColor=white" alt="MIT License" />
     </a>
@@ -50,6 +56,8 @@
 Tutor is a local-first study workspace for reading papers and textbooks,
 asking a source-aware tutor questions, speaking with a realtime voice tutor, and
 turning useful sessions into revision books.
+
+**🔗 Live:** <https://tutor-system-architecture.vercel.app/>
 
 The app is built around one clear product loop:
 
