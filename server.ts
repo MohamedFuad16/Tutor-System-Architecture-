@@ -487,8 +487,37 @@ const isAuthorizedDebugRequest = (request: RequestLike) => {
   );
 };
 
+// A browser always sends an Origin on a WebSocket handshake. Requiring it to
+// match the host the app is served from blocks cross-site WebSocket hijacking
+// while letting the deployed app's own page open the voice broker. Voice keys
+// are supplied per-connection by the client (BYOK); server fallback keys stay
+// gated behind the ALLOW_SERVER_* env flags regardless of this check.
+const isSameOriginBrokerRequest = (request: RequestLike) => {
+  const origin = firstHeader(request.headers.origin).trim();
+  if (!origin) return false;
+  let originHost = "";
+  try {
+    originHost = new URL(origin).host.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (!originHost) return false;
+  const forwardedHost = hostNameFromHeader(
+    request.headers["x-forwarded-host"] as string | string[] | undefined,
+  );
+  const hostCandidates = [
+    firstHeader(request.headers.host).trim().toLowerCase(),
+    forwardedHost,
+    hostNameFromHeader(request.headers.host),
+  ].filter(Boolean);
+  const originHostname = originHost.split(":")[0];
+  return hostCandidates.some(
+    (candidate) => candidate === originHost || candidate === originHostname,
+  );
+};
+
 const isAuthorizedLocalVoiceBrokerRequest = (request: RequestLike) =>
-  isAuthorizedDebugRequest(request);
+  isAuthorizedDebugRequest(request) || isSameOriginBrokerRequest(request);
 
 const wsCanSend = (socket: WSWebSocket | null | undefined) =>
   Boolean(
@@ -2412,13 +2441,18 @@ CRITICAL RULES:
     let requestedModelForRun = DEFAULT_CHAT_MODEL;
     let usedModelForRun = DEFAULT_CHAT_MODEL;
     let runtimeSettingsForRun: Record<string, string | number> | undefined;
-    // Enable SSE
+    // Enable SSE. no-transform stops the compression middleware (and any
+    // downstream proxy) from buffering the stream so tokens flush incrementally.
     res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
 
     const sendEvent = (type: string, data: any) => {
       res.write(`data: ${JSON.stringify({ type, requestId, ...data })}\n\n`);
+      // compression() wraps res.flush to flush the gzip buffer; without this the
+      // SSE events are held until the response ends, defeating live streaming.
+      (res as unknown as { flush?: () => void }).flush?.();
     };
     const compactToolText = (value: unknown, fallback: string) => {
       const text =
