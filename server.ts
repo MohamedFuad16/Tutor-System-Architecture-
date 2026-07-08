@@ -2412,13 +2412,18 @@ CRITICAL RULES:
     let requestedModelForRun = DEFAULT_CHAT_MODEL;
     let usedModelForRun = DEFAULT_CHAT_MODEL;
     let runtimeSettingsForRun: Record<string, string | number> | undefined;
-    // Enable SSE
+    // Enable SSE. no-transform stops the compression middleware (and any
+    // downstream proxy) from buffering the stream so tokens flush incrementally.
     res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
 
     const sendEvent = (type: string, data: any) => {
       res.write(`data: ${JSON.stringify({ type, requestId, ...data })}\n\n`);
+      // compression() wraps res.flush to flush the gzip buffer; without this the
+      // SSE events are held until the response ends, defeating live streaming.
+      (res as unknown as { flush?: () => void }).flush?.();
     };
     const compactToolText = (value: unknown, fallback: string) => {
       const text =
