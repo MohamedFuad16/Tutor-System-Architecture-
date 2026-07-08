@@ -26,6 +26,8 @@ import {
   Check,
   Folder,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Volume2,
   Square,
   Zap,
@@ -341,6 +343,20 @@ const collectMermaidTourNodes = (svg: SVGSVGElement) => {
     .slice(0, 16);
 };
 
+type MermaidViewBox = [number, number, number, number];
+
+const parseMermaidViewBox = (svg: SVGSVGElement): MermaidViewBox | null => {
+  const parts = (svg.getAttribute("viewBox") || "")
+    .trim()
+    .split(/[\s,]+/)
+    .map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part))) {
+    return null;
+  }
+  if (parts[2] <= 0 || parts[3] <= 0) return null;
+  return parts as MermaidViewBox;
+};
+
 const Mermaid = ({
   chart,
   variant = "inline",
@@ -349,7 +365,7 @@ const Mermaid = ({
   variant?: "inline" | "stage";
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
-  const originalViewBoxRef = useRef<string>("");
+  const originalViewBoxRef = useRef<MermaidViewBox | null>(null);
   const viewBoxAnimationRef = useRef<number | null>(null);
   const [tourNodes, setTourNodes] = useState<string[]>([]);
   const [activeNodeIndex, setActiveNodeIndex] = useState(0);
@@ -359,7 +375,7 @@ const Mermaid = ({
     let cancelled = false;
     if (!chartRef.current) return;
     chartRef.current.textContent = "";
-    originalViewBoxRef.current = "";
+    originalViewBoxRef.current = null;
     if (viewBoxAnimationRef.current !== null) {
       cancelAnimationFrame(viewBoxAnimationRef.current);
       viewBoxAnimationRef.current = null;
@@ -384,18 +400,13 @@ const Mermaid = ({
         svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
         svg.removeAttribute("width");
         svg.removeAttribute("height");
-        svg.style.transition = `transform ${
-          isStage ? 1280 : 900
-        }ms cubic-bezier(0.22, 1, 0.36, 1), filter 560ms ease`;
         svg.style.display = "block";
         svg.style.width = "100%";
         svg.style.maxWidth = "100%";
-        svg.style.maxHeight = isStage ? "72vh" : "none";
+        svg.style.maxHeight = isStage ? "72vh" : "70dvh";
         svg.style.minWidth = "0";
         svg.style.height = "auto";
         svg.style.margin = "0 auto";
-        svg.style.transformOrigin = "0 0";
-        svg.style.willChange = "transform";
         if (!svg.getAttribute("viewBox")) {
           try {
             const bounds = (svg as unknown as SVGGraphicsElement).getBBox();
@@ -405,12 +416,13 @@ const Mermaid = ({
             );
           } catch {}
         }
-        originalViewBoxRef.current = svg.getAttribute("viewBox") || "";
+        originalViewBoxRef.current = parseMermaidViewBox(svg);
         const nodes = collectMermaidTourNodes(svg);
         nodes.forEach((node, index) => {
           node.setAttribute("data-mermaid-tour-node", "true");
           node.setAttribute("data-mermaid-tour-index", String(index));
           node.setAttribute("tabindex", "0");
+          node.addEventListener("click", () => setActiveNodeIndex(index));
         });
         setTourNodes(
           nodes.map((node, index) => {
@@ -463,43 +475,78 @@ const Mermaid = ({
     const activeNode = nodes[activeNodeIndex];
     if (!activeNode) return;
     activeNode.setAttribute("data-mermaid-active", "true");
-    try {
-      if (originalViewBoxRef.current) {
-        svg.setAttribute("viewBox", originalViewBoxRef.current);
-      }
-      if (viewBoxAnimationRef.current !== null) {
-        cancelAnimationFrame(viewBoxAnimationRef.current);
-        viewBoxAnimationRef.current = null;
-      }
-      svg.style.transform = "translate(0px, 0px) scale(1)";
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        return;
-      }
-      viewBoxAnimationRef.current = requestAnimationFrame(() => {
-        const viewportRect = container.getBoundingClientRect();
-        const activeRect = activeNode.getBoundingClientRect();
-        const viewportCenterX = viewportRect.left + viewportRect.width / 2;
-        const viewportCenterY = viewportRect.top + viewportRect.height * 0.44;
-        const activeCenterX = activeRect.left + activeRect.width / 2;
-        const activeCenterY = activeRect.top + activeRect.height / 2;
-        const rawDx = viewportCenterX - activeCenterX;
-        const rawDy = viewportCenterY - activeCenterY;
-        const maxDx = viewportRect.width * (isStage ? 0.18 : 0.24);
-        const maxDy = viewportRect.height * (isStage ? 0.14 : 0.22);
-        const dx = Math.max(-maxDx, Math.min(maxDx, rawDx));
-        const dy = Math.max(-maxDy, Math.min(maxDy, rawDy));
-        const scale =
-          activeRect.width > viewportRect.width * 0.78
-            ? isStage
-              ? 1
-              : 1.02
-            : isStage
-              ? 1.055
-              : 1.09;
-        svg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-        viewBoxAnimationRef.current = null;
-      });
-    } catch {}
+    const original = originalViewBoxRef.current;
+    if (!original) return;
+
+    if (viewBoxAnimationRef.current !== null) {
+      cancelAnimationFrame(viewBoxAnimationRef.current);
+      viewBoxAnimationRef.current = null;
+    }
+
+    // Focus by animating the SVG viewBox rather than a CSS transform. The
+    // viewBox is in diagram coordinates, so the pan/zoom lands exactly on the
+    // node (no clamped-pixel drift, no mid-transition measurement races) and
+    // the diagram can never escape its container.
+    const current = parseMermaidViewBox(svg) || original;
+    const svgRect = svg.getBoundingClientRect();
+    const nodeRect = activeNode.getBoundingClientRect();
+    if (svgRect.width < 1 || svgRect.height < 1) return;
+    // Invert the xMidYMid-meet mapping to express the node in viewBox coords.
+    const renderScale = Math.min(
+      svgRect.width / current[2],
+      svgRect.height / current[3],
+    );
+    const contentLeft =
+      svgRect.left + (svgRect.width - current[2] * renderScale) / 2;
+    const contentTop =
+      svgRect.top + (svgRect.height - current[3] * renderScale) / 2;
+    const nodeX = current[0] + (nodeRect.left - contentLeft) / renderScale;
+    const nodeY = current[1] + (nodeRect.top - contentTop) / renderScale;
+    const nodeW = nodeRect.width / renderScale;
+    const nodeH = nodeRect.height / renderScale;
+
+    const [origX, origY, origW, origH] = original;
+    const aspect = origW / origH;
+    // Zoom so the node fills roughly a third of the frame, but never zoom in
+    // past 2x or out past the full diagram.
+    let targetW = Math.min(
+      origW,
+      Math.max(nodeW * (isStage ? 2.6 : 3.1), origW * 0.5),
+    );
+    let targetH = targetW / aspect;
+    if (targetH < nodeH * 1.7) {
+      targetH = Math.min(origH, nodeH * 1.7);
+      targetW = targetH * aspect;
+    }
+    let targetX = nodeX + nodeW / 2 - targetW / 2;
+    let targetY = nodeY + nodeH / 2 - targetH / 2;
+    targetX = Math.max(origX, Math.min(origX + origW - targetW, targetX));
+    targetY = Math.max(origY, Math.min(origY + origH - targetH, targetY));
+    const target: MermaidViewBox = [targetX, targetY, targetW, targetH];
+
+    const applyViewBox = (box: MermaidViewBox) =>
+      svg.setAttribute("viewBox", box.map((v) => v.toFixed(2)).join(" "));
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      applyViewBox(target);
+      return;
+    }
+
+    const durationMs = isStage ? 1050 : 800;
+    const startedAt = performance.now();
+    const from = current;
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - startedAt) / durationMs);
+      const eased = easeInOutCubic(progress);
+      applyViewBox(
+        from.map((value, i) => value + (target[i] - value) * eased) as MermaidViewBox,
+      );
+      viewBoxAnimationRef.current =
+        progress < 1 ? requestAnimationFrame(tick) : null;
+    };
+    viewBoxAnimationRef.current = requestAnimationFrame(tick);
   }, [activeNodeIndex, isStage, tourNodes.length]);
 
   const activeTourLabel = tourNodes[activeNodeIndex];
@@ -517,6 +564,7 @@ const Mermaid = ({
       <style>{`
         .learningai-mermaid-tour [data-mermaid-tour-node='true'] {
           opacity: 0.48;
+          cursor: pointer;
           transition: opacity 500ms ease, filter 500ms ease, transform 500ms ease;
         }
         .learningai-mermaid-tour [data-mermaid-active='true'] {
@@ -563,19 +611,49 @@ const Mermaid = ({
         }`}
       />
       {tourNodes.length > 1 && !isStage && (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs text-zinc-200">
-          <span data-mermaid-focus-label>
-            Focus tour {activeNodeIndex + 1}/{tourNodes.length}
-            {activeTourLabel ? `: ${activeTourLabel}` : ""}
-          </span>
+        <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-2.5 py-2 text-xs text-zinc-200">
           <button
             type="button"
+            aria-label="Previous diagram step"
+            onClick={() =>
+              setActiveNodeIndex(
+                (current) =>
+                  (current - 1 + tourNodes.length) % tourNodes.length,
+              )
+            }
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-orange-300 hover:text-orange-100"
+          >
+            <ChevronLeft size={13} strokeWidth={2.5} />
+          </button>
+          <div className="min-w-0 flex-1 text-center">
+            <span
+              data-mermaid-focus-label
+              className="block truncate font-medium text-zinc-100"
+            >
+              {activeTourLabel || `Step ${activeNodeIndex + 1}`}
+            </span>
+            <span className="mt-1 flex items-center justify-center gap-1">
+              {tourNodes.map((node, index) => (
+                <span
+                  key={`${node}-${index}`}
+                  className={`h-1 rounded-full transition-[width,background-color] duration-300 ${
+                    index === activeNodeIndex
+                      ? "w-4 bg-orange-400"
+                      : "w-1 bg-white/25"
+                  }`}
+                />
+              ))}
+            </span>
+          </div>
+          <button
+            type="button"
+            aria-label="Next diagram step"
             onClick={() =>
               setActiveNodeIndex((current) => (current + 1) % tourNodes.length)
             }
-            className="rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-100 transition-colors hover:border-orange-300 hover:text-orange-100"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-orange-300 hover:text-orange-100"
           >
-            Next box
+            <ChevronRight size={13} strokeWidth={2.5} />
           </button>
         </div>
       )}
