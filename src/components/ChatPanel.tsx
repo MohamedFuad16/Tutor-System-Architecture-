@@ -2629,8 +2629,46 @@ const SearchActivityPanel = ({
 const FinalSourcesPanel = ({ sources }: { sources: NormalizedWebSource[] }) => {
   const [expanded, setExpanded] = useState(false);
   if (!sources.length) return null;
+  const imageSources = sources
+    .filter(
+      (source) =>
+        source.sourceType === "image" &&
+        (source.imageUrl || source.thumbnailUrl),
+    )
+    .slice(0, 4);
   return (
     <div className="not-prose mt-5 overflow-hidden rounded-2xl border border-black/5 bg-zinc-50/80">
+      {imageSources.length > 0 && (
+        <div
+          className={`grid gap-2 p-3 pb-0 ${imageSources.length === 1 ? "" : "grid-cols-2"}`}
+          data-web-image-strip
+        >
+          {imageSources.map((source) => (
+            <a
+              key={`strip-${source.id || source.url}`}
+              href={source.url}
+              target="_blank"
+              rel="noreferrer"
+              className="group relative block overflow-hidden rounded-xl border border-black/5 bg-zinc-100"
+            >
+              <img
+                src={source.imageUrl || source.thumbnailUrl}
+                alt={source.title || "Web image result"}
+                loading="lazy"
+                className="h-32 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-36"
+              />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-1.5 pt-6">
+                <span className="block truncate text-[11px] font-semibold text-white">
+                  {source.title}
+                </span>
+                <span className="block truncate text-[9px] font-bold uppercase tracking-[0.12em] text-white/70">
+                  {source.imageSource || source.domain}
+                </span>
+              </span>
+            </a>
+          ))}
+        </div>
+      )}
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
