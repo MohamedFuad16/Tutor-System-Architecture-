@@ -386,6 +386,10 @@ function StudyIntroSplash({
 
   const toGsapTarget = (target: CardTarget) => ({
     autoAlpha: target.opacity,
+    // x must stay 0: if the element mounts with a percentage translate in its
+    // inline style, GSAP parses it as a pixel offset and stacks it under every
+    // xPercent tween, shoving the whole card fan half a card-width off-center.
+    x: 0,
     xPercent: target.xPercent,
     y: target.y,
     scale: target.scale,
@@ -468,7 +472,7 @@ function StudyIntroSplash({
       <div className="relative z-10 mx-auto flex h-full w-full max-w-5xl flex-col items-center justify-start px-4 pb-5 pt-4 sm:px-6 sm:pt-5 md:px-10 md:pt-5">
         <div
           key={introCards[activeIndex].key}
-          className="flex w-full justify-center"
+          className="flex w-full justify-center px-10 sm:px-0"
         >
           <AnimatedHeadlineWords
             text={introCards[activeIndex].headline}
@@ -494,7 +498,10 @@ function StudyIntroSplash({
                 }`}
                 style={{
                   opacity: 0,
-                  transform: "translate(-50%, 80px) scale(0.9)",
+                  // translateY only — a -50% translateX here would be parsed
+                  // by GSAP as a pixel offset and permanently mis-center the
+                  // card fan (GSAP centers via xPercent in toGsapTarget).
+                  transform: "translateY(80px) scale(0.9)",
                   filter: "blur(14px)",
                   zIndex: finalStack
                     ? index === 2
@@ -505,7 +512,7 @@ function StudyIntroSplash({
                       : 10 + index,
                 }}
               >
-                <div className="origin-top scale-[0.56] sm:scale-[0.64] md:scale-[0.73] lg:scale-[0.82] xl:scale-[0.89]">
+                <div className="origin-top scale-[0.7] sm:scale-[0.64] md:scale-[0.73] lg:scale-[0.82] xl:scale-[0.89]">
                   <PatternCard
                     onClick={isUpload ? openFilePicker : undefined}
                     onDragOver={
