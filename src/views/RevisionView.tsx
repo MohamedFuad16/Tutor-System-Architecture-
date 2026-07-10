@@ -98,9 +98,45 @@ const loadRevisionMermaid = () => {
       const mermaid = module.default;
       mermaid.initialize({
         startOnLoad: false,
-        theme: "default",
+        theme: "base",
         securityLevel: "strict",
-        fontFamily: "Inter, sans-serif",
+        fontFamily:
+          "'Geist Sans', Inter, 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', system-ui, sans-serif",
+        themeVariables: {
+          background: "transparent",
+          fontSize: "14px",
+          primaryColor: "#ffffff",
+          primaryTextColor: "#18181b",
+          primaryBorderColor: "#d4d4d8",
+          secondaryColor: "#f4f4f5",
+          secondaryTextColor: "#27272a",
+          secondaryBorderColor: "#d4d4d8",
+          tertiaryColor: "#fafafa",
+          tertiaryTextColor: "#3f3f46",
+          tertiaryBorderColor: "#e4e4e7",
+          mainBkg: "#ffffff",
+          nodeBorder: "#d4d4d8",
+          nodeTextColor: "#18181b",
+          textColor: "#3f3f46",
+          titleColor: "#18181b",
+          lineColor: "#a1a1aa",
+          arrowheadColor: "#a1a1aa",
+          edgeLabelBackground: "#fafaf9",
+          clusterBkg: "#fafafa",
+          clusterBorder: "#e4e4e7",
+          noteBkgColor: "#fef3c7",
+          noteTextColor: "#78350f",
+          noteBorderColor: "#fcd34d",
+        },
+        flowchart: {
+          curve: "basis",
+          padding: 12,
+          nodeSpacing: 44,
+          rankSpacing: 54,
+          htmlLabels: true,
+          useMaxWidth: true,
+        },
+        sequence: { useMaxWidth: true },
       });
       return mermaid;
     });
@@ -2697,7 +2733,7 @@ const FlashcardUI = React.memo(
     );
 
     return (
-      <div className="w-full max-w-sm mx-auto mb-8 h-[240px] relative perspective-[1000px]">
+      <div className="w-full max-w-md mx-auto mb-8 h-[280px] relative perspective-[1000px]">
         <div
           className="w-full h-full relative"
           style={{
@@ -3461,7 +3497,7 @@ export function RevisionView() {
                 {activeBuiltInBook?.renderChapter ? (
                   activeBuiltInBook.renderChapter(currentChapterIndex)
                 ) : (
-                  <div className="prose prose-zinc w-full max-w-none prose-sm md:prose-base font-serif prose-a:text-blue-700 prose-a:decoration-blue-300 prose-a:underline-offset-4 prose-a:hover:text-blue-900 prose-p:leading-[1.8] prose-p:text-zinc-800 prose-p:font-light prose-p:my-5 prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-zinc-900 prose-li:leading-[1.8] prose-li:text-zinc-800 prose-li:font-light prose-ul:my-5 prose-pre:bg-zinc-100 prose-pre:text-zinc-800 prose-pre:border prose-pre:border-zinc-200 prose-pre:shadow-inner prose-pre:my-8 prose-code:before:content-none prose-code:after:content-none prose-code:bg-transparent prose-code:px-0 prose-code:py-0 prose-code:font-mono prose-code:text-[0.88em] prose-code:font-normal prose-code:text-zinc-700 prose-strong:text-zinc-900 prose-strong:font-medium selection:bg-zinc-200 selection:text-zinc-950">
+                  <div className="prose prose-zinc w-full max-w-none prose-sm md:prose-base font-serif prose-a:text-blue-700 prose-a:decoration-blue-300 prose-a:underline-offset-4 prose-a:hover:text-blue-900 prose-p:leading-[1.8] prose-p:text-zinc-800 prose-p:font-light prose-p:my-5 prose-headings:font-serif prose-headings:font-medium prose-headings:tracking-tight prose-h2:text-2xl prose-h2:mt-14 prose-h2:mb-5 prose-h2:border-b prose-h2:border-zinc-200/80 prose-h2:pb-3 prose-h2:text-zinc-900 prose-h3:text-lg prose-h3:mt-10 prose-h3:mb-3 prose-h3:text-zinc-900 prose-li:leading-[1.75] prose-li:text-zinc-800 prose-li:font-light prose-li:my-1.5 prose-li:marker:text-zinc-400 prose-ul:my-5 prose-ol:my-5 prose-pre:bg-zinc-100 prose-pre:text-zinc-800 prose-pre:border prose-pre:border-zinc-200 prose-pre:shadow-inner prose-pre:my-8 prose-code:before:content-none prose-code:after:content-none prose-code:bg-transparent prose-code:px-0 prose-code:py-0 prose-code:font-mono prose-code:text-[0.88em] prose-code:font-normal prose-code:text-zinc-700 prose-strong:text-zinc-900 prose-strong:font-medium selection:bg-zinc-200 selection:text-zinc-950">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
@@ -3513,6 +3549,11 @@ export function RevisionView() {
                             alt={alt || ""}
                             className="not-prose my-8 w-full rounded-lg border border-zinc-200 shadow-[0_18px_48px_rgba(24,24,27,0.14)]"
                           />
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="not-prose not-italic my-8 rounded-2xl border border-amber-200/80 bg-amber-50/70 px-5 py-4 font-sans text-[15px] leading-relaxed text-amber-950 shadow-sm [&>p]:my-1 [&_strong]:font-semibold [&_strong]:text-amber-900">
+                            {children}
+                          </blockquote>
                         ),
                         table: ({ children }) => (
                           <div className="not-prose my-8 overflow-x-auto rounded-lg border border-zinc-200 bg-white/70 shadow-sm">

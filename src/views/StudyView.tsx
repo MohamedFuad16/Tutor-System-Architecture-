@@ -450,16 +450,6 @@ function StudyIntroSplash({
 
   return (
     <div className="relative flex h-full w-full flex-1 overflow-hidden">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at center, rgba(255,255,255,0.035) 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,110,0,0.1),transparent_38%),radial-gradient(circle_at_50%_100%,rgba(139,92,246,0.12),transparent_42%)]" />
-
       <input
         type="file"
         accept="application/pdf"
@@ -558,7 +548,7 @@ function StudyIntroSplash({
           })}
         </div>
 
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-auto flex h-14 items-center gap-2">
           {introCards.map((card, index) => (
             <span
               key={`${card.key}-dot`}
@@ -1219,13 +1209,13 @@ export function StudyView() {
   }, [askTutorQuery]);
 
   return (
-    <div className="relative flex h-full w-full flex-col gap-3 overflow-hidden bg-[#030303] px-3 pb-3 pt-16 md:gap-5 md:overflow-y-auto md:px-5 md:pb-6 md:pt-20 xl:h-[100dvh] xl:flex-row xl:gap-8 xl:overflow-hidden xl:px-8 xl:pb-8 xl:pt-24">
+    <div className="relative flex h-full w-full flex-col gap-3 overflow-hidden bg-[#050505] px-3 pb-3 pt-16 md:gap-5 md:overflow-y-auto md:px-5 md:pb-6 md:pt-20 xl:h-[100dvh] xl:flex-row xl:gap-8 xl:overflow-hidden xl:px-8 xl:pb-8 xl:pt-24">
       <div
         data-testid="study-document-surface"
         className={`relative w-full shrink flex-col overflow-hidden shadow-none transition-[flex-basis,width,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] xl:h-full xl:min-h-0 ${
           pdfUrl
             ? "gap-1 rounded-none border border-transparent bg-transparent"
-            : "rounded-2xl border border-[#1a1a1a] bg-[#0A0A0B]"
+            : "rounded-none border-0 bg-transparent"
         } ${documentSurfaceLayout}`}
       >
         {pdfUrl ? (
@@ -1387,7 +1377,7 @@ export function StudyView() {
           }}
           className={`${
             isChatFullscreen
-              ? "fixed inset-0 z-[90] flex bg-[#030303] p-3 md:p-6"
+              ? "fixed inset-0 z-[90] flex bg-[#050505] p-3 md:p-6"
               : `${isMobilePdfOpen ? "hidden md:flex" : "flex"} h-full max-h-none w-full flex-1 md:h-auto md:max-h-[54dvh] md:flex-none xl:h-[calc(100%-0.5rem)] xl:max-h-none xl:w-[36%] xl:max-w-[560px] xl:flex-none xl:self-center`
           } min-h-0 origin-bottom-right flex-col gap-2 md:min-h-[360px] md:gap-3`}
         >
