@@ -192,7 +192,9 @@ describe("rendered RevisionView flows", () => {
     expect(
       screen.getByText("Recall strengthens access to stored knowledge."),
     ).toBeInTheDocument();
-    expect(screen.getByText("Retrieval Practice")).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Retrieval Practice").length,
+    ).toBeGreaterThanOrEqual(1);
 
     await user.click(screen.getByRole("button", { name: /Next/ }));
 

@@ -655,8 +655,8 @@ describe("rendered ChatPanel expanded suite", () => {
       await screen.findByText("Spaced retrieval improves durable recall."),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByRole("button", { name: /Add to Graph/ }).length,
-    ).toBeGreaterThanOrEqual(1);
+      screen.queryByRole("button", { name: /Add to Graph/ }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getAllByRole("button", { name: "Read aloud with Asteria" }).length,
     ).toBeGreaterThanOrEqual(1);
@@ -1142,23 +1142,6 @@ describe("rendered ChatPanel expanded suite", () => {
       "Selected retrieval paragraph.",
     );
     expect(useStore.getState().selectedTextContext).toBe("");
-  });
-
-  it("sends the Add to Graph action as a follow-up chat request", async () => {
-    await seedThread([completeAssistant()]);
-    renderChatPanel();
-    await screen.findByText("Spaced retrieval improves durable recall.");
-
-    const graphButtons = screen.getAllByRole("button", {
-      name: /Add to Graph/,
-    });
-    fireEvent.click(graphButtons[graphButtons.length - 1]);
-
-    const payload = await expectOneChatRequest();
-    expect(payload.messages.at(-1)?.content).toContain("update_graph");
-    expect(payload.messages.at(-1)?.content).toContain(
-      "Spaced retrieval improves durable recall.",
-    );
   });
 
   it("renders streamed chunks and final done content from the chat API", async () => {

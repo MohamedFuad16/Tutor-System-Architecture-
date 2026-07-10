@@ -1771,7 +1771,7 @@ Schema:
   "bookSource": "chat|pdf|library|mixed",
   "overview": "stable overview of the whole session learning book",
   "chapterTitle": "short chapter title for this conversation",
-  "chapterSummary": "a self-contained revision chapter in Markdown with a clear explanation, mechanism, distinctions, and a worked example; include a fenced Mermaid flowchart for processes and a fenced language-specific code sample when code was actually taught",
+  "chapterSummary": "a self-contained revision chapter in Markdown following the REVISION CHAPTER FORMAT below",
   "conversationSummary": "notebook-quality learning material, not a chat recap: preserve definitions, reasoning, examples, mistakes, and application steps without greetings or tool chatter",
   "knowledgeSummary": "cumulative notes on what the learner now appears to know, including precise concept relationships",
   "conceptsLearned": ["plain names of concepts learned or practiced"],
@@ -1794,7 +1794,15 @@ CRITICAL RULES:
 - You MUST dynamically generate a specific, highly relevant \`chapterTitle\` based strictly on what the user actually asked about in this message (e.g. "List Comprehensions", "Promises and Async/Await", "Calculus Integrals"). DO NOT use generic chapter titles like "Conversation Notes".
 - The summaries must be substantial study material. Avoid one-line summaries and headings such as "Concepts to revise". Capture the actual learning, key distinctions, worked examples, misconceptions, and next review hooks.
 - Write for a capable teenager: clear and direct, but never childish.
-- If the lesson explains a process, include a small \`\`\`mermaid flowchart. If it teaches code, include a runnable fenced code example in the correct language. Do not invent a diagram or code sample for subjects where it would add noise.
+REVISION CHAPTER FORMAT (for chapterSummary) — follow the structure students actually revise from; never produce a wall of paragraphs:
+1. Open with a blockquote summary: "> **In one sentence:** ..." capturing the core idea.
+2. "## Key ideas" — 3-6 bullets; bold the key term at the start of each bullet, then a one-line plain-language explanation.
+3. "## How it works" — short paragraphs of at most 3 sentences each; use a numbered list for any step-by-step process; bold important terms the first time they appear.
+4. "## Worked example" — one concrete worked example from the conversation (or a minimal new one that matches it exactly).
+5. "## Common mistakes" — 2-4 bullets of misconceptions or traps, each with the correction.
+6. "## Quick self-check" — 3 short recall questions, each immediately followed by its answer in **bold** on the next line.
+Use a Markdown table when comparing 2+ things. Keep every section scannable; whitespace between sections is mandatory.
+- If the lesson explains a process, include a small \`\`\`mermaid flowchart inside "How it works". If it teaches code, include a runnable fenced code example in the correct language. Do not invent a diagram or code sample for subjects where it would add noise.
 - Never include raw tool JSON, provider metadata, hidden prompts, greetings, or a transcript-style recap.
 - Each concept summary should be useful by itself when shown in the Revision library. Include how the concept works, not just that it was mentioned.
 - If the current book already exists, prefer continuing it and adding/refining chapters. Do not invent advanced concepts absent from the conversation.`,
@@ -1927,7 +1935,7 @@ CRITICAL RULES:
           {
             role: "system",
             content:
-              "You are an AI study assistant. Extract the key educational concepts from the provided text and generate 1-3 flashcards. Return ONLY a valid JSON object matching the schema. No markdown.",
+              "You are an AI study assistant. Extract the key educational concepts from the provided text and generate 1-3 flashcards following spaced-repetition best practice: each card tests exactly ONE atomic fact or distinction; the front is a specific recall question (never 'What did we discuss?'); the back is the direct answer in at most 2 short sentences with the key term first — no preamble, no restating the question. Write the cards in the same language as the provided text. Return ONLY a valid JSON object matching the schema. No markdown.",
           },
           {
             role: "user",
@@ -2872,11 +2880,13 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
         systemInstruction += `\n\nCURRENT PAGE IMAGE IS ATTACHED THROUGH THE look_at_current_page TOOL. For this source-material request, call look_at_current_page before answering and answer from the page image plus selected/library context. Do not use web_search unless the user explicitly asks for web search.`;
       }
 
-      if (language === "ja") {
-        systemInstruction += `\n\nCRITICAL LANGUAGE REQUIREMENT: You must think, reason, and respond natively in Japanese (日本語). Ensure all educational explanations, conceptual analogies, and technical feedback are phrased naturally in fluent Japanese. Keep the professional academic tone with no emojis.`;
-      } else if (language === "ko") {
-        systemInstruction += `\n\nCRITICAL LANGUAGE REQUIREMENT: You must think, reason, and respond natively in Korean (한국어). Ensure all educational explanations, conceptual analogies, and technical feedback are phrased naturally in fluent Korean. Keep the professional academic tone with no emojis.`;
-      }
+      const uiLanguageName =
+        language === "ja"
+          ? "Japanese (日本語)"
+          : language === "ko"
+            ? "Korean (한국어)"
+            : "English";
+      systemInstruction += `\n\nCRITICAL LANGUAGE REQUIREMENT: Always reply in the language the learner's most recent message is written in. If they write in English, answer in English; if they write in Japanese, answer in Japanese; likewise for any other language — regardless of the app's interface language. Only when the latest message has no clear language (e.g. a bare equation, code snippet, or single symbol) fall back to ${uiLanguageName}, the learner's interface language. Keep the professional academic tone with no emojis.`;
 
       // Eager vision prefetch removed. Vision tool look_at_current_page is registered if currentPageImage is present.
 

@@ -20,7 +20,6 @@ import {
 import {
   ArrowUp,
   Sparkles,
-  Network,
   BookOpen,
   X,
   Check,
@@ -294,9 +293,52 @@ const loadMermaid = () => {
       const mermaid = module.default;
       mermaid.initialize({
         startOnLoad: false,
-        theme: "dark",
+        theme: "base",
         securityLevel: "loose",
-        fontFamily: "Inter, sans-serif",
+        fontFamily:
+          "'Geist Sans', Inter, 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', system-ui, sans-serif",
+        themeVariables: {
+          background: "transparent",
+          fontSize: "14px",
+          // Node surfaces: one calm zinc family instead of mermaid's default
+          // olive/pink mix, with the app's orange reserved for focus states.
+          primaryColor: "#1f1f23",
+          primaryTextColor: "#f4f4f5",
+          primaryBorderColor: "#4b4b52",
+          secondaryColor: "#2a2a30",
+          secondaryTextColor: "#e4e4e7",
+          secondaryBorderColor: "#4b4b52",
+          tertiaryColor: "#232327",
+          tertiaryTextColor: "#e4e4e7",
+          tertiaryBorderColor: "#3f3f46",
+          mainBkg: "#1f1f23",
+          nodeBorder: "#4b4b52",
+          nodeTextColor: "#f4f4f5",
+          textColor: "#d4d4d8",
+          titleColor: "#f4f4f5",
+          lineColor: "#8a8a93",
+          arrowheadColor: "#8a8a93",
+          edgeLabelBackground: "#0f0f11",
+          clusterBkg: "rgba(42,42,48,0.45)",
+          clusterBorder: "#3f3f46",
+          noteBkgColor: "#292524",
+          noteTextColor: "#fcd34d",
+          noteBorderColor: "#57534e",
+          actorBkg: "#1f1f23",
+          actorTextColor: "#f4f4f5",
+          actorBorder: "#4b4b52",
+          labelBoxBkgColor: "#1f1f23",
+          labelTextColor: "#f4f4f5",
+        },
+        flowchart: {
+          curve: "basis",
+          padding: 14,
+          nodeSpacing: 48,
+          rankSpacing: 58,
+          htmlLabels: true,
+          useMaxWidth: true,
+        },
+        sequence: { useMaxWidth: true },
       });
       return mermaid;
     });
@@ -556,20 +598,40 @@ const Mermaid = ({
       className={`learningai-mermaid-tour w-full text-zinc-100 ${
         isStage
           ? "my-0 max-w-none overflow-visible border-0 bg-transparent p-0 shadow-none"
-          : "my-4 max-w-[420px] overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.22)]"
+          : "my-4 max-w-none overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#101012] p-3 shadow-[0_20px_50px_rgba(0,0,0,0.22)]"
       }`}
       data-mermaid-focus-tour
       data-mermaid-variant={variant}
     >
       <style>{`
         .learningai-mermaid-tour [data-mermaid-tour-node='true'] {
-          opacity: 0.48;
+          opacity: 0.55;
           cursor: pointer;
           transition: opacity 500ms ease, filter 500ms ease, transform 500ms ease;
         }
         .learningai-mermaid-tour [data-mermaid-active='true'] {
           opacity: 1;
-          filter: drop-shadow(0 0 18px rgba(249, 115, 22, 0.65));
+          filter: drop-shadow(0 0 14px rgba(255, 110, 0, 0.45));
+        }
+        .learningai-mermaid-tour .node rect,
+        .learningai-mermaid-tour .node polygon {
+          rx: 10px;
+          ry: 10px;
+        }
+        /* Edge labels: compact pills instead of raw text boxes colliding
+           with the arrows underneath. */
+        .learningai-mermaid-tour .edgeLabel {
+          border-radius: 8px;
+          line-height: 1.25;
+        }
+        .learningai-mermaid-tour .edgeLabel p,
+        .learningai-mermaid-tour .edgeLabel span {
+          background: #0f0f11 !important;
+          color: #d4d4d8 !important;
+          border-radius: 8px;
+          padding: 2px 7px;
+          font-size: 11.5px;
+          font-weight: 500;
         }
         .learningai-mermaid-tour[data-mermaid-variant='stage'] svg {
           background: transparent !important;
@@ -580,8 +642,8 @@ const Mermaid = ({
         .learningai-mermaid-tour[data-mermaid-variant='stage'] .node ellipse,
         .learningai-mermaid-tour[data-mermaid-variant='stage'] .stateGroup rect,
         .learningai-mermaid-tour[data-mermaid-variant='stage'] .entityBox {
-          fill: rgba(24, 24, 27, 0.88) !important;
-          stroke: rgba(244, 244, 245, 0.62) !important;
+          fill: rgba(31, 31, 35, 0.92) !important;
+          stroke: rgba(148, 148, 158, 0.55) !important;
         }
         .learningai-mermaid-tour[data-mermaid-variant='stage'] text,
         .learningai-mermaid-tour[data-mermaid-variant='stage'] tspan {
@@ -592,8 +654,8 @@ const Mermaid = ({
         .learningai-mermaid-tour [data-mermaid-active='true'] path,
         .learningai-mermaid-tour [data-mermaid-active='true'] circle,
         .learningai-mermaid-tour [data-mermaid-active='true'] ellipse {
-          stroke: #fb923c !important;
-          stroke-width: 3px !important;
+          stroke: #ff8a2a !important;
+          stroke-width: 2.5px !important;
         }
         @media (prefers-reduced-motion: reduce) {
           .learningai-mermaid-tour svg,
@@ -2654,20 +2716,93 @@ const FinalSourcesPanel = ({ sources }: { sources: NormalizedWebSource[] }) => {
           className={`grid gap-2 p-3 pb-0 ${imageSources.length === 1 ? "" : "grid-cols-2"}`}
           data-web-image-strip
         >
-          {imageSources.map((source) => (
+          <style>{`
+            /* Genmoji-style materialize: each image condenses out of a blur
+               with a soft overshoot, then a light sweep passes over it. */
+            @keyframes webImageMaterialize {
+              0% {
+                opacity: 0;
+                transform: scale(0.55) rotate(-3deg);
+                filter: blur(16px) saturate(0.2) brightness(1.6);
+              }
+              55% {
+                opacity: 1;
+                filter: blur(2px) saturate(0.85) brightness(1.12);
+              }
+              78% {
+                transform: scale(1.035) rotate(0.4deg);
+              }
+              100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+                filter: blur(0) saturate(1) brightness(1);
+              }
+            }
+            @keyframes webImageSweep {
+              0% { transform: translateX(-130%) skewX(-14deg); opacity: 0; }
+              35% { opacity: 0.9; }
+              100% { transform: translateX(160%) skewX(-14deg); opacity: 0; }
+            }
+            @keyframes webImageHalo {
+              0% { opacity: 0.85; transform: scale(0.6); }
+              100% { opacity: 0; transform: scale(1.25); }
+            }
+            [data-web-image-spawn] {
+              opacity: 0;
+              animation: webImageMaterialize 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            }
+            [data-web-image-spawn] .web-image-sweep {
+              animation: webImageSweep 1.1s ease-out forwards;
+              animation-delay: inherit;
+            }
+            [data-web-image-spawn] .web-image-halo {
+              animation: webImageHalo 1.15s ease-out forwards;
+              animation-delay: inherit;
+            }
+            @media (prefers-reduced-motion: reduce) {
+              [data-web-image-spawn],
+              [data-web-image-spawn] .web-image-sweep,
+              [data-web-image-spawn] .web-image-halo {
+                animation: none !important;
+                opacity: 1 !important;
+              }
+              [data-web-image-spawn] .web-image-sweep,
+              [data-web-image-spawn] .web-image-halo {
+                display: none;
+              }
+            }
+          `}</style>
+          {imageSources.map((source, index) => (
             <a
               key={`strip-${source.id || source.url}`}
               href={source.url}
               target="_blank"
               rel="noreferrer"
-              className="group relative block overflow-hidden rounded-xl border border-black/5 bg-zinc-100"
+              data-web-image-spawn
+              style={{ animationDelay: `${index * 140}ms` }}
+              className={`group relative block overflow-hidden rounded-2xl border border-black/5 bg-zinc-100 shadow-[0_14px_36px_rgba(24,24,27,0.14)] ${
+                imageSources.length === 3 && index === 0 ? "col-span-2" : ""
+              }`}
             >
               <img
                 src={source.imageUrl || source.thumbnailUrl}
                 alt={source.title || "Web image result"}
                 loading="lazy"
-                className="h-32 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] sm:h-36"
+                className={`w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] ${
+                  imageSources.length === 1 ||
+                  (imageSources.length === 3 && index === 0)
+                    ? "h-44 sm:h-52"
+                    : "h-32 sm:h-36"
+                }`}
               />
+              <span
+                className="web-image-halo pointer-events-none absolute inset-0 rounded-2xl"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, rgba(255,255,255,0.55) 0%, rgba(255,170,80,0.18) 45%, transparent 72%)",
+                }}
+              />
+              <span className="web-image-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/45 to-transparent" />
               <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-2.5 pb-1.5 pt-6">
                 <span className="block truncate text-[11px] font-semibold text-white">
                   {source.title}
@@ -3228,18 +3363,28 @@ function useSmoothStreamingText(
     }
 
     if (rafRef.current === null) {
+      // Markdown is parsed on every committed update, so batch keystrokes into
+      // ~20fps state commits (3 frames) with proportionally larger chunks —
+      // same visual typing speed, a third of the parse work.
+      let frameSkip = 0;
       const tick = () => {
         const target = queueRef.current;
         const current = displayedRef.current;
 
         if (current !== target) {
+          if (frameSkip > 0) {
+            frameSkip -= 1;
+            rafRef.current = requestAnimationFrame(tick);
+            return;
+          }
+          frameSkip = 2;
           let nextContent = target;
           if (target.startsWith(current) && target.length > current.length) {
             const diff = target.length - current.length;
-            // Base speed 3 chars/frame (~180 chars/sec).
-            // If lagging, speed up but cap at 12 chars/frame (~720 chars/sec)
-            // so it ALWAYS looks like smooth typing and never jumps in huge blocks.
-            const speed = diff > 30 ? Math.min(12, Math.ceil(diff / 15)) : 3;
+            // Base speed ~180 chars/sec; if lagging, speed up but cap at
+            // ~720 chars/sec so it always looks like smooth typing and never
+            // jumps in huge blocks.
+            const speed = diff > 90 ? Math.min(36, Math.ceil(diff / 15)) : 9;
             const charsToAdd = Math.min(diff, speed);
             nextContent = target.slice(0, current.length + charsToAdd);
           } else {
@@ -3293,7 +3438,10 @@ const AnimatedMarkdown = React.memo(
           text-rendering: geometricPrecision;
           contain: content;
         }
-        .streaming-text.typing-active .streaming-plain::after {
+        /* Blinking caret rides the last rendered block so streamed markdown
+           keeps its real formatting instead of flashing raw syntax first. */
+        .streaming-text.typing-active > :last-child > :last-child::after,
+        .streaming-text.typing-active > p:last-child::after {
           content: '';
           display: inline-block;
           width: 6px;
@@ -3305,22 +3453,16 @@ const AnimatedMarkdown = React.memo(
           animation: terminalBlink 1s step-start infinite;
           transition: opacity 0.2s ease;
         }
-        @keyframes terminalBlink { 
-          50% { opacity: 0; } 
+        @keyframes terminalBlink {
+          50% { opacity: 0; }
         }
       `}</style>
-        {isStreaming ? (
-          <div className="streaming-plain whitespace-pre-wrap leading-relaxed">
-            {smoothContent}
-          </div>
-        ) : (
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={markdownComponents}
-          >
-            {smoothContent}
-          </ReactMarkdown>
-        )}
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={markdownComponents}
+        >
+          {smoothContent}
+        </ReactMarkdown>
       </div>
     );
   },
@@ -3662,17 +3804,6 @@ const MessageItem = React.memo(
         </div>
         {msg.role === "assistant" && (
           <div className="mt-4 flex flex-wrap gap-2 w-full">
-            <button
-              onClick={() =>
-                onSendMessage(
-                  `Extract the core atomic concept from this, describe it briefly, and explicitly call the update_graph tool to add it to the learning graph:\n\n"${msg.content}"`,
-                )
-              }
-              className="flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-50 px-3 py-1.5 rounded-lg transition-colors border border-black/10 shadow-sm"
-            >
-              <Network size={13} /> Add to Graph
-            </button>
-
             {msg.phase === "complete" && !msg.hasFlashcards && (
               <button
                 onClick={handleGenerateFlashcards}
@@ -4517,6 +4648,9 @@ export function ChatPanel({
     if (ttsObjectUrlRef.current) {
       URL.revokeObjectURL(ttsObjectUrlRef.current);
       ttsObjectUrlRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
     }
   }, []);
 
@@ -6671,6 +6805,48 @@ export function ChatPanel({
     };
   }, []);
 
+  // Free browser speech is the safety net: server TTS needs a provider key
+  // (OpenAI env key or the user's Deepgram key) and the Deepgram Aura voices
+  // are English-only, so without this fallback Read Aloud silently did
+  // nothing for missing keys and for Japanese/Korean answers.
+  const speakWithBrowserTts = (msgId: string, text: string, lang: string) =>
+    new Promise<boolean>((resolve) => {
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+        resolve(false);
+        return;
+      }
+      const requestId = ttsRequestIdRef.current;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      const voices = window.speechSynthesis.getVoices();
+      const voiceMatch =
+        voices.find((voice) => voice.lang === lang && voice.localService) ||
+        voices.find((voice) => voice.lang === lang) ||
+        voices.find((voice) => voice.lang.startsWith(lang.split("-")[0]));
+      if (voiceMatch) utterance.voice = voiceMatch;
+      utterance.rate = 1.02;
+      utterance.onend = () => {
+        if (requestId === ttsRequestIdRef.current) setIsPlayingTTS(null);
+        resolve(true);
+      };
+      utterance.onerror = (event) => {
+        if (requestId === ttsRequestIdRef.current) setIsPlayingTTS(null);
+        resolve(event.error === "canceled" || event.error === "interrupted");
+      };
+      setIsPlayingTTS(msgId);
+      window.speechSynthesis.speak(utterance);
+    });
+
+  const detectReadAloudLanguage = (value: string) => {
+    if (/[぀-ヿㇰ-ㇿ]/.test(value)) return "ja-JP";
+    if (/[가-힯]/.test(value)) return "ko-KR";
+    if (/[一-鿿]/.test(value)) {
+      return language === "ja" ? "ja-JP" : "zh-CN";
+    }
+    return "en-US";
+  };
+
   const handleTTS = async (msgId: string, text: string) => {
     if (isPlayingTTS === msgId) {
       stopReadAloud();
@@ -6698,6 +6874,15 @@ export function ChatPanel({
         cleanText.length > 1500
           ? cleanText.substring(0, 1500) + "..."
           : cleanText;
+      const speechLang = detectReadAloudLanguage(safeText);
+      const activeVoice = ttsVoice || "aura-asteria-en";
+      // Deepgram Aura voices are English-only; send Japanese/Korean/Chinese
+      // answers straight to the browser's native speech engine instead of
+      // getting garbled English-model audio (or a silent failure) back.
+      if (speechLang !== "en-US" && /^aura-/i.test(activeVoice)) {
+        await speakWithBrowserTts(msgId, safeText, speechLang);
+        return;
+      }
       const ttsHeaders: Record<string, string> = {};
       if (deepgramApiKey) {
         ttsHeaders["x-deepgram-key"] = deepgramApiKey;
@@ -6762,13 +6947,35 @@ export function ChatPanel({
 
       await audioObj.play();
     } catch (err) {
-      if (!(err instanceof DOMException && err.name === "AbortError")) {
-        console.error(err);
+      if (err instanceof DOMException && err.name === "AbortError") {
+        setIsPlayingTTS(null);
+        return;
       }
-      if (requestId === ttsRequestIdRef.current) {
+      console.warn(
+        "[ChatPanel] Server TTS failed, falling back to browser speech:",
+        err,
+      );
+      if (requestId !== ttsRequestIdRef.current) {
+        setIsPlayingTTS(null);
+        return;
+      }
+      const cleanFallback = text
+        .replace(/!\[.*?\]\(.*?\)/g, "")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/`([^`]+)`/g, "$1")
+        .replace(/[*_#~>]/g, "")
+        .trim()
+        .slice(0, 1500);
+      const spoke = await speakWithBrowserTts(
+        msgId,
+        cleanFallback,
+        detectReadAloudLanguage(cleanFallback),
+      );
+      if (!spoke) {
         stopReadAloud();
+        setIsPlayingTTS(null);
       }
-      setIsPlayingTTS(null);
     }
   };
 
@@ -7865,8 +8072,9 @@ export function ChatPanel({
 
           <div className="hidden h-4 w-px bg-black/10 sm:block" />
 
-          {/* Context/Project Pill */}
-          <div className="relative min-w-0 flex-1 sm:flex-initial">
+          {/* Context/Project Pill — the dropdown anchors to the header itself
+              so it can span the same width as the chat bar below. */}
+          <div className="min-w-0 flex-1 sm:flex-initial">
             <button
               type="button"
               onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
@@ -7897,7 +8105,7 @@ export function ChatPanel({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -5, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-0 mt-2 w-[280px] sm:w-[320px] p-2 bg-white border border-black/10 rounded-2xl shadow-[0_16px_50px_-10px_rgba(0,0,0,0.3)] overflow-hidden z-50 origin-top-left"
+                  className="pointer-events-auto absolute inset-x-3 top-full z-50 mx-auto mt-2 max-w-3xl origin-top overflow-y-auto rounded-[28px] border border-black/10 bg-white p-2 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.35)] max-h-[min(62dvh,540px)] custom-scroll sm:inset-x-6"
                 >
                   <div className="px-3 py-2 border-b border-black/5 mb-1">
                     <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">

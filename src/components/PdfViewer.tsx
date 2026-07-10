@@ -25,6 +25,16 @@ import { db } from "../memory/longterm.memory";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
+// cMaps and standard fonts are required for CJK (Japanese/Chinese/Korean)
+// PDFs — without them pdf.js silently renders pages with no text at all.
+// Served by the pdfjs-static-assets plugin in vite.config.ts. Kept as a
+// module constant so react-pdf doesn't reload the document on each render.
+const PDF_DOCUMENT_OPTIONS = {
+  cMapUrl: "/pdfjs-assets/cmaps/",
+  cMapPacked: true,
+  standardFontDataUrl: "/pdfjs-assets/standard_fonts/",
+};
+
 export function PdfViewer() {
   const { t } = useTranslation();
   const pdfUrl = useStore((state) => state.pdfUrl);
@@ -716,6 +726,7 @@ export function PdfViewer() {
         >
           <Document
             file={pdfUrl}
+            options={PDF_DOCUMENT_OPTIONS}
             onLoadSuccess={onDocumentLoadSuccess}
             onItemClick={({ pageNumber }) => setPdfPage(pageNumber)}
             loading={
