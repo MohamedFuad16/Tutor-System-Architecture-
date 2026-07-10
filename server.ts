@@ -487,6 +487,18 @@ const isAuthorizedDebugRequest = (request: RequestLike) => {
   );
 };
 
+// When the voice/signaling server runs on a separate host from the web app
+// (e.g. the broker on an Azure VM while the app is served from Vercel), the
+// app's origins must be listed here so their cross-origin WebSocket
+// handshakes are accepted. Comma-separated full origins, e.g.
+// "https://tutor-system-architecture.vercel.app,http://localhost:5173".
+const VOICE_ALLOWED_ORIGINS = new Set(
+  String(process.env.VOICE_ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((value) => value.trim().replace(/\/+$/, "").toLowerCase())
+    .filter(Boolean),
+);
+
 // A browser always sends an Origin on a WebSocket handshake. Requiring it to
 // match the host the app is served from blocks cross-site WebSocket hijacking
 // while letting the deployed app's own page open the voice broker. Voice keys
@@ -497,7 +509,11 @@ const isSameOriginBrokerRequest = (request: RequestLike) => {
   if (!origin) return false;
   let originHost = "";
   try {
-    originHost = new URL(origin).host.toLowerCase();
+    const parsedOrigin = new URL(origin);
+    if (VOICE_ALLOWED_ORIGINS.has(parsedOrigin.origin.toLowerCase())) {
+      return true;
+    }
+    originHost = parsedOrigin.host.toLowerCase();
   } catch {
     return false;
   }

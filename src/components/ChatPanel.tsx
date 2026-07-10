@@ -879,6 +879,17 @@ const compactVoiceEventText = (text: string, maxLength = 120) => {
 };
 
 const voiceServerWsUrl = () => {
+  // A dedicated voice/signaling server (e.g. an Azure VM) can be configured
+  // via VITE_VOICE_WS_URL when the web app itself is hosted somewhere that
+  // cannot serve WebSockets (e.g. Vercel serverless). Accepts ws(s):// or
+  // http(s):// forms; falls back to the page's own host when unset.
+  const configured = String(import.meta.env.VITE_VOICE_WS_URL || "").trim();
+  if (configured) {
+    return configured
+      .replace(/^https:/i, "wss:")
+      .replace(/^http:/i, "ws:")
+      .replace(/\/+$/, "");
+  }
   const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
   const hostPort =
     import.meta.env.DEV && /^517\d$/.test(window.location.port)
