@@ -22,7 +22,10 @@ export type RealtimeSessionOptions = {
   instructions: string;
   tools?: RealtimeToolDefinition[];
   /** Runs a tool the model called; returns the result to hand back. */
-  onToolCall?: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+  onToolCall?: (
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<unknown>;
   onUserTranscript?: (text: string) => void;
   onAssistantTranscript?: (text: string, done: boolean) => void;
   onStateChange?: (state: "connecting" | "live" | "closed" | "error") => void;
