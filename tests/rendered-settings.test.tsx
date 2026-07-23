@@ -429,9 +429,18 @@ describe("rendered SettingsModal", () => {
       screen.getByPlaceholderText("http://127.0.0.1:8080"),
       "http://127.0.0.1:9090",
     );
+    // Select each control by an option it uniquely owns, so the assertion is
+    // robust to added selects (e.g. the voice-mode picker) rather than pinned
+    // to a brittle combobox index.
     const comboboxes = screen.getAllByRole("combobox");
-    await user.selectOptions(comboboxes[1], "aura-luna-en");
-    await user.selectOptions(comboboxes[2], "gpt-4o");
+    const selectWithOption = (optionValue: string) =>
+      comboboxes.find((combobox) =>
+        Array.from(combobox.querySelectorAll("option")).some(
+          (option) => (option as HTMLOptionElement).value === optionValue,
+        ),
+      )!;
+    await user.selectOptions(selectWithOption("aura-luna-en"), "aura-luna-en");
+    await user.selectOptions(selectWithOption("gpt-4o"), "gpt-4o");
     await user.click(screen.getByRole("button", { name: "Persona Studio" }));
     await user.type(
       screen.getByPlaceholderText(/You are a precise, professional tutor/i),

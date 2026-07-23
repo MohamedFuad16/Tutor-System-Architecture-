@@ -50,6 +50,7 @@ type StoreDocumentInput = {
   size: number;
   sourcePath: string;
   extractedText: string;
+  pages?: { page_num: number; text: string }[];
   classification?: string;
   extractionMode?: string;
   totalPages?: number;
@@ -141,10 +142,40 @@ export class LearnerStore {
     return userDir;
   }
 
+  // Each distinct client-supplied userId opens (and, previously, never closed)
+  // its own WAL SQLite handle. An unauthenticated caller looping distinct ids
+  // could therefore exhaust file descriptors / process memory. Bound the number
+  // of concurrently open handles with a simple LRU: re-inserting a key moves it
+  // to the most-recently-used end of the Map, and the oldest is closed once the
+  // cap is exceeded. Handles reopen lazily, so eviction is transparent.
+  private static readonly MAX_OPEN_DATABASES = Math.max(
+    4,
+    Number(process.env.LEARNINGAI_MAX_OPEN_DBS || 64),
+  );
+
+  private evictIdleDatabases() {
+    while (this.databases.size > LearnerStore.MAX_OPEN_DATABASES) {
+      const oldestKey = this.databases.keys().next().value;
+      if (oldestKey === undefined) break;
+      const oldestDb = this.databases.get(oldestKey);
+      this.databases.delete(oldestKey);
+      try {
+        oldestDb?.close();
+      } catch {
+        // The handle is being discarded regardless; ignore close races.
+      }
+    }
+  }
+
   private dbFor(userIdInput: unknown) {
     const userId = normalizeLearnerUserId(userIdInput);
     const cached = this.databases.get(userId);
-    if (cached) return cached;
+    if (cached) {
+      // Mark as most-recently-used.
+      this.databases.delete(userId);
+      this.databases.set(userId, cached);
+      return cached;
+    }
     const dbPath = path.join(this.getUserDir(userId), "brain.sqlite");
     const Database = loadSqliteDatabase();
     const db = new Database(dbPath);
@@ -203,6 +234,7 @@ export class LearnerStore {
         ON background_tasks (user_id, request_id, updated_at);
     `);
     this.databases.set(userId, db);
+    this.evictIdleDatabases();
     return db;
   }
 
@@ -236,10 +268,23 @@ export class LearnerStore {
       "extracted-text",
       `${documentSegment}.txt`,
     );
+    const pagesRelativePath = path.join(
+      "extracted-text",
+      `${documentSegment}.pages.json`,
+    );
     const pdfPath = path.join(userDir, pdfRelativePath);
     const textPath = path.join(userDir, textRelativePath);
+    const pagesPath = path.join(userDir, pagesRelativePath);
     fs.copyFileSync(input.sourcePath, pdfPath);
     fs.writeFileSync(textPath, input.extractedText || "", "utf8");
+    // Persist the page-indexed text next to the flat extracted text so the
+    // tutor can be handed the exact page the learner is viewing.
+    if (Array.isArray(input.pages) && input.pages.length > 0) {
+      fs.writeFileSync(pagesPath, JSON.stringify(input.pages), "utf8");
+    } else if (fs.existsSync(pagesPath)) {
+      // A re-ingest with no page map should not leave a stale one behind.
+      fs.rmSync(pagesPath, { force: true });
+    }
     const now = Date.now();
     const db = this.dbFor(userId);
     db.prepare(
@@ -327,6 +372,65 @@ export class LearnerStore {
     const document = this.getDocument(userIdInput, documentIdInput);
     if (!document?.textPath || !fs.existsSync(document.textPath)) return "";
     return fs.readFileSync(document.textPath, "utf8");
+  }
+
+  // Return the extracted text of a single page (1-based, matching the reader's
+  // page number) plus the immediate neighbours for local context. Falls back
+  // to an empty result when no page map was stored for the document.
+  readDocumentPageText(
+    userIdInput: unknown,
+    documentIdInput: unknown,
+    pageNumber: number,
+    options: { neighborRadius?: number } = {},
+  ): {
+    page: number;
+    totalPages: number;
+    pageText: string;
+    neighborText: string;
+  } | null {
+    const userId = normalizeLearnerUserId(userIdInput);
+    const documentId = String(documentIdInput || "").trim();
+    if (!documentId) return null;
+    const documentSegment = sanitizePathSegment(documentId, "document");
+    const pagesPath = path.join(
+      this.getUserDir(userId),
+      "extracted-text",
+      `${documentSegment}.pages.json`,
+    );
+    if (!fs.existsSync(pagesPath)) return null;
+    let pages: { page_num: number; text: string }[];
+    try {
+      pages = JSON.parse(fs.readFileSync(pagesPath, "utf8"));
+    } catch {
+      return null;
+    }
+    if (!Array.isArray(pages) || pages.length === 0) return null;
+    // Reader page numbers are 1-based; stored page_num is 0-based.
+    const targetIndex = Math.max(
+      0,
+      Math.min(pages.length - 1, Math.round(pageNumber) - 1),
+    );
+    const radius = Math.max(0, options.neighborRadius ?? 1);
+    const byPageNum = new Map<number, string>();
+    for (const entry of pages) {
+      byPageNum.set(Number(entry.page_num), String(entry.text || ""));
+    }
+    const target = pages[targetIndex];
+    const targetPageNum = Number(target.page_num);
+    const neighborParts: string[] = [];
+    for (let offset = -radius; offset <= radius; offset += 1) {
+      if (offset === 0) continue;
+      const neighbor = byPageNum.get(targetPageNum + offset);
+      if (neighbor && neighbor.trim()) {
+        neighborParts.push(`[page ${targetPageNum + offset + 1}] ${neighbor}`);
+      }
+    }
+    return {
+      page: targetPageNum + 1,
+      totalPages: pages.length,
+      pageText: String(target.text || ""),
+      neighborText: neighborParts.join("\n\n"),
+    };
   }
 
   copyMigrationRecords(records: MigrationRecordInput[]) {

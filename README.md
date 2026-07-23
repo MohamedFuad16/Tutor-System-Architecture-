@@ -202,16 +202,37 @@ to cloud Postgres/object storage later.
 
 ## Voice Modes
 
-- `deepgram` mode uses the Deepgram Voice Agent path.
-- `custom` mode opens a browser WebSocket to the local broker. The broker sends
-  foreground teaching to an OpenRouter-compatible `VOICE_FOREGROUND_MODEL` and
-  delegates web/code/PDF/tool work to `VOICE_BACKGROUND_MODEL`.
+Voice mode is a **runtime setting** in Settings (no rebuild required):
+
+- **`deepgram-duplex` (default)** — the two-model "interaction" mimic of
+  Thinking Machines' interaction models. A fast foreground model
+  (`VOICE_FOREGROUND_MODEL`) keeps the live conversation moving while an async
+  background model (`VOICE_BACKGROUND_MODEL`) does web/code/PDF/tool heavy
+  lifting, whose result is stitched back in as a spoken aside. It runs inside
+  the same `npm run dev` / `npm start` Node process that serves the app — **no
+  separate server to spin up** — and needs only a **Deepgram key** (STT + Aura
+  TTS) plus an **LLM key**. The LLM key can be OpenAI **or** OpenRouter; the
+  broker auto-detects the provider from the key shape (`sk-or-…` → OpenRouter,
+  `sk-…` → OpenAI direct), so "just a Deepgram key + a ChatGPT key" works.
+- **`deepgram-agent`** — the single Deepgram Voice Agent path.
+- **`openai-realtime` (test / comparison only)** — connects the browser
+  straight to OpenAI's Realtime API over **WebRTC**, for a true full-duplex,
+  uninterrupted benchmark against the cheaper mimic. It needs **no persistent
+  server** (only a tiny `/api/realtime/token` endpoint that also runs on Vercel
+  serverless) and is BYOK-first (the browser's OpenAI key mints a short-lived
+  ephemeral secret; the standard key never reaches the WebRTC exchange). This is
+  intentionally **not** the default and is billed at premium realtime rates.
+
 - Background answers are cleaned before insertion so raw markdown such as
   `**Apple**` is not read aloud.
 - MisoTTS is optional and experimental. The local broker only accepts loopback
-  Miso URLs such as `http://127.0.0.1:8080`.
+  Miso URLs such as `http://127.0.0.1:8080`; set `MISO_TTS_ALLOW_HEADER_URL=false`
+  on deployed hosts to ignore the client-supplied Miso URL header.
 - No route should claim a universal sub-200 ms guarantee. Report latency as
   measured p50, p95, failure rate, route, provider, region, and hardware.
+- Deployments that terminate the voice WebSocket behind a proxy must strip any
+  inbound `X-Forwarded-Host` header so the same-origin broker check can't be
+  spoofed.
 
 ## Getting Started
 

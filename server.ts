@@ -73,15 +73,41 @@ const VOICE_BACKGROUND_MODEL =
   process.env.VOICE_BACKGROUND_MODEL ||
   process.env.GPT55_MODEL ||
   "openai/gpt-5.5";
+
+// The two-model duplex broker can run its foreground/background LLM calls on a
+// raw OpenAI ("ChatGPT") key or on OpenRouter, chosen automatically from the
+// key shape: OpenRouter keys are "sk-or-...", OpenAI keys are "sk-..." only.
+// This lets the duplex work with just a Deepgram key + an OpenAI key, no
+// OpenRouter account required. OpenAI wants bare model ids, so the OpenRouter
+// "openai/" prefix is stripped, and OpenRouter-only hosted tools are dropped.
+const resolveBrokerLlmProvider = (apiKey: string, model: string) => {
+  const key = String(apiKey || "");
+  const isOpenAiDirect = /^sk-/.test(key) && !/^sk-or-/.test(key);
+  if (isOpenAiDirect) {
+    return {
+      baseURL: "https://api.openai.com/v1",
+      model: model.replace(/^openai\//, ""),
+      supportsOpenRouterTools: false,
+    };
+  }
+  return {
+    baseURL: "https://openrouter.ai/api/v1",
+    model,
+    supportsOpenRouterTools: true,
+  };
+};
 const VOICE_BROKER_FAST_ACK = /^(1|true|yes|on)$/i.test(
   String(process.env.VOICE_BROKER_FAST_ACK || "").trim(),
 );
 const VOICE_BROKER_FAST_ACK_TEXT =
   process.env.VOICE_BROKER_FAST_ACK_TEXT || "Okay.";
 const VOICE_BROKER_FAST_ACK_FILE = process.env.VOICE_BROKER_FAST_ACK_FILE || "";
+// Deepgram Aura / MisoTTS synthesis rarely returns in under ~180ms, so the old
+// default aborted almost every utterance before audio arrived. 1500ms is a
+// realistic upper bound that still fails fast on a genuinely stuck provider.
 const VOICE_BROKER_TTS_DEADLINE_MS = Math.max(
   50,
-  Number(process.env.VOICE_BROKER_TTS_DEADLINE_MS || 180),
+  Number(process.env.VOICE_BROKER_TTS_DEADLINE_MS || 1500),
 );
 const VOICE_BROKER_STT_MODEL = process.env.VOICE_BROKER_STT_MODEL || "nova-3";
 const VOICE_BROKER_TTS_MODEL =
@@ -178,7 +204,14 @@ const MISO_TTS_HEALTH_TIMEOUT_MS = 800;
 const VOICE_WS_BUFFER_HIGH_WATER_BYTES = 1_000_000;
 const VOICE_AGENT_MESSAGE_BUFFER_LIMIT = 80;
 
+// The client can point TTS at a local Miso server via this header, which is
+// convenient for local dev but lets a caller probe arbitrary loopback ports on
+// a deployed host. Deployments can set MISO_TTS_ALLOW_HEADER_URL=false to ignore
+// the header and use only the server-configured MISO_TTS_API_URL. Defaults to
+// on to preserve the existing local workflow.
+const ALLOW_MISO_HEADER_URL = process.env.MISO_TTS_ALLOW_HEADER_URL !== "false";
 const readMisoTtsApiUrlOverride = (headers: IncomingHttpHeaders) => {
+  if (!ALLOW_MISO_HEADER_URL) return "";
   const raw = headers["x-miso-tts-api-url"];
   if (Array.isArray(raw)) return raw[0] || "";
   return typeof raw === "string" ? raw : "";
@@ -626,10 +659,19 @@ const openRouterCost = (
   inputTokens: number,
   outputTokens: number,
 ) => {
+  // Resolve pricing across provider-prefix variants so a model such as
+  // "anthropic/claude-..." or a bare "gpt-4o-mini" doesn't silently read as $0
+  // when the pricing map keys it under a different prefix.
+  const bareModel = model.includes("/")
+    ? model.slice(model.indexOf("/") + 1)
+    : model;
   const modelPricing =
     pricing[model] ||
-    pricing[model.replace(/^openai\//, "")] ||
-    pricing[`openai/${model}`];
+    pricing[bareModel] ||
+    pricing[`openai/${bareModel}`] ||
+    Object.entries(pricing).find(
+      ([key]) => key === model || key.endsWith(`/${bareModel}`),
+    )?.[1];
   if (!modelPricing) return 0;
   return roundCost(
     inputTokens * modelPricing.prompt + outputTokens * modelPricing.completion,
@@ -877,7 +919,10 @@ export async function createTutorServerApp(
 
   app.use(compression());
   app.use(express.json({ limit: "10mb" }));
-  app.use(express.urlencoded({ limit: "100mb", extended: true }));
+  // Cap urlencoded bodies far below the previous 100mb: no route needs a large
+  // form body, and an oversized `extended` (qs) parse is a cheap memory-DoS
+  // amplifier. Large binary uploads go through multer, not this parser.
+  app.use(express.urlencoded({ limit: "1mb", extended: true }));
 
   const uploadDir =
     process.env.TUTOR_UPLOAD_DIR ||
@@ -1100,6 +1145,81 @@ export async function createTutorServerApp(
     });
   });
 
+  // Mint a short-lived OpenAI Realtime client secret for the browser's WebRTC
+  // handshake (the test/comparison voice mode). This is the ONLY server piece
+  // that path needs — a single POST, so it also runs on Vercel serverless. The
+  // standard key never reaches the browser: it stays here, and only the
+  // ephemeral secret is returned. BYOK (the browser's own key via Authorization)
+  // is preferred; the server key is used only when ALLOW_SERVER_OPENAI_FALLBACK
+  // is enabled.
+  app.post("/api/realtime/token", async (req, res) => {
+    const byokKey = sanitizeApiKey(
+      String(req.headers["authorization"] || "").replace(/^Bearer\s+/i, ""),
+    );
+    const allowServerOpenAi = /^(1|true|yes|on)$/i.test(
+      String(process.env.ALLOW_SERVER_OPENAI_FALLBACK || "").trim(),
+    );
+    const apiKey =
+      byokKey ||
+      (allowServerOpenAi ? sanitizeApiKey(process.env.OPENAI_API_KEY) : "");
+    if (!apiKey) {
+      return res.status(401).json({
+        error:
+          "An OpenAI API key is required for Realtime voice (test mode). Add it in Settings.",
+        code: "OPENAI_KEY_MISSING",
+      });
+    }
+    const model = String(req.body?.model || "gpt-realtime").slice(0, 100);
+    const voice = String(req.body?.voice || "marin").slice(0, 40);
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/realtime/client_secrets",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            session: {
+              type: "realtime",
+              model,
+              audio: { output: { voice } },
+            },
+          }),
+        },
+      );
+      const bodyText = await response.text();
+      if (!response.ok) {
+        return res.status(response.status).json({
+          error: "Failed to mint an OpenAI Realtime client secret.",
+          detail: bodyText.slice(0, 500),
+        });
+      }
+      let parsed: any = {};
+      try {
+        parsed = JSON.parse(bodyText);
+      } catch {
+        parsed = {};
+      }
+      const value = parsed?.value || parsed?.client_secret?.value || "";
+      if (!value) {
+        return res
+          .status(502)
+          .json({ error: "OpenAI did not return a client secret." });
+      }
+      return res.json({
+        value,
+        expiresAt: parsed?.expires_at || parsed?.expires_after || null,
+        model,
+      });
+    } catch (error: any) {
+      return res.status(502).json({
+        error: error?.message || "Realtime token mint failed.",
+      });
+    }
+  });
+
   app.get("/api/learner/profile", (req, res) => {
     const userId = learnerUserIdFromHeaders(req.headers);
     const profile = learnerStore.ensureProfile(
@@ -1171,10 +1291,36 @@ export async function createTutorServerApp(
     res.json({ ok: true, ...result });
   });
 
-  app.get("/api/learner/documents/:documentId/file", (req, res) => {
-    const userId = normalizeLearnerUserId(
-      req.query.userId || learnerUserIdFromHeaders(req.headers),
+  // Local profiles are not real auth (see README): both the request header and
+  // the ?userId= query are client-supplied, so this cannot enforce true tenant
+  // isolation. What it *can* do is reject a request whose header identity and
+  // query identity explicitly disagree (a confused-deputy / URL-smuggling
+  // vector) while still allowing the header-less react-pdf `<Document file>`
+  // fetch, which can only carry identity via the query string. Prefer the
+  // header when present; fall back to the query otherwise.
+  const resolveDocumentUserId = (req: express.Request): string | null => {
+    const headerRaw =
+      req.headers["x-learningai-user-id"] ||
+      req.headers["X-LearningAI-User-Id"] ||
+      req.headers["x-user-id"];
+    const hasHeader = Boolean(
+      Array.isArray(headerRaw) ? headerRaw[0] : headerRaw,
     );
+    const headerUser = learnerUserIdFromHeaders(req.headers);
+    const queryUser = req.query.userId
+      ? normalizeLearnerUserId(req.query.userId)
+      : "";
+    if (hasHeader && queryUser && headerUser !== queryUser) {
+      return null;
+    }
+    return hasHeader ? headerUser : queryUser || headerUser;
+  };
+
+  app.get("/api/learner/documents/:documentId/file", (req, res) => {
+    const userId = resolveDocumentUserId(req);
+    if (!userId) {
+      return res.status(403).json({ error: "User identity mismatch." });
+    }
     const document = learnerStore.getDocument(userId, req.params.documentId);
     if (!document || !fs.existsSync(document.filePath)) {
       return res.status(404).json({ error: "Document file not found." });
@@ -1184,9 +1330,10 @@ export async function createTutorServerApp(
   });
 
   app.get("/api/learner/documents/:documentId/text", (req, res) => {
-    const userId = normalizeLearnerUserId(
-      req.query.userId || learnerUserIdFromHeaders(req.headers),
-    );
+    const userId = resolveDocumentUserId(req);
+    if (!userId) {
+      return res.status(403).json({ error: "User identity mismatch." });
+    }
     const document = learnerStore.getDocument(userId, req.params.documentId);
     if (!document) {
       return res.status(404).json({ error: "Document text not found." });
@@ -1387,6 +1534,17 @@ export async function createTutorServerApp(
 
           let extractedText = result.content || "";
 
+          // Page-indexed text so the tutor can be told exactly what is on the
+          // page the learner is viewing. Seed from the pymupdf4llm page chunks;
+          // vision-OCR pages below are merged in by page number.
+          const pageTextMap = new Map<number, string>();
+          for (const page of Array.isArray(result.pages) ? result.pages : []) {
+            const pageNum = Number(page?.page_num);
+            if (Number.isFinite(pageNum)) {
+              pageTextMap.set(pageNum, String(page?.text || ""));
+            }
+          }
+
           // If Scanned or Mixed, perform Vision Parsing on page images.
           if (
             result.classification === "Scanned" ||
@@ -1426,7 +1584,13 @@ export async function createTutorServerApp(
                   const pageText =
                     response.choices[0]?.message?.content?.trim();
                   if (pageText) {
-                    extractedText += `\n\n## OCR / Vision Page ${Number(img.page_num ?? 0) + 1}\n\n${pageText}`;
+                    const pageNum = Number(img.page_num ?? 0);
+                    extractedText += `\n\n## OCR / Vision Page ${pageNum + 1}\n\n${pageText}`;
+                    const existing = pageTextMap.get(pageNum);
+                    pageTextMap.set(
+                      pageNum,
+                      existing ? `${existing}\n\n${pageText}` : pageText,
+                    );
                   }
                 }
               } catch (visionError) {
@@ -1434,6 +1598,10 @@ export async function createTutorServerApp(
               }
             }
           }
+
+          const pages = Array.from(pageTextMap.entries())
+            .sort((a, b) => a[0] - b[0])
+            .map(([page_num, text]) => ({ page_num, text }));
 
           let serverDocument = null;
           if (documentId && bookId) {
@@ -1447,6 +1615,7 @@ export async function createTutorServerApp(
                 size: req.file?.size || 0,
                 sourcePath: filePath,
                 extractedText,
+                pages,
                 classification: result.classification,
                 extractionMode: result.extraction_mode,
                 totalPages: result.total_pages,
@@ -2150,7 +2319,10 @@ Use a Markdown table when comparing 2+ things. Keep every section scannable; whi
             apiKey: openaiKey,
           });
           const mp3 = await openai.audio.speech.create({
-            model: "tts-1",
+            // Call the model actually reported below in X-Usage-Model rather
+            // than silently substituting tts-1, so usage/cost telemetry is
+            // truthful. gpt-4o-mini-tts is a current OpenAI speech model.
+            model: "gpt-4o-mini-tts",
             voice: "alloy",
             input: billedText,
           });
@@ -2585,7 +2757,32 @@ Use a Markdown table when comparing 2+ things. Keep every section scannable; whi
         serperApiKey: bodySerperKey,
         language,
         requestId: clientRequestId,
+        activeDocumentId: bodyActiveDocumentId,
+        currentPage: bodyCurrentPage,
+        currentPageTotal: bodyCurrentPageTotal,
       } = req.body;
+      // Resolve the extracted text of the page the learner is currently viewing
+      // so it can be injected as an explicit "CURRENT PAGE" block below.
+      const currentPageContext = (() => {
+        const documentId =
+          typeof bodyActiveDocumentId === "string" ? bodyActiveDocumentId : "";
+        const pageNumber = Number(bodyCurrentPage);
+        if (!documentId || !Number.isFinite(pageNumber) || pageNumber < 1) {
+          return null;
+        }
+        try {
+          const userId = learnerUserIdFromHeaders(req.headers);
+          const page = learnerStore.readDocumentPageText(
+            userId,
+            documentId,
+            pageNumber,
+          );
+          if (!page || !page.pageText.trim()) return null;
+          return page;
+        } catch {
+          return null;
+        }
+      })();
       requestId = normalizeClientRequestId(clientRequestId) || requestId;
       const runtimeSettings = normalizeBrainRuntimeSettings(rawRuntimeSettings);
       const runtimeSettingsSnapshot = compactRuntimeSettings(runtimeSettings);
@@ -2876,6 +3073,25 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
         systemInstruction += `\n\n${memoryContext}`;
       }
 
+      // Tell the tutor exactly what is on the page the learner is looking at.
+      // This is the extracted text of the current reader page (plus immediate
+      // neighbours for continuity), so questions like "what's on this page?" are
+      // answered from the real page rather than the document's opening excerpt.
+      if (currentPageContext) {
+        const pageBody = currentPageContext.pageText
+          .replace(/\s+\n/g, "\n")
+          .trim()
+          .slice(0, 4000);
+        const neighborBody = currentPageContext.neighborText
+          .trim()
+          .slice(0, 2000);
+        systemInstruction += `\n\nCURRENT PAGE ${currentPageContext.page} of ${currentPageContext.totalPages} (the page the learner is viewing right now):\n${pageBody}`;
+        if (neighborBody) {
+          systemInstruction += `\n\nADJACENT PAGES (for continuity only):\n${neighborBody}`;
+        }
+        systemInstruction += `\n\nWhen the learner refers to "this page", "here", or "the current page", answer from the CURRENT PAGE text above.`;
+      }
+
       if (currentPageImage && sourceMaterialRequest) {
         systemInstruction += `\n\nCURRENT PAGE IMAGE IS ATTACHED THROUGH THE look_at_current_page TOOL. For this source-material request, call look_at_current_page before answering and answer from the page image plus selected/library context. Do not use web_search unless the user explicitly asks for web search.`;
       }
@@ -2924,6 +3140,15 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
       let evaluatedAnswers: any[] = [];
 
       let iterations = 0;
+      // Count actual model completions (each streamed turn), including the
+      // final answer turn that `break`s out before iterations++ and the
+      // post-loop synthesis turn. This is the honest number for telemetry;
+      // `iterations` alone only counts tool-executing turns.
+      let modelTurns = 0;
+      // True once a turn has emitted tool calls and false again once a turn
+      // answers with text. If the loop exits with this still true, the budget
+      // was exhausted mid-tool-call and we owe the user a synthesis turn.
+      let lastTurnHadToolCalls = false;
       const MAX_ITERATIONS = runtimeSettings.toolIterationLimit;
       let finalContent = "";
 
@@ -3086,11 +3311,15 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
           }
         }
 
+        modelTurns++;
+
         if (!isToolCall) {
+          lastTurnHadToolCalls = false;
           break; // Done!
         }
 
         // We have tool calls
+        lastTurnHadToolCalls = true;
         sendEvent("status", { phase: "tool_execution" });
         const validToolCalls = currentToolCalls.filter(Boolean);
         recordSystemActivity({
@@ -3582,6 +3811,46 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
         }
       }
 
+      // If the loop exhausted its tool-iteration budget while the last model
+      // turn was still emitting tool calls, the tool results were appended to
+      // the message list but never turned into a spoken answer — the user
+      // would otherwise get a blank/truncated reply. Run one final synthesis
+      // turn with no tools so the accumulated tool results become text.
+      if (lastTurnHadToolCalls) {
+        try {
+          sendEvent("status", { phase: "synthesizing" });
+          const synthesisStream: any = await openai.chat.completions.create({
+            model: usedModelForUsage,
+            messages: formattedMessages as any,
+            stream: true,
+            stream_options: { include_usage: true } as any,
+          } as any);
+          modelTurns++;
+          for await (const chunk of synthesisStream) {
+            const usage = (chunk as any).usage;
+            if (usage) {
+              inputTokens = usage.prompt_tokens ?? inputTokens;
+              outputTokens = usage.completion_tokens ?? outputTokens;
+              usageEstimated = false;
+            }
+            const delta = chunk.choices?.[0]?.delta;
+            if (delta?.content) {
+              finalContent += delta.content;
+              sendEvent("chunk", { content: delta.content });
+            }
+          }
+        } catch (synthesisError: any) {
+          recordSystemActivity({
+            kind: "model",
+            status: "failed",
+            title: "Final synthesis turn failed",
+            detail: String(synthesisError?.message || synthesisError),
+            requestId,
+            phase: "tool_followup",
+          });
+        }
+      }
+
       if (inputTokens === 0 && outputTokens === 0) {
         inputTokens = estimateTokensFromText(formattedMessages);
         outputTokens = estimateTokensFromText(finalContent);
@@ -3613,7 +3882,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
         graphUpdates: graphUpdates.length,
         flashcards: flashcardsUpdates.length,
         evaluatedAnswers: evaluatedAnswers.length,
-        iterations: iterations + 1,
+        iterations: modelTurns,
         runtimeSettings: runtimeSettingsSnapshot,
       });
       recordSystemActivity({
@@ -3636,7 +3905,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
           flashcards: flashcardsUpdates.length,
           evaluatedAnswers: evaluatedAnswers.length,
           webSources: webSources.length,
-          iterations: iterations + 1,
+          iterations: modelTurns,
           runtimeSettings: runtimeSettingsSnapshot,
         },
       });
@@ -3726,6 +3995,16 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
           wss.emit("connection", ws, request);
         });
       } else if (pathname === "/api/voice-agent") {
+        // Gate the Deepgram Voice Agent upgrade with the same same-origin /
+        // debug-token check the custom broker uses. Without it, any external
+        // page could open this socket (cross-site WebSocket hijacking) and, if
+        // ALLOW_SERVER_DEEPGRAM_FALLBACK is enabled, drain the deployment's
+        // Deepgram credits or exhaust connections.
+        if (!isAuthorizedLocalVoiceBrokerRequest(request)) {
+          socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
+          socket.destroy();
+          return;
+        }
         wss.handleUpgrade(request, socket, head, (ws) => {
           wss.emit("connection", ws, request);
         });
@@ -4674,12 +4953,16 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
             return "I have the local learning book, previous context, and document memory loaded. I can answer the live part now, and any web, PDF, code, or pricing work is staged for the GPT-5.5 background layer once the provider key is connected.";
           }
           const startedAt = Date.now();
+          const fgProvider = resolveBrokerLlmProvider(
+            brokerOpenRouterApiKey,
+            foregroundModel,
+          );
           const openai = new OpenAI({
-            baseURL: "https://openrouter.ai/api/v1",
+            baseURL: fgProvider.baseURL,
             apiKey: brokerOpenRouterApiKey,
           });
           const response = await openai.chat.completions.create({
-            model: foregroundModel,
+            model: fgProvider.model,
             temperature: 0.35,
             max_tokens: 180,
             messages: [
@@ -4754,12 +5037,16 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
               );
             }
 
+            const bgProvider = resolveBrokerLlmProvider(
+              brokerBackgroundApiKey,
+              backgroundModel,
+            );
             const openai = new OpenAI({
-              baseURL: "https://openrouter.ai/api/v1",
+              baseURL: bgProvider.baseURL,
               apiKey: brokerBackgroundApiKey,
             });
             const modelResponse = await openai.chat.completions.create({
-              model: backgroundModel,
+              model: bgProvider.model,
               temperature: 0.18,
               max_tokens: 420,
               messages: [
@@ -4781,11 +5068,12 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
                     .join("\n\n"),
                 },
               ],
-              tools: [
-                {
-                  type: "openrouter:web_search",
-                },
-              ],
+              // OpenRouter's hosted web tool only exists on OpenRouter; on a
+              // direct OpenAI key the background model still reasons over the
+              // delegated request, just without hosted web search.
+              tools: bgProvider.supportsOpenRouterTools
+                ? [{ type: "openrouter:web_search" }]
+                : undefined,
             } as any);
             const responseMessage =
               (modelResponse.choices[0]?.message as Record<string, any>) ||

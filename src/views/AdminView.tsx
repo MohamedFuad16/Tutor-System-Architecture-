@@ -297,7 +297,7 @@ const statusTone = (status: string) => {
   if (status === "deferred")
     return "border-violet-200 bg-violet-50 text-violet-700";
   if (status === "dismissed")
-    return "border-zinc-300 bg-zinc-100 text-zinc-600";
+    return "border-white/15 bg-white/[0.06] text-zinc-400";
   return "border-blue-200 bg-blue-50 text-blue-700";
 };
 
@@ -1716,7 +1716,7 @@ export function AdminView() {
       ? "border-green-200 bg-green-50 text-green-600"
       : serverConsoleStatus === "connecting"
         ? "border-blue-200 bg-blue-50 text-blue-600"
-        : "border-zinc-200 bg-zinc-50 text-zinc-500";
+        : "border-white/10 bg-white/[0.04] text-zinc-400";
   const activityLabel =
     activityStatus === "ready"
       ? "Live"
@@ -1732,7 +1732,7 @@ export function AdminView() {
         ? "border-blue-200 bg-blue-50 text-blue-600"
         : activityStatus === "error"
           ? "border-red-200 bg-red-50 text-red-600"
-          : "border-zinc-200 bg-zinc-50 text-zinc-500";
+          : "border-white/10 bg-white/[0.04] text-zinc-400";
   const updateRuntimeSetting = <K extends keyof BrainRuntimeSettings>(
     key: K,
     value: BrainRuntimeSettings[K],
@@ -2025,7 +2025,7 @@ export function AdminView() {
   ]);
 
   return (
-    <div className="w-full h-full bg-[#faf9f6] text-zinc-900 flex flex-col overflow-x-hidden overflow-y-auto custom-scroll scroll-pt-32 pt-20 md:pt-0 relative font-serif">
+    <div className="w-full h-full bg-[#0A0A0B] text-zinc-100 flex flex-col overflow-x-hidden overflow-y-auto custom-scroll scroll-pt-32 pt-20 md:pt-0 relative font-serif">
       {/* Subtle Paper Texture Overlay */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03]"
@@ -2037,10 +2037,10 @@ export function AdminView() {
 
       <div className="min-h-full flex w-full min-w-0 relative z-10 pt-16 md:pt-20 shrink-0">
         {/* Sidebar Navigation */}
-        <div className="sticky top-20 z-40 hidden h-[calc(100vh-80px)] min-h-[calc(100vh-80px)] w-64 flex-shrink-0 self-start overflow-y-auto border-r border-zinc-200/70 bg-[#faf9f6]/98 px-4 py-6 font-sans shadow-[12px_0_36px_rgba(255,255,255,0.72)] backdrop-blur-xl custom-scroll lg:block">
+        <div className="sticky top-20 z-40 hidden h-[calc(100vh-80px)] min-h-[calc(100vh-80px)] w-64 flex-shrink-0 self-start overflow-y-auto border-r border-white/10 bg-[#0A0A0B]/98 px-4 py-6 font-sans shadow-[12px_0_36px_rgba(0,0,0,0.5)] backdrop-blur-xl custom-scroll lg:block">
           <button
             onClick={() => setActiveView("study")}
-            className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors mb-8 px-2"
+            className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors mb-8 px-2"
           >
             <Menu size={16} /> Back to Library
           </button>
@@ -2052,35 +2052,35 @@ export function AdminView() {
           <nav className="flex flex-col gap-1">
             <button
               onClick={() => setActiveTab("learners")}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "learners" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 border border-transparent"}`}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "learners" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100 border border-transparent"}`}
             >
               <BrainCircuit size={16} />
               <span className="line-clamp-1 leading-snug">Learners</span>
             </button>
             <button
               onClick={() => setActiveTab("activity")}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "activity" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 border border-transparent"}`}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "activity" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100 border border-transparent"}`}
             >
               <Gauge size={16} />
               <span className="line-clamp-1 leading-snug">System Activity</span>
             </button>
             <button
               onClick={() => setActiveTab("evidence")}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "evidence" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 border border-transparent"}`}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "evidence" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100 border border-transparent"}`}
             >
               <BrainCircuit size={16} />
               <span className="line-clamp-1 leading-snug">Evidence Ledger</span>
             </button>
             <button
               onClick={() => setActiveTab("diagnostics")}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "diagnostics" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 border border-transparent"}`}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-[color,background-color,border-color,box-shadow,transform,opacity] duration-200 flex items-center gap-2 ${activeTab === "diagnostics" ? "bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-100" : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100 border border-transparent"}`}
             >
               <ShieldCheck size={16} />
               <span className="line-clamp-1 leading-snug">
                 Beta Diagnostics
               </span>
             </button>
-            <details className="mt-5 border-t border-zinc-200 pt-4">
+            <details className="mt-5 border-t border-white/10 pt-4">
               <summary className="cursor-pointer px-3 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                 Advanced debugging
               </summary>
@@ -2121,7 +2121,7 @@ export function AdminView() {
                       className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
                         activeTab === tab.id
                           ? "border-blue-100 bg-blue-50 font-medium text-blue-700"
-                          : "border-transparent text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+                          : "border-transparent text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
                       }`}
                     >
                       <Icon size={14} />
@@ -2137,14 +2137,14 @@ export function AdminView() {
         {/* Main Content */}
         <div className="flex-1 min-w-0 flex flex-col relative font-sans">
           {/* Header for mobile */}
-          <div className="sticky top-16 md:top-20 left-0 right-0 z-50 bg-[#faf9f6]/95 backdrop-blur-md border-b border-zinc-200/50 px-6 py-4 flex items-center justify-between shadow-sm lg:hidden">
+          <div className="sticky top-16 md:top-20 left-0 right-0 z-50 bg-[#0A0A0B]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between shadow-sm lg:hidden">
             <button
               onClick={() => setActiveView("study")}
-              className="flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-zinc-100 transition-colors"
             >
               <Menu size={16} /> Back
             </button>
-            <div className="text-sm font-semibold text-zinc-800 tracking-wide truncate max-w-[200px] md:max-w-md">
+            <div className="text-sm font-semibold text-zinc-200 tracking-wide truncate max-w-[200px] md:max-w-md">
               Admin Center
             </div>
             <div className="w-16"></div>
@@ -2158,19 +2158,19 @@ export function AdminView() {
             >
               {/* Admin Center Preface */}
               <div className="mb-12">
-                <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 mb-3">
+                <h1 className="text-3xl font-semibold tracking-tight text-zinc-100 mb-3">
                   {activeTab === "learners"
                     ? "Learner Administration"
                     : "Admin Center"}
                 </h1>
-                <p className="text-zinc-600 leading-relaxed max-w-2xl text-sm font-serif">
+                <p className="text-zinc-400 leading-relaxed max-w-2xl text-sm font-serif">
                   {activeTab === "learners"
                     ? "Select a learner, inspect their knowledge map, and follow the evidence behind each interpretation."
                     : "Inspect the few operational signals needed to explain behavior and judge local readiness."}
                 </p>
               </div>
 
-              <div className="mb-8 grid grid-cols-2 gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm lg:hidden">
+              <div className="mb-8 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-[#14171D] p-2 shadow-sm lg:hidden">
                 {[
                   { id: "learners", label: "Learners", icon: BrainCircuit },
                   { id: "activity", label: "Activity", icon: Gauge },
@@ -2186,7 +2186,7 @@ export function AdminView() {
                       className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                         activeTab === tab.id
                           ? "bg-blue-50 text-blue-700"
-                          : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                          : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
                       }`}
                     >
                       <Icon size={14} />
@@ -2196,7 +2196,7 @@ export function AdminView() {
                 })}
               </div>
 
-              <details className="mb-8 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm lg:hidden">
+              <details className="mb-8 rounded-2xl border border-white/10 bg-[#14171D] p-3 shadow-sm lg:hidden">
                 <summary className="cursor-pointer px-2 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                   Advanced debugging
                 </summary>
@@ -2225,7 +2225,7 @@ export function AdminView() {
                         className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                           activeTab === tab.id
                             ? "bg-blue-50 text-blue-700"
-                            : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                            : "text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-100"
                         }`}
                       >
                         <Icon size={14} />
@@ -2236,7 +2236,7 @@ export function AdminView() {
                 </div>
               </details>
 
-              <div className="mb-10 border-b border-zinc-200 pb-8 pt-4 font-sans cursor-default">
+              <div className="mb-10 border-b border-white/10 pb-8 pt-4 font-sans cursor-default">
                 <span className="text-[11px] uppercase tracking-[0.2em] font-mono text-zinc-400 mb-6 block font-medium">
                   <span className="text-blue-500 mr-2">#</span>
                   {activeTab === "learners"
@@ -2266,7 +2266,7 @@ export function AdminView() {
                                           : "Runtime Environment"}
                 </span>
                 <div className="flex items-center justify-between">
-                  <h1 className="text-3xl md:text-4xl lg:text-4xl font-medium tracking-tight text-zinc-900 mb-2 font-serif leading-[1.15]">
+                  <h1 className="text-3xl md:text-4xl lg:text-4xl font-medium tracking-tight text-zinc-100 mb-2 font-serif leading-[1.15]">
                     {activeTab === "learners"
                       ? "Knowledge, evidence, and learning patterns"
                       : activeTab === "brain"
@@ -2309,7 +2309,7 @@ export function AdminView() {
                                 ? "bg-blue-500"
                                 : activityStatus === "error"
                                   ? "bg-red-500"
-                                  : "bg-zinc-400"
+                                  : "bg-zinc-600"
                           }`}
                         ></span>
                       </span>
@@ -2332,7 +2332,7 @@ export function AdminView() {
                               ? "bg-green-500"
                               : serverConsoleStatus === "connecting"
                                 ? "bg-blue-500"
-                                : "bg-zinc-400"
+                                : "bg-zinc-600"
                           }`}
                         ></span>
                       </span>
@@ -2344,23 +2344,23 @@ export function AdminView() {
                 </div>
               </div>
 
-              <div className="prose prose-zinc w-full max-w-none prose-sm md:prose-base font-serif prose-p:leading-[1.8] prose-p:text-zinc-800 prose-p:font-light prose-p:my-5 selection:bg-blue-200 selection:text-zinc-900">
+              <div className="prose prose-zinc w-full max-w-none prose-sm md:prose-base font-serif prose-p:leading-[1.8] prose-p:text-zinc-200 prose-p:font-light prose-p:my-5 selection:bg-blue-200 selection:text-zinc-100">
                 {activeTab === "learners" ? (
                   <div
                     className="flex flex-col gap-8 font-sans"
                     data-admin-default-view="learner-overview"
                     data-testid="admin-brain-overview"
                   >
-                    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-lg border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                         <div className="max-w-3xl">
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
                             <BrainCircuit size={13} /> How to read this page
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Start with a learner, then inspect the evidence
                           </h2>
-                          <p className="mt-2 text-sm leading-6 text-zinc-600">
+                          <p className="mt-2 text-sm leading-6 text-zinc-400">
                             The graph shows concepts saved in this learner's
                             books. Mastery is an evidence-linked estimate,
                             confidence describes the strength of local support,
@@ -2368,7 +2368,7 @@ export function AdminView() {
                             grade or diagnosis.
                           </p>
                         </div>
-                        <div className="flex min-w-[240px] flex-col gap-2 text-xs font-semibold text-zinc-600">
+                        <div className="flex min-w-[240px] flex-col gap-2 text-xs font-semibold text-zinc-400">
                           <label htmlFor="admin-learner-selector">
                             Learner
                           </label>
@@ -2379,7 +2379,7 @@ export function AdminView() {
                               setSelectedLearnerName(event.target.value)
                             }
                             data-testid="admin-learner-selector"
-                            className="h-11 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm font-medium text-zinc-900 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                            className="h-11 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm font-medium text-zinc-100 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                           >
                             {learnerNames.map((name) => (
                               <option key={name} value={name}>
@@ -2422,32 +2422,32 @@ export function AdminView() {
                       ].map((metric) => (
                         <div
                           key={metric.label}
-                          className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+                          className="rounded-lg border border-white/10 bg-[#14171D] p-4 shadow-sm"
                         >
                           <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                             {metric.label}
                           </div>
-                          <div className="mt-2 text-3xl font-semibold text-zinc-950">
+                          <div className="mt-2 text-3xl font-semibold text-zinc-50">
                             {metric.value}
                           </div>
-                          <p className="mt-2 text-xs leading-5 text-zinc-500">
+                          <p className="mt-2 text-xs leading-5 text-zinc-400">
                             {metric.detail}
                           </p>
                         </div>
                       ))}
                     </section>
 
-                    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-lg border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Learner concept graph
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             What {selectedLearnerName} has been studying
                           </h2>
                         </div>
-                        <p className="max-w-md text-xs leading-5 text-zinc-500">
+                        <p className="max-w-md text-xs leading-5 text-zinc-400">
                           Lines come from saved parent and child concept
                           relationships. This is learner knowledge, not the
                           Graphify source-code graph.
@@ -2456,7 +2456,7 @@ export function AdminView() {
 
                       {learnerGraphNodes.length > 0 ? (
                         <div
-                          className="mt-6 overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-950"
+                          className="mt-6 overflow-x-auto rounded-lg border border-white/10 bg-zinc-950"
                           role="img"
                           aria-label={`${selectedLearnerName} learner concept graph`}
                           aria-describedby="learner-concept-graph-node-list"
@@ -2577,16 +2577,16 @@ export function AdminView() {
                           </ul>
                         </div>
                       ) : (
-                        <div className="mt-6 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 px-5 py-12 text-center">
+                        <div className="mt-6 rounded-lg border border-dashed border-white/15 bg-white/[0.04] px-5 py-12 text-center">
                           <BrainCircuit
                             size={24}
                             className="mx-auto text-zinc-400"
                           />
-                          <p className="mt-3 text-sm font-medium text-zinc-700">
+                          <p className="mt-3 text-sm font-medium text-zinc-300">
                             No concept relationships have been saved for this
                             learner yet.
                           </p>
-                          <p className="mt-1 text-xs text-zinc-500">
+                          <p className="mt-1 text-xs text-zinc-400">
                             Complete a tutor lesson to create the first learning
                             book and concept nodes.
                           </p>
@@ -2595,11 +2595,11 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 lg:grid-cols-3">
-                      <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-base font-semibold text-zinc-900">
+                      <div className="rounded-lg border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-base font-semibold text-zinc-100">
                           Strongest current signals
                         </h3>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                        <p className="mt-1 text-xs leading-5 text-zinc-400">
                           Highest combined mastery and confidence. Verify the
                           evidence before making a high-stakes decision.
                         </p>
@@ -2608,7 +2608,7 @@ export function AdminView() {
                             strongestLearnerConcepts.map((concept) => (
                               <div key={concept.id}>
                                 <div className="flex items-center justify-between gap-3 text-sm">
-                                  <span className="truncate font-medium text-zinc-800">
+                                  <span className="truncate font-medium text-zinc-200">
                                     {concept.name}
                                   </span>
                                   <span className="font-mono text-xs text-green-700">
@@ -2624,18 +2624,18 @@ export function AdminView() {
                               </div>
                             ))
                           ) : (
-                            <p className="text-sm text-zinc-500">
+                            <p className="text-sm text-zinc-400">
                               Waiting for concept evidence.
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-base font-semibold text-zinc-900">
+                      <div className="rounded-lg border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-base font-semibold text-zinc-100">
                           Review opportunities
                         </h3>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                        <p className="mt-1 text-xs leading-5 text-zinc-400">
                           Low signals suggest a useful follow-up question, not a
                           failure label.
                         </p>
@@ -2644,7 +2644,7 @@ export function AdminView() {
                             learnerConceptsToReview.map((concept) => (
                               <div key={concept.id}>
                                 <div className="flex items-center justify-between gap-3 text-sm">
-                                  <span className="truncate font-medium text-zinc-800">
+                                  <span className="truncate font-medium text-zinc-200">
                                     {concept.name}
                                   </span>
                                   <span className="font-mono text-xs text-orange-700">
@@ -2660,35 +2660,35 @@ export function AdminView() {
                               </div>
                             ))
                           ) : (
-                            <p className="text-sm text-zinc-500">
+                            <p className="text-sm text-zinc-400">
                               Waiting for concept evidence.
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-base font-semibold text-zinc-900">
+                      <div className="rounded-lg border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-base font-semibold text-zinc-100">
                           Recent learning books
                         </h3>
-                        <p className="mt-1 text-xs leading-5 text-zinc-500">
+                        <p className="mt-1 text-xs leading-5 text-zinc-400">
                           These establish the subjects and document context
                           behind the graph.
                         </p>
                         <div className="mt-4 space-y-3">
                           {selectedLearnerBooks.slice(0, 3).map((book) => (
                             <div key={book.id}>
-                              <div className="text-sm font-medium text-zinc-800">
+                              <div className="text-sm font-medium text-zinc-200">
                                 {book.title}
                               </div>
-                              <div className="mt-0.5 text-xs text-zinc-500">
+                              <div className="mt-0.5 text-xs text-zinc-400">
                                 {book.chapters?.length || 0} chapters ·{" "}
                                 {book.conversationCount} conversations
                               </div>
                             </div>
                           ))}
                           {selectedLearnerBooks.length === 0 && (
-                            <p className="text-sm text-zinc-500">
+                            <p className="text-sm text-zinc-400">
                               No learning books saved yet.
                             </p>
                           )}
@@ -2703,10 +2703,10 @@ export function AdminView() {
                           className="mt-0.5 shrink-0 text-blue-600"
                         />
                         <div>
-                          <h3 className="text-sm font-semibold text-zinc-900">
+                          <h3 className="text-sm font-semibold text-zinc-100">
                             Local identity boundary
                           </h3>
-                          <p className="mt-1 text-sm leading-6 text-zinc-600">
+                          <p className="mt-1 text-sm leading-6 text-zinc-400">
                             Learners are currently separated by the{" "}
                             <code>userName</code> stored on local learning
                             books. This supports local inspection, but it is not
@@ -2732,10 +2732,10 @@ export function AdminView() {
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-600/75">
                             <BrainCircuit size={13} /> Learner Brain
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Learner-brain control room
                           </h2>
-                          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400 font-serif">
                             The product goal is exactly the loop you described:
                             chat, voice, PDFs, flashcards, and evaluated answers
                             become local learner memory; validated evidence
@@ -2745,11 +2745,11 @@ export function AdminView() {
                             missing for beta proof.
                           </p>
                         </div>
-                        <div className="shrink-0 rounded-lg border border-blue-100 bg-white px-5 py-4 text-left">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="shrink-0 rounded-lg border border-blue-100 bg-[#14171D] px-5 py-4 text-left">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Local beta proof
                           </div>
-                          <div className="mt-1 text-3xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-1 text-3xl font-semibold tabular-nums text-zinc-100">
                             {
                               betaDiagnosticsSnapshot.brainArchitectureReadiness
                                 .localBetaPercent
@@ -2792,15 +2792,15 @@ export function AdminView() {
                         ].map((item) => (
                           <article
                             key={item.label}
-                            className="rounded-lg border border-white/80 bg-white/90 p-4"
+                            className="rounded-lg border border-white/80 bg-[#14171D]/90 p-4"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {item.label}
                             </div>
-                            <div className="mt-2 truncate text-2xl font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-2xl font-semibold tabular-nums text-zinc-100">
                               {item.value}
                             </div>
-                            <p className="mt-2 text-xs leading-relaxed text-zinc-500 font-serif">
+                            <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-serif">
                               {item.detail}
                             </p>
                           </article>
@@ -2811,7 +2811,7 @@ export function AdminView() {
                         {brainLoopSteps.map((step, index) => (
                           <article
                             key={step.label}
-                            className="rounded-lg border border-blue-100 bg-white p-4"
+                            className="rounded-lg border border-blue-100 bg-[#14171D] p-4"
                           >
                             <div className="flex items-center justify-between gap-2">
                               <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
@@ -2821,10 +2821,10 @@ export function AdminView() {
                                 {index + 1}
                               </span>
                             </div>
-                            <h3 className="mt-3 text-sm font-semibold leading-snug text-zinc-900">
+                            <h3 className="mt-3 text-sm font-semibold leading-snug text-zinc-100">
                               {step.title}
                             </h3>
-                            <p className="mt-2 text-xs leading-relaxed text-zinc-500 font-serif">
+                            <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-serif">
                               {step.detail}
                             </p>
                           </article>
@@ -2833,11 +2833,11 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-                      <article className="rounded-lg border border-zinc-200 bg-white p-5">
+                      <article className="rounded-lg border border-white/10 bg-[#14171D] p-5">
                         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                           <BookOpen size={13} /> Active Learning Context
                         </div>
-                        <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                        <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                           {activeLearningBook?.title ||
                             activeProject ||
                             "General Study"}
@@ -2856,35 +2856,35 @@ export function AdminView() {
                           ].map(([label, value]) => (
                             <div
                               key={label}
-                              className="rounded-lg border border-zinc-200 bg-zinc-50 p-3"
+                              className="rounded-lg border border-white/10 bg-white/[0.04] p-3"
                             >
-                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 {label}
                               </div>
-                              <div className="mt-1 truncate text-sm font-semibold text-zinc-900">
+                              <div className="mt-1 truncate text-sm font-semibold text-zinc-100">
                                 {value}
                               </div>
                             </div>
                           ))}
                         </div>
-                        <div className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-600 font-serif">
+                        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.04] p-4 text-sm leading-relaxed text-zinc-400 font-serif">
                           {activeBookReadyDocuments.length > 0
                             ? `The active book has ${activeBookReadyDocuments.length} ready PDF context source${activeBookReadyDocuments.length === 1 ? "" : "s"} available for tutor injection.`
                             : "The active book does not yet have a ready PDF source for tutor injection."}
                         </div>
                       </article>
 
-                      <article className="rounded-lg border border-zinc-200 bg-white p-5">
+                      <article className="rounded-lg border border-white/10 bg-[#14171D] p-5">
                         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                           <SlidersHorizontal size={13} /> Learning Algorithm
                         </div>
                         <h3
-                          className="mt-2 text-xl font-serif font-medium text-zinc-900"
+                          className="mt-2 text-xl font-serif font-medium text-zinc-100"
                           data-testid="admin-learner-algorithm-selector"
                         >
                           Automatic local selector is active
                         </h3>
-                        <p className="mt-2 text-sm leading-relaxed text-zinc-600 font-serif">
+                        <p className="mt-2 text-sm leading-relaxed text-zinc-400 font-serif">
                           Validated attempts can choose conservative evidence
                           thresholding, Bayesian Knowledge Tracing, or
                           decay-sensitive BKT. AKT-style neural tracing and
@@ -2912,12 +2912,12 @@ export function AdminView() {
                           ].map(([label, value]) => (
                             <div
                               key={label}
-                              className="rounded-lg border border-zinc-200 bg-zinc-50 p-3"
+                              className="rounded-lg border border-white/10 bg-white/[0.04] p-3"
                             >
-                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 {label}
                               </div>
-                              <div className="mt-1 truncate text-sm font-semibold text-zinc-900">
+                              <div className="mt-1 truncate text-sm font-semibold text-zinc-100">
                                 {value}
                               </div>
                             </div>
@@ -2931,25 +2931,25 @@ export function AdminView() {
                               className={`rounded-lg border p-3 ${
                                 entry.count > 0
                                   ? "border-green-200 bg-green-50"
-                                  : "border-zinc-200 bg-zinc-50"
+                                  : "border-white/10 bg-white/[0.04]"
                               }`}
                             >
-                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 {entry.shortLabel}
                               </div>
-                              <div className="mt-1 text-sm font-semibold text-zinc-900">
+                              <div className="mt-1 text-sm font-semibold text-zinc-100">
                                 {entry.count} decision
                                 {entry.count === 1 ? "" : "s"}
                               </div>
-                              <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                 {entry.label}
                               </p>
                             </div>
                           ))}
                         </div>
 
-                        <div className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.04] p-4">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Recent selector choices
                           </div>
                           {recentLearnerAlgorithmRows.length > 0 ? (
@@ -2957,10 +2957,10 @@ export function AdminView() {
                               {recentLearnerAlgorithmRows.map((row) => (
                                 <div
                                   key={`${row.source}-${row.id}`}
-                                  className="rounded-md border border-white bg-white px-3 py-2"
+                                  className="rounded-md border border-white bg-[#14171D] px-3 py-2"
                                 >
                                   <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <span className="text-xs font-semibold text-zinc-900">
+                                    <span className="text-xs font-semibold text-zinc-100">
                                       {row.label}
                                     </span>
                                     <span
@@ -2973,7 +2973,7 @@ export function AdminView() {
                                       {row.verified ? "verified" : "watch"}
                                     </span>
                                   </div>
-                                  <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                                  <p className="mt-1 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                     {row.source} | {row.evidenceType} |{" "}
                                     {row.conceptId}
                                     {row.confidence !== null
@@ -2981,7 +2981,7 @@ export function AdminView() {
                                       : ""}
                                   </p>
                                   {row.reason && (
-                                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                                    <p className="mt-1 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                       {row.reason}
                                     </p>
                                   )}
@@ -2989,7 +2989,7 @@ export function AdminView() {
                               ))}
                             </div>
                           ) : (
-                            <p className="mt-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-3 text-sm leading-relaxed text-zinc-400 font-serif">
                               No selector rows have been recorded yet. The next
                               validated recall, generated answer, or transfer
                               attempt will write the selected local algorithm
@@ -3010,7 +3010,7 @@ export function AdminView() {
                           <button
                             type="button"
                             onClick={() => setActiveTab("evidence")}
-                            className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
+                            className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-white/[0.06]"
                           >
                             <BrainCircuit size={13} />
                             Open evidence
@@ -3019,20 +3019,20 @@ export function AdminView() {
                       </article>
                     </section>
 
-                    <section className="rounded-lg border border-zinc-200 bg-white p-5">
+                    <section className="rounded-lg border border-white/10 bg-[#14171D] p-5">
                       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <ShieldCheck size={13} /> Brain Readiness
                           </div>
-                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                             What is proven right now
                           </h3>
                         </div>
                         <button
                           type="button"
                           onClick={() => setActiveTab("diagnostics")}
-                          className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-100"
+                          className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-white/[0.06]"
                         >
                           <ShieldCheck size={13} />
                           Open proof details
@@ -3048,22 +3048,22 @@ export function AdminView() {
                             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
                               Beta proof path
                             </div>
-                            <h4 className="mt-1 text-base font-semibold text-zinc-900">
+                            <h4 className="mt-1 text-base font-semibold text-zinc-100">
                               Typed chat - book memory - retrieval - evidence -
                               live voice
                             </h4>
-                            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-400 font-serif">
                               A pass means the learner brain can prove one typed
                               chat and one live voice run shared the same active
                               book, local thread, multi-PDF context,
                               provider-backed rows, and scored evidence.
                             </p>
                           </div>
-                          <div className="shrink-0 rounded-lg border border-blue-100 bg-white px-4 py-3">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="shrink-0 rounded-lg border border-blue-100 bg-[#14171D] px-4 py-3">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               Coherent proof
                             </div>
-                            <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-100">
                               {
                                 betaDiagnosticsSnapshot.coherentLiveProof
                                   .completionPercent
@@ -3082,10 +3082,10 @@ export function AdminView() {
                           {proofSpotlightChecks.map((check) => (
                             <article
                               key={check.id}
-                              className="rounded-lg border border-white bg-white/90 p-3"
+                              className="rounded-lg border border-white bg-[#14171D]/90 p-3"
                             >
                               <div className="flex items-start justify-between gap-2">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                   {check.title}
                                 </div>
                                 <span
@@ -3094,7 +3094,7 @@ export function AdminView() {
                                   {check.ready ? "ready" : check.status}
                                 </span>
                               </div>
-                              <p className="mt-2 line-clamp-4 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                              <p className="mt-2 line-clamp-4 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                 {check.summary}
                               </p>
                             </article>
@@ -3128,10 +3128,10 @@ export function AdminView() {
                         ].map((item) => (
                           <article
                             key={item.title}
-                            className="rounded-lg border border-zinc-200 bg-zinc-50 p-4"
+                            className="rounded-lg border border-white/10 bg-white/[0.04] p-4"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 {item.title}
                               </div>
                               <span
@@ -3140,7 +3140,7 @@ export function AdminView() {
                                 {item.status}
                               </span>
                             </div>
-                            <p className="mt-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-3 text-sm leading-relaxed text-zinc-400 font-serif">
                               {item.detail}
                             </p>
                           </article>
@@ -3181,12 +3181,12 @@ export function AdminView() {
                             key={item.label}
                             type="button"
                             onClick={() => setActiveTab(item.tab)}
-                            className="min-w-0 rounded-lg border border-zinc-200 bg-white p-4 text-left transition-colors hover:bg-zinc-50"
+                            className="min-w-0 rounded-lg border border-white/10 bg-[#14171D] p-4 text-left transition-colors hover:bg-white/[0.06]"
                           >
                             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-500/70">
                               <Icon size={13} /> {item.label}
                             </div>
-                            <p className="mt-2 text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-2 text-sm leading-relaxed text-zinc-400 font-serif">
                               {item.detail}
                             </p>
                           </button>
@@ -3196,16 +3196,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "activity" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="min-w-0 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="min-w-0 rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <Gauge size={13} /> Local Observability
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Behind-the-scenes activity
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Required local logs for model calls, tool jobs,
                             background jobs, retrieval, voice, memory writes,
                             and errors. Deeper ledgers stay in their focused
@@ -3218,7 +3218,7 @@ export function AdminView() {
                           onClick={() => {
                             setActivityRefreshKey((key) => key + 1);
                           }}
-                          className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-600 transition-colors hover:bg-white hover:text-zinc-900"
+                          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-zinc-400 transition-colors hover:bg-[#1b1f27] hover:text-zinc-100"
                         >
                           <RefreshCw size={13} />
                           Auto-refresh{" "}
@@ -3237,33 +3237,33 @@ export function AdminView() {
                       ) : null}
 
                       <div className="grid min-w-0 gap-3 md:grid-cols-4">
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Activity Events
                           </div>
-                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                             {systemSummary?.total || 0}
                           </div>
-                          <div className="mt-1 text-[10px] font-mono text-zinc-500">
+                          <div className="mt-1 text-[10px] font-mono text-zinc-400">
                             limit {systemSummary?.retentionLimit || 250}
                           </div>
                         </div>
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Current Model
                           </div>
-                          <div className="mt-2 truncate text-sm font-semibold text-zinc-900">
+                          <div className="mt-2 truncate text-sm font-semibold text-zinc-100">
                             {aiModel}
                           </div>
-                          <div className="mt-1 text-[10px] font-mono text-zinc-500">
+                          <div className="mt-1 text-[10px] font-mono text-zinc-400">
                             {chatUsage.requests} chat requests
                           </div>
                         </div>
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Local Memory
                           </div>
-                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                             {learningEntries.length +
                               memoryEventCount +
                               backgroundJobCount +
@@ -3272,18 +3272,18 @@ export function AdminView() {
                               retrievalEventCount +
                               traceCount}
                           </div>
-                          <div className="mt-1 text-[10px] font-mono text-zinc-500">
+                          <div className="mt-1 text-[10px] font-mono text-zinc-400">
                             entries + memory + jobs + sources + traces
                           </div>
                         </div>
-                        <div className="min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Providers Ready
                           </div>
-                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                             {localProviderCount}
                           </div>
-                          <div className="mt-1 text-[10px] font-mono text-zinc-500">
+                          <div className="mt-1 text-[10px] font-mono text-zinc-400">
                             local config meters
                           </div>
                         </div>
@@ -3295,26 +3295,26 @@ export function AdminView() {
                             <BrainCircuit size={13} /> Learner-brain logic
                           </div>
                           <div className="mt-2 flex flex-wrap gap-2 text-[11px] font-mono text-blue-800">
-                            <span className="rounded-full border border-blue-200 bg-white/80 px-2 py-0.5">
+                            <span className="rounded-full border border-blue-200 bg-[#14171D]/80 px-2 py-0.5">
                               evidence{" "}
                               {brainRuntimeSettings.masteryEvidencePolicy.replace(
                                 /_/g,
                                 " ",
                               )}
                             </span>
-                            <span className="rounded-full border border-blue-200 bg-white/80 px-2 py-0.5">
+                            <span className="rounded-full border border-blue-200 bg-[#14171D]/80 px-2 py-0.5">
                               transit{" "}
                               {brainRuntimeSettings.bktTransitProbability.toFixed(
                                 2,
                               )}
                             </span>
-                            <span className="rounded-full border border-blue-200 bg-white/80 px-2 py-0.5">
+                            <span className="rounded-full border border-blue-200 bg-[#14171D]/80 px-2 py-0.5">
                               slip{" "}
                               {brainRuntimeSettings.bktSlipProbability.toFixed(
                                 2,
                               )}
                             </span>
-                            <span className="rounded-full border border-blue-200 bg-white/80 px-2 py-0.5">
+                            <span className="rounded-full border border-blue-200 bg-[#14171D]/80 px-2 py-0.5">
                               guess{" "}
                               {brainRuntimeSettings.bktGuessProbability.toFixed(
                                 2,
@@ -3325,7 +3325,7 @@ export function AdminView() {
                         <button
                           type="button"
                           onClick={() => setActiveTab("tuning")}
-                          className="inline-flex items-center justify-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-full border border-blue-200 bg-[#14171D] px-4 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50"
                         >
                           <SlidersHorizontal size={13} />
                           Tune brain logic
@@ -3333,25 +3333,25 @@ export function AdminView() {
                       </div>
                     </section>
 
-                    <section className="min-w-0 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="min-w-0 rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Request timelines
                           </h3>
-                          <p className="mt-1 text-sm text-zinc-500 font-serif">
+                          <p className="mt-1 text-sm text-zinc-400 font-serif">
                             Shows only the newest request groups for quick
                             triage. Focused tabs keep the full local ledgers
                             available when a turn needs deeper inspection.
                           </p>
                         </div>
-                        <div className="w-fit max-w-full rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                        <div className="w-fit max-w-full rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                           {requestTimelines.length} recent
                         </div>
                       </div>
 
                       {requestTimelines.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-500">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-6 text-center text-sm text-zinc-400">
                           No request ids have been observed yet. A chat request
                           or blocked model call will create a local timeline.
                         </div>
@@ -3360,12 +3360,12 @@ export function AdminView() {
                           {requestTimelines.map((timeline, index) => (
                             <article
                               key={timeline.requestId}
-                              className={`min-w-0 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 8 ? "admin-animated-item" : ""}`}
+                              className={`min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 8 ? "admin-animated-item" : ""}`}
                             >
                               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                 <div className="min-w-0">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                    <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                       {timeline.title}
                                     </h4>
                                     <span
@@ -3374,7 +3374,7 @@ export function AdminView() {
                                       {timeline.status}
                                     </span>
                                   </div>
-                                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                     <span className="max-w-[12rem] truncate">
                                       {timeline.requestId}
                                     </span>
@@ -3388,30 +3388,30 @@ export function AdminView() {
                                     )}
                                   </div>
                                 </div>
-                                <div className="grid min-w-0 grid-cols-2 gap-2 text-center text-[10px] font-mono text-zinc-500 sm:grid-cols-6">
-                                  <span className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-1">
+                                <div className="grid min-w-0 grid-cols-2 gap-2 text-center text-[10px] font-mono text-zinc-400 sm:grid-cols-6">
+                                  <span className="min-w-0 rounded-xl border border-white/10 bg-[#14171D] px-2 py-1">
                                     {timeline.events.length} events
                                   </span>
-                                  <span className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-1">
+                                  <span className="min-w-0 rounded-xl border border-white/10 bg-[#14171D] px-2 py-1">
                                     {timeline.memoryEvents.length} memory
                                   </span>
-                                  <span className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-1">
+                                  <span className="min-w-0 rounded-xl border border-white/10 bg-[#14171D] px-2 py-1">
                                     {timeline.retrievalEvents.length} retrievals
                                   </span>
-                                  <span className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-1">
+                                  <span className="min-w-0 rounded-xl border border-white/10 bg-[#14171D] px-2 py-1">
                                     {timeline.modelRuns.length} models
                                   </span>
-                                  <span className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-1">
+                                  <span className="min-w-0 rounded-xl border border-white/10 bg-[#14171D] px-2 py-1">
                                     {timeline.toolJobs.length} tools
                                   </span>
-                                  <span className="min-w-0 rounded-xl border border-zinc-200 bg-white px-2 py-1">
+                                  <span className="min-w-0 rounded-xl border border-white/10 bg-[#14171D] px-2 py-1">
                                     {timeline.backgroundJobs.length} jobs
                                   </span>
                                 </div>
                               </div>
 
                               <details className="group mt-3">
-                                <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                   <ChevronRight
                                     size={14}
                                     className="transition-transform group-open:rotate-90"
@@ -3422,9 +3422,9 @@ export function AdminView() {
                                   {timeline.events.map((event) => (
                                     <div
                                       key={event.id}
-                                      className="rounded-xl border border-zinc-200 bg-white px-3 py-2"
+                                      className="rounded-xl border border-white/10 bg-[#14171D] px-3 py-2"
                                     >
-                                      <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-zinc-700">
+                                      <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-zinc-300">
                                         <span className="truncate">
                                           {event.title}
                                         </span>
@@ -3434,7 +3434,7 @@ export function AdminView() {
                                           {event.status}
                                         </span>
                                       </div>
-                                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-1 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                         <span>
                                           {formatTime(event.timestamp)}
                                         </span>
@@ -3539,13 +3539,13 @@ export function AdminView() {
                                           "brain_context_injected" &&
                                           documentCount > 0 && (
                                             <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-mono text-amber-700">
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 PDFs {documentCount}
                                               </span>
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 ready {readyDocumentCount}
                                               </span>
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 excerpted{" "}
                                                 {contextDocumentIds.length}
                                               </span>
@@ -3568,15 +3568,15 @@ export function AdminView() {
                                           "book_chat_thread_saved" && (
                                           <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-mono text-amber-700">
                                             {transcriptMode && (
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 {transcriptMode} transcript
                                               </span>
                                             )}
-                                            <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                            <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                               {meaningfulMessageCount} messages
                                             </span>
                                             {voiceTurnCount > 0 && (
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 {voiceTurnCount} voice turns
                                               </span>
                                             )}
@@ -3593,12 +3593,12 @@ export function AdminView() {
                                         {showEvidenceGate && (
                                           <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-mono text-amber-700">
                                             {evidenceContract && (
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 {evidenceContract}
                                               </span>
                                             )}
                                             {evidenceRole && (
-                                              <span className="rounded-full border border-amber-200 bg-white/70 px-2 py-0.5">
+                                              <span className="rounded-full border border-amber-200 bg-[#14171D]/70 px-2 py-0.5">
                                                 {evidenceRole.replace(
                                                   /_/g,
                                                   " ",
@@ -3624,7 +3624,7 @@ export function AdminView() {
                                                 className={`rounded-full border px-2 py-0.5 ${
                                                   masteryMutationAllowed
                                                     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                                    : "border-zinc-300 bg-white/80 text-zinc-600"
+                                                    : "border-white/15 bg-[#14171D]/80 text-zinc-400"
                                                 }`}
                                               >
                                                 mastery{" "}
@@ -3639,7 +3639,7 @@ export function AdminView() {
                                                 className={`rounded-full border px-2 py-0.5 ${
                                                   confidenceMutationAllowed
                                                     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                                    : "border-zinc-300 bg-white/80 text-zinc-600"
+                                                    : "border-white/15 bg-[#14171D]/80 text-zinc-400"
                                                 }`}
                                               >
                                                 confidence{" "}
@@ -3715,29 +3715,29 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Event stream
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Newest {MAIN_ACTIVITY_EVENT_LIMIT} required
                               events, redacted server-side and retained in
                               memory for this local backend process.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(systemSummary?.latestEventAt)}
                           </div>
                         </div>
 
                         {activityStatus === "loading" && !activityPayload ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             Loading system activity...
                           </div>
                         ) : recentSystemEvents.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No activity events yet. Start a chat, trigger a
                             tool, or generate learning-book notes to fill the
                             ledger.
@@ -3749,16 +3749,16 @@ export function AdminView() {
                               return (
                                 <article
                                   key={event.id}
-                                  className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                                  className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                                 >
                                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                     <div className="flex min-w-0 gap-3">
-                                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-blue-600">
+                                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#14171D] text-blue-600">
                                         <Icon size={17} />
                                       </div>
                                       <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
-                                          <h4 className="m-0 text-sm font-semibold text-zinc-900">
+                                          <h4 className="m-0 text-sm font-semibold text-zinc-100">
                                             {event.title}
                                           </h4>
                                           <span
@@ -3768,11 +3768,11 @@ export function AdminView() {
                                           </span>
                                         </div>
                                         {event.detail && (
-                                          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-600 font-serif">
+                                          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-400 font-serif">
                                             {event.detail}
                                           </p>
                                         )}
-                                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                           <span>{event.kind}</span>
                                           {event.phase && (
                                             <span>phase {event.phase}</span>
@@ -3791,7 +3791,7 @@ export function AdminView() {
                                         </div>
                                       </div>
                                     </div>
-                                    <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                    <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                       <div>{formatTime(event.timestamp)}</div>
                                       {event.requestId && (
                                         <div className="mt-1 max-w-[140px] truncate">
@@ -3802,14 +3802,14 @@ export function AdminView() {
                                   </div>
                                   {event.metadata && (
                                     <details className="group mt-3">
-                                      <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                      <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                         <ChevronRight
                                           size={14}
                                           className="transition-transform group-open:rotate-90"
                                         />
                                         Metadata
                                       </summary>
-                                      <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                      <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                         {JSON.stringify(
                                           event.metadata,
                                           null,
@@ -3826,8 +3826,8 @@ export function AdminView() {
                       </div>
 
                       <div className="flex min-w-0 flex-col gap-4">
-                        <section className="min-w-0 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="min-w-0 rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Meters
                           </h3>
                           <div className="mt-4 grid gap-3">
@@ -3862,12 +3862,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="grid min-w-0 gap-1 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center sm:gap-3"
+                                className="grid min-w-0 gap-1 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center sm:gap-3"
                               >
-                                <span className="min-w-0 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <span className="min-w-0 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </span>
-                                <span className="min-w-0 break-words text-xs font-semibold text-zinc-900 sm:text-right">
+                                <span className="min-w-0 break-words text-xs font-semibold text-zinc-100 sm:text-right">
                                   {value}
                                 </span>
                               </div>
@@ -3875,16 +3875,16 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="min-w-0 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                        <section className="min-w-0 rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-500/70">
                                 <Activity size={12} /> Voice agent
                               </div>
-                              <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                              <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                                 Live voice timeline
                               </h3>
-                              <p className="mt-1 text-sm leading-relaxed text-zinc-500 font-serif">
+                              <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                                 Local session events from the ChatPanel voice
                                 websocket, Deepgram settings handshake, barge-in
                                 handling, and transcript turns.
@@ -3894,7 +3894,7 @@ export function AdminView() {
                               type="button"
                               onClick={clearVoiceAgentEvents}
                               disabled={voiceAgentEvents.length === 0}
-                              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-[11px] font-semibold text-zinc-500 transition-colors hover:bg-white hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-45"
+                              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold text-zinc-400 transition-colors hover:bg-[#1b1f27] hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-45"
                             >
                               <RotateCcw size={12} /> Clear
                             </button>
@@ -3920,12 +3920,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                               >
-                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </span>
-                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-900">
+                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-100">
                                   {value}
                                 </span>
                               </div>
@@ -3934,7 +3934,7 @@ export function AdminView() {
 
                           <div className="mt-4 space-y-2">
                             {voiceAgentEvents.length === 0 ? (
-                              <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-500 font-serif">
+                              <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-4 text-sm leading-relaxed text-zinc-400 font-serif">
                                 Start a voice chat to see the local
                                 orchestration trace here. Nothing is sent to a
                                 cloud dashboard.
@@ -3943,12 +3943,12 @@ export function AdminView() {
                               voiceAgentEvents.slice(0, 8).map((event) => (
                                 <article
                                   key={event.id}
-                                  className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                                 >
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                           {event.type.replace(/_/g, " ")}
                                         </span>
                                         <span
@@ -3957,7 +3957,7 @@ export function AdminView() {
                                           {event.status}
                                         </span>
                                       </div>
-                                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-700 font-serif">
+                                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-300 font-serif">
                                         {event.summary}
                                       </p>
                                     </div>
@@ -3970,7 +3970,7 @@ export function AdminView() {
                                       <summary className="cursor-pointer text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">
                                         Metadata
                                       </summary>
-                                      <pre className="mt-2 max-h-32 overflow-auto rounded-xl border border-zinc-200 bg-white p-2 text-[10px] text-zinc-500">
+                                      <pre className="mt-2 max-h-32 overflow-auto rounded-xl border border-white/10 bg-[#14171D] p-2 text-[10px] text-zinc-400">
                                         {JSON.stringify(
                                           event.metadata,
                                           null,
@@ -3985,13 +3985,13 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="min-w-0 rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="min-w-0 rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Event mix
                           </h3>
                           <div className="mt-4 space-y-4">
                             <div>
-                              <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 By kind
                               </div>
                               <div className="flex flex-wrap gap-2">
@@ -4000,7 +4000,7 @@ export function AdminView() {
                                 ).map(([kind, count]) => (
                                   <span
                                     key={kind}
-                                    className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700"
+                                    className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-zinc-300"
                                   >
                                     {kind}: {count}
                                   </span>
@@ -4008,7 +4008,7 @@ export function AdminView() {
                               </div>
                             </div>
                             <div>
-                              <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 By status
                               </div>
                               <div className="flex flex-wrap gap-2">
@@ -4027,29 +4027,29 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Tuning snapshot
                           </h3>
-                          <div className="mt-4 space-y-2 text-xs text-zinc-600">
+                          <div className="mt-4 space-y-2 text-xs text-zinc-400">
                             {activityPayload ? (
                               Object.entries(activityPayload.meters.tuning).map(
                                 ([label, value]) => (
                                   <div
                                     key={label}
-                                    className="grid min-w-0 gap-1 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center sm:gap-3"
+                                    className="grid min-w-0 gap-1 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] sm:items-center sm:gap-3"
                                   >
-                                    <span className="min-w-0 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                    <span className="min-w-0 font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-400">
                                       {label}
                                     </span>
-                                    <span className="min-w-0 break-words font-semibold text-zinc-900 sm:text-right">
+                                    <span className="min-w-0 break-words font-semibold text-zinc-100 sm:text-right">
                                       {value}
                                     </span>
                                   </div>
                                 ),
                               )
                             ) : (
-                              <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-4 text-center text-zinc-500">
+                              <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-4 text-center text-zinc-400">
                                 Waiting for backend meters.
                               </div>
                             )}
@@ -4060,16 +4060,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "models" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <Cpu size={13} /> Durable Model Behavior
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Chat model run ledger
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Local records for chat model starts, fallbacks,
                             completions, blocked requests, and failures. These
                             rows make provider behavior auditable without
@@ -4077,11 +4077,11 @@ export function AdminView() {
                             graph.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {modelRunCount}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Durable runs
                           </div>
                         </div>
@@ -4101,12 +4101,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -4114,25 +4114,25 @@ export function AdminView() {
                       </div>
                     </section>
 
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Recent runs
                           </h3>
-                          <p className="mt-1 text-sm text-zinc-500 font-serif">
+                          <p className="mt-1 text-sm text-zinc-400 font-serif">
                             Newest first. Runtime settings are captured per
                             request so tuning decisions can be compared against
                             model behavior.
                           </p>
                         </div>
-                        <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                        <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                           {formatTime(latestModelRun?.timestamp)}
                         </div>
                       </div>
 
                       {modelRuns.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                           No durable model runs yet. Send a chat request and the
                           stream will persist local model-run rows here,
                           including blocked API-key checks.
@@ -4142,12 +4142,12 @@ export function AdminView() {
                           {modelRuns.map((run, index) => (
                             <article
                               key={run.id}
-                              className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                              className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                             >
                               <div className="flex items-start justify-between gap-4">
                                 <div className="min-w-0">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                    <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                       {run.usedModel ||
                                         run.requestedModel ||
                                         "unknown model"}
@@ -4166,11 +4166,11 @@ export function AdminView() {
                                         {run.usedModel}.
                                       </p>
                                     )}
-                                  <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-600 font-serif">
+                                  <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-400 font-serif">
                                     {run.error ||
                                       `${run.outputTokens || 0} output tokens, ${run.inputTokens || 0} input tokens${run.cost !== undefined ? `, $${run.cost.toFixed(6)}` : ""}.`}
                                   </p>
-                                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                     {run.requestId && (
                                       <span className="max-w-[9rem] truncate">
                                         {run.requestId}
@@ -4189,21 +4189,21 @@ export function AdminView() {
                                     {run.estimated && <span>estimated</span>}
                                   </div>
                                 </div>
-                                <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                   {formatTime(run.timestamp)}
                                 </div>
                               </div>
 
                               {(run.runtimeSettings || run.metadata) && (
                                 <details className="group mt-3">
-                                  <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                  <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                     <ChevronRight
                                       size={14}
                                       className="transition-transform group-open:rotate-90"
                                     />
                                     Runtime and metadata
                                   </summary>
-                                  <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                  <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                     {JSON.stringify(
                                       {
                                         runtimeSettings: run.runtimeSettings,
@@ -4231,16 +4231,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "memory" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <Network size={13} /> Durable Memory Activity
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Learner memory event ledger
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Append-only local records for memory sessions, saved
                             chat interactions, learning-book updates, concept
                             writes, and graph memory changes. This is the
@@ -4248,11 +4248,11 @@ export function AdminView() {
                             Graphify's code architecture graph.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {memoryEventCount}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Durable events
                           </div>
                         </div>
@@ -4267,12 +4267,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -4281,25 +4281,25 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Recent memory writes
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Newest first. Rows are written from local memory
                               code paths so failures are visible without
                               blocking the learner flow.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(latestMemoryEvent?.timestamp)}
                           </div>
                         </div>
 
                         {memoryEvents.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No durable memory events yet. Opening Tutor starts a
                             local memory session; completed chats will add
                             interaction and learning-book rows.
@@ -4309,16 +4309,16 @@ export function AdminView() {
                             {memoryEvents.map((event, index) => (
                               <article
                                 key={event.id}
-                                className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                   <div className="flex min-w-0 gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-blue-600">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#14171D] text-blue-600">
                                       <Network size={17} />
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                           {event.eventType.replace(/_/g, " ")}
                                         </h4>
                                         <span
@@ -4327,10 +4327,10 @@ export function AdminView() {
                                           {event.status}
                                         </span>
                                       </div>
-                                      <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                                      <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-400 font-serif">
                                         {event.summary}
                                       </p>
-                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                         <span>{event.source}</span>
                                         {event.bookId && (
                                           <span className="max-w-[10rem] truncate">
@@ -4359,7 +4359,7 @@ export function AdminView() {
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                     <div>{formatTime(event.timestamp)}</div>
                                     {event.retentionPolicy && (
                                       <div className="mt-1">
@@ -4425,14 +4425,14 @@ export function AdminView() {
                                 {(event.sourceIds?.length ||
                                   event.metadata) && (
                                   <details className="group mt-3">
-                                    <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                    <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                       <ChevronRight
                                         size={14}
                                         className="transition-transform group-open:rotate-90"
                                       />
                                       Source ids and metadata
                                     </summary>
-                                    <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                    <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                       {JSON.stringify(
                                         {
                                           sourceIds: event.sourceIds,
@@ -4451,13 +4451,13 @@ export function AdminView() {
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Event mix
                           </h3>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {Object.keys(memoryEventsByType).length === 0 ? (
-                              <span className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                              <span className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-zinc-400">
                                 Waiting for memory writes.
                               </span>
                             ) : (
@@ -4465,7 +4465,7 @@ export function AdminView() {
                                 ([type, count]) => (
                                   <span
                                     key={type}
-                                    className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700"
+                                    className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-zinc-300"
                                   >
                                     {type.replace(/_/g, " ")}: {count}
                                   </span>
@@ -4475,11 +4475,11 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Saved threads
                           </h3>
-                          <p className="mt-1 text-sm text-zinc-500 font-serif">
+                          <p className="mt-1 text-sm text-zinc-400 font-serif">
                             Durable book chat rows prove typed chat and voice
                             transcripts can be reloaded locally.
                           </p>
@@ -4491,12 +4491,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                               >
-                                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </div>
-                                <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                                <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                                   {value}
                                 </div>
                               </div>
@@ -4504,7 +4504,7 @@ export function AdminView() {
                           </div>
                           <div className="mt-4 space-y-2">
                             {bookChatThreadSummaries.length === 0 ? (
-                              <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
+                              <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] px-3 py-3 text-sm text-zinc-400">
                                 Waiting for a book-scoped chat or voice save.
                               </div>
                             ) : (
@@ -4513,22 +4513,22 @@ export function AdminView() {
                                 .map(({ thread, summary }) => (
                                   <div
                                     key={thread.id}
-                                    className="rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-3"
+                                    className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3"
                                   >
                                     <div className="flex items-start justify-between gap-3">
                                       <div className="min-w-0">
-                                        <div className="truncate text-sm font-semibold text-zinc-900">
+                                        <div className="truncate text-sm font-semibold text-zinc-100">
                                           {thread.title}
                                         </div>
-                                        <div className="mt-1 truncate text-[11px] font-mono text-zinc-500">
+                                        <div className="mt-1 truncate text-[11px] font-mono text-zinc-400">
                                           {thread.bookTitle}
                                         </div>
                                       </div>
-                                      <span className="shrink-0 rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-600">
+                                      <span className="shrink-0 rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                                         {summary.mode}
                                       </span>
                                     </div>
-                                    <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                    <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                       <span>
                                         {summary.meaningfulMessageCount}{" "}
                                         messages
@@ -4546,8 +4546,8 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Latest context
                           </h3>
                           <div className="mt-4 space-y-2">
@@ -4578,12 +4578,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                               >
-                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </span>
-                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-900">
+                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-100">
                                   {value}
                                 </span>
                               </div>
@@ -4591,20 +4591,20 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Boundary
                           </h3>
-                          <div className="mt-4 grid gap-2 text-sm text-zinc-600 font-serif">
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                          <div className="mt-4 grid gap-2 text-sm text-zinc-400 font-serif">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Memory Events describe the user-facing learner
                               brain runtime.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Graphify remains the separate code architecture
                               graph for agents.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               AWS/cloud synchronization is still deferred until
                               beta testing.
                             </div>
@@ -4615,16 +4615,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "corrections" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <Flag size={13} /> Local Memory Control
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Correction and deletion request ledger
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Local requests for marking learner-brain records
                             wrong, requesting deletion review, or flagging
                             entries that need a human correction pass. Applied
@@ -4633,11 +4633,11 @@ export function AdminView() {
                             exists.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {correctionEventCount}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Requests
                           </div>
                         </div>
@@ -4654,12 +4654,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -4668,25 +4668,25 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1fr_0.8fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Recent correction requests
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Newest first. Memory rows can create these
                               requests directly; manual entries can target any
                               local learner-brain record.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(latestCorrectionEvent?.timestamp)}
                           </div>
                         </div>
 
                         {correctionEvents.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No correction requests yet. Use Memory Events to
                             mark a local memory write wrong or request deletion
                             review.
@@ -4696,16 +4696,16 @@ export function AdminView() {
                             {correctionEvents.map((event, index) => (
                               <article
                                 key={event.id}
-                                className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                   <div className="flex min-w-0 gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-blue-600">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#14171D] text-blue-600">
                                       <Flag size={17} />
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                           {event.action.replace(/_/g, " ")}
                                         </h4>
                                         <span
@@ -4714,11 +4714,11 @@ export function AdminView() {
                                           {event.status}
                                         </span>
                                       </div>
-                                      <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                                      <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-400 font-serif">
                                         {event.reason}
                                       </p>
                                       {event.targetSummary && (
-                                        <p className="mt-2 line-clamp-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs leading-relaxed text-zinc-500 font-serif">
+                                        <p className="mt-2 line-clamp-2 rounded-xl border border-white/10 bg-[#14171D] px-3 py-2 text-xs leading-relaxed text-zinc-400 font-serif">
                                           {event.targetSummary}
                                         </p>
                                       )}
@@ -4733,7 +4733,7 @@ export function AdminView() {
                                           .
                                         </div>
                                       )}
-                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                         <span>{event.targetType}</span>
                                         <span className="max-w-[12rem] truncate">
                                           target {event.targetId}
@@ -4751,7 +4751,7 @@ export function AdminView() {
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                     <div>{formatTime(event.timestamp)}</div>
                                     <div className="mt-1">{event.source}</div>
                                   </div>
@@ -4759,14 +4759,14 @@ export function AdminView() {
                                 {(event.relatedEventIds?.length ||
                                   event.metadata) && (
                                   <details className="group mt-3">
-                                    <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                    <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                       <ChevronRight
                                         size={14}
                                         className="transition-transform group-open:rotate-90"
                                       />
                                       Related ids and metadata
                                     </summary>
-                                    <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                    <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                       {JSON.stringify(
                                         {
                                           relatedEventIds:
@@ -4801,7 +4801,7 @@ export function AdminView() {
                                           "dismissed",
                                         )
                                       }
-                                      className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-600 transition-colors hover:bg-zinc-100"
+                                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-semibold text-zinc-400 transition-colors hover:bg-white/[0.06]"
                                     >
                                       Dismiss
                                     </button>
@@ -4828,15 +4828,15 @@ export function AdminView() {
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Manual request
                           </h3>
                           <form
                             className="mt-4 grid gap-3"
                             onSubmit={submitManualCorrection}
                           >
-                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-600">
+                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
                               Action
                               <select
                                 value={correctionAction}
@@ -4846,7 +4846,7 @@ export function AdminView() {
                                       .value as CorrectionEvent["action"],
                                   )
                                 }
-                                className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 outline-none transition-colors focus:border-blue-300 focus:bg-white"
+                                className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 outline-none transition-colors focus:border-blue-300 focus:bg-[#1b1f27]"
                               >
                                 <option value="mark_wrong">Mark wrong</option>
                                 <option value="delete_request">
@@ -4856,7 +4856,7 @@ export function AdminView() {
                                 <option value="review">Review</option>
                               </select>
                             </label>
-                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-600">
+                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
                               Target type
                               <select
                                 value={correctionTargetType}
@@ -4866,7 +4866,7 @@ export function AdminView() {
                                       .value as CorrectionEvent["targetType"],
                                   )
                                 }
-                                className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 outline-none transition-colors focus:border-blue-300 focus:bg-white"
+                                className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 outline-none transition-colors focus:border-blue-300 focus:bg-[#1b1f27]"
                               >
                                 <option value="memory_event">
                                   Memory event
@@ -4896,7 +4896,7 @@ export function AdminView() {
                                 <option value="other">Other</option>
                               </select>
                             </label>
-                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-600">
+                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
                               Target id
                               <input
                                 value={correctionTargetId}
@@ -4904,10 +4904,10 @@ export function AdminView() {
                                   setCorrectionTargetId(event.target.value)
                                 }
                                 placeholder="Paste a local event, concept, or book id"
-                                className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 outline-none transition-colors placeholder:text-zinc-400 focus:border-blue-300 focus:bg-white"
+                                className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 outline-none transition-colors placeholder:text-zinc-400 focus:border-blue-300 focus:bg-[#1b1f27]"
                               />
                             </label>
-                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-600">
+                            <label className="grid gap-1.5 text-xs font-semibold text-zinc-400">
                               Reason
                               <textarea
                                 value={correctionReason}
@@ -4915,7 +4915,7 @@ export function AdminView() {
                                   setCorrectionReason(event.target.value)
                                 }
                                 placeholder="What is wrong, stale, sensitive, or ready for deletion review?"
-                                className="min-h-24 resize-y rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 outline-none transition-colors placeholder:text-zinc-400 focus:border-blue-300 focus:bg-white"
+                                className="min-h-24 resize-y rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 outline-none transition-colors placeholder:text-zinc-400 focus:border-blue-300 focus:bg-[#1b1f27]"
                               />
                             </label>
                             <button
@@ -4939,14 +4939,14 @@ export function AdminView() {
                           )}
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Target mix
                           </h3>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {Object.keys(correctionEventsByTarget).length ===
                             0 ? (
-                              <span className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                              <span className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-zinc-400">
                                 Waiting for correction requests.
                               </span>
                             ) : (
@@ -4954,7 +4954,7 @@ export function AdminView() {
                                 ([targetType, count]) => (
                                   <span
                                     key={targetType}
-                                    className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700"
+                                    className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-zinc-300"
                                   >
                                     {targetType.replace(/_/g, " ")}: {count}
                                   </span>
@@ -4964,29 +4964,29 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Boundary
                           </h3>
-                          <div className="mt-4 grid gap-2 text-sm text-zinc-600 font-serif">
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                          <div className="mt-4 grid gap-2 text-sm text-zinc-400 font-serif">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Applied requests mark affected local ledger rows
                               with correction metadata and conservative
                               stale/skipped states. They do not destructively
                               delete learner data.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Concept corrections quarantine learner-state
                               scores locally: confidence is cleared, mastery/BKT
                               knowledge are capped, and previous values stay in
                               correctionState for review.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Later propagation must mark derived summaries,
                               embeddings, graph facts, and mastery deltas as
                               superseded where practical.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               AWS/cloud synchronization remains deferred until
                               beta testing.
                             </div>
@@ -4997,16 +4997,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "artifacts" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <BookOpen size={13} /> Local Source Grounding
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Artifact and citation state ledger
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Durable local records for source cards, generated
                             study artifacts, chapter audio guides, and citation
                             states captured from chat, memory, tool streams, and
@@ -5020,11 +5020,11 @@ export function AdminView() {
                             without fetching external pages.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {artifactRecordCount}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Artifacts
                           </div>
                         </div>
@@ -5050,37 +5050,37 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
                         ))}
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <h3 className="text-sm font-semibold text-zinc-900">
+                            <h3 className="text-sm font-semibold text-zinc-100">
                               Local verifier coverage
                             </h3>
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                               Coverage counts artifact rows that have a local,
                               no-fetch integrity contract. Unsupported rows stay
                               visible so future chart, code, image, website, or
                               preview contracts can be added deliberately.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-mono text-zinc-600">
+                          <div className="rounded-full border border-white/10 bg-[#14171D] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {locallyVerifiableArtifactRecords}/
                             {artifactRecordCount} rows
                           </div>
                         </div>
-                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
+                        <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#14171D]">
                           <div
                             className="h-full rounded-full bg-green-500"
                             style={{
@@ -5088,15 +5088,15 @@ export function AdminView() {
                             }}
                           />
                         </div>
-                        <div className="mt-3 grid gap-2 text-xs text-zinc-600 sm:grid-cols-3">
+                        <div className="mt-3 grid gap-2 text-xs text-zinc-400 sm:grid-cols-3">
                           <div className="rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-green-700">
                             {locallyVerifiableArtifactRecords} locally checkable
                           </div>
-                          <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                          <div className="rounded-xl border border-white/10 bg-[#14171D] px-3 py-2">
                             {locallyUnsupportedArtifactRecords} awaiting a
                             verifier contract
                           </div>
-                          <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                          <div className="rounded-xl border border-white/10 bg-[#14171D] px-3 py-2">
                             {unsupportedVerifierArtifactTypes.length > 0
                               ? unsupportedVerifierArtifactTypes
                                   .map((type) => type.replace(/_/g, " "))
@@ -5120,25 +5120,25 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Recent artifacts
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Newest first. These rows include source cards and
                               generated study artifacts captured locally for
                               review before they influence learner-brain trust.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(latestArtifactRecord?.timestamp)}
                           </div>
                         </div>
 
                         {artifactRecords.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No artifacts yet. A chat web-search result,
                             generated flashcard batch, or generated learning
                             note will persist reviewable artifact rows here.
@@ -5150,16 +5150,16 @@ export function AdminView() {
                             {artifactRecords.map((record, index) => (
                               <article
                                 key={record.id}
-                                className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                   <div className="flex min-w-0 gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-blue-600">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#14171D] text-blue-600">
                                       <BookOpen size={17} />
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                           {record.title}
                                         </h4>
                                         <span
@@ -5177,11 +5177,11 @@ export function AdminView() {
                                         </span>
                                       </div>
                                       {record.summary && (
-                                        <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                                        <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-400 font-serif">
                                           {record.summary}
                                         </p>
                                       )}
-                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                         <span>{record.artifactType}</span>
                                         <span>{record.source}</span>
                                         {record.domain && (
@@ -5210,8 +5210,8 @@ export function AdminView() {
                                             record,
                                           );
                                         return coverage ? (
-                                          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 text-[11px] text-zinc-600">
-                                            <span className="font-semibold text-zinc-800">
+                                          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-[#14171D] px-3 py-2 text-[11px] text-zinc-400">
+                                            <span className="font-semibold text-zinc-200">
                                               Preview lexical support
                                             </span>
                                             <span
@@ -5246,7 +5246,7 @@ export function AdminView() {
                                       )}
                                     </div>
                                   </div>
-                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                     {formatTime(record.timestamp)}
                                   </div>
                                 </div>
@@ -5276,7 +5276,7 @@ export function AdminView() {
                                       Run local check
                                     </button>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-500">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-semibold text-zinc-400">
                                       No local verifier yet
                                     </span>
                                   )}
@@ -5316,14 +5316,14 @@ export function AdminView() {
                                   record.citationStateIds.length ||
                                   record.metadata) && (
                                   <details className="group mt-3">
-                                    <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                    <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                       <ChevronRight
                                         size={14}
                                         className="transition-transform group-open:rotate-90"
                                       />
                                       Source ids, citation ids, and metadata
                                     </summary>
-                                    <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                    <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                       {JSON.stringify(
                                         {
                                           sourceIds: record.sourceIds,
@@ -5344,25 +5344,25 @@ export function AdminView() {
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                           <div className="mb-4 flex items-center justify-between gap-3">
                             <div>
-                              <h3 className="text-xl font-serif font-medium text-zinc-900">
+                              <h3 className="text-xl font-serif font-medium text-zinc-100">
                                 Citation states
                               </h3>
-                              <p className="mt-1 text-sm text-zinc-500 font-serif">
+                              <p className="mt-1 text-sm text-zinc-400 font-serif">
                                 State machine rows for source-card claims,
                                 generated-artifact provenance, and search
                                 failures.
                               </p>
                             </div>
-                            <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                            <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                               {formatTime(latestCitationState?.timestamp)}
                             </div>
                           </div>
 
                           {citationStates.length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-500">
+                            <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-6 text-center text-sm text-zinc-400">
                               No citation states yet. Source capture writes
                               checking states, generated artifacts write not
                               checked states, and source failures write
@@ -5373,12 +5373,12 @@ export function AdminView() {
                               {citationStates.map((state, index) => (
                                 <article
                                   key={state.id}
-                                  className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                                  className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                                 >
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                           {state.title || state.sourceRef}
                                         </h4>
                                         <span
@@ -5392,7 +5392,7 @@ export function AdminView() {
                                           {state.failureReason}
                                         </p>
                                       )}
-                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                         <span>{state.verifier}</span>
                                         {state.domain && (
                                           <span>{state.domain}</span>
@@ -5410,7 +5410,7 @@ export function AdminView() {
                                         )}
                                       </div>
                                     </div>
-                                    <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                    <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                       {formatTime(state.timestamp)}
                                     </div>
                                   </div>
@@ -5457,7 +5457,7 @@ export function AdminView() {
                                           Run local check
                                         </button>
                                       ) : (
-                                        <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-500">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-semibold text-zinc-400">
                                           No local verifier yet
                                         </span>
                                       );
@@ -5493,14 +5493,14 @@ export function AdminView() {
                                   </div>
                                   {(state.metadata || state.url) && (
                                     <details className="group mt-3">
-                                      <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                      <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                         <ChevronRight
                                           size={14}
                                           className="transition-transform group-open:rotate-90"
                                         />
                                         Source ref and metadata
                                       </summary>
-                                      <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                      <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                         {JSON.stringify(
                                           {
                                             claimId: state.claimId,
@@ -5520,13 +5520,13 @@ export function AdminView() {
                           )}
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             State mix
                           </h3>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {Object.keys(citationStatesByState).length === 0 ? (
-                              <span className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                              <span className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-zinc-400">
                                 Waiting for citation states.
                               </span>
                             ) : (
@@ -5544,13 +5544,13 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Artifact mix
                           </h3>
                           <div className="mt-4 flex flex-wrap gap-2">
                             {Object.keys(artifactRecordsByType).length === 0 ? (
-                              <span className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-500">
+                              <span className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-zinc-400">
                                 Waiting for artifact records.
                               </span>
                             ) : (
@@ -5558,7 +5558,7 @@ export function AdminView() {
                                 ([type, count]) => (
                                   <span
                                     key={type}
-                                    className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700"
+                                    className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-zinc-300"
                                   >
                                     {type.replace(/_/g, " ")}: {count}
                                   </span>
@@ -5568,12 +5568,12 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Boundary
                           </h3>
-                          <div className="mt-4 grid gap-2 text-sm text-zinc-600 font-serif">
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                          <div className="mt-4 grid gap-2 text-sm text-zinc-400 font-serif">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Source artifacts describe captured source cards,
                               generated artifacts, and citation state, not
                               learner concept mastery. Generated-note preview
@@ -5582,7 +5582,7 @@ export function AdminView() {
                               sentence-level entailment, note truth, or
                               document-wide grounding.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               A checking citation is not a verified citation.
                               The local verifier can only check saved
                               source-card structure, citation linkage, URL
@@ -5595,7 +5595,7 @@ export function AdminView() {
                               correctness, note sentence truth, semantic
                               entailment, or audio transcription accuracy.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               AWS/cloud synchronization remains deferred until
                               beta testing.
                             </div>
@@ -5606,16 +5606,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "diagnostics" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <ShieldCheck size={13} /> Local Beta Readiness
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Diagnostic snapshot and export
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             A non-destructive local readiness snapshot across
                             model runs, tool jobs, memory writes, retrieval,
                             background jobs, correction requests, source
@@ -5656,10 +5656,10 @@ export function AdminView() {
                             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-600/75">
                               <BrainCircuit size={13} /> Brain Architecture
                             </div>
-                            <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                               Local beta completion
                             </h3>
-                            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-400 font-serif">
                               {
                                 betaDiagnosticsSnapshot
                                   .brainArchitectureReadiness.summary
@@ -5674,7 +5674,7 @@ export function AdminView() {
                                   " ",
                                 )}
                               </span>
-                              <span className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-600">
+                              <span className="rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                                 brain flow{" "}
                                 {
                                   betaDiagnosticsSnapshot
@@ -5682,7 +5682,7 @@ export function AdminView() {
                                 }
                                 %
                               </span>
-                              <span className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-600">
+                              <span className="rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                                 coherent proof{" "}
                                 {
                                   betaDiagnosticsSnapshot
@@ -5702,24 +5702,24 @@ export function AdminView() {
                               </span>
                             </div>
                           </div>
-                          <div className="shrink-0 rounded-2xl border border-blue-100 bg-white px-5 py-4 text-right shadow-sm">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="shrink-0 rounded-2xl border border-blue-100 bg-[#14171D] px-5 py-4 text-right shadow-sm">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               Completion
                             </div>
-                            <div className="mt-1 text-3xl font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-1 text-3xl font-semibold tabular-nums text-zinc-100">
                               {
                                 betaDiagnosticsSnapshot
                                   .brainArchitectureReadiness.localBetaPercent
                               }
                               %
                             </div>
-                            <p className="mt-2 max-w-[11rem] text-[11px] leading-relaxed text-zinc-500 font-serif">
+                            <p className="mt-2 max-w-[11rem] text-[11px] leading-relaxed text-zinc-400 font-serif">
                               Local brain architecture proof, not AWS readiness.
                             </p>
                           </div>
                         </div>
 
-                        <div className="mt-4 rounded-xl border border-white/80 bg-white/80 px-3 py-2 text-xs leading-relaxed text-zinc-600 font-serif">
+                        <div className="mt-4 rounded-xl border border-white/80 bg-[#14171D]/80 px-3 py-2 text-xs leading-relaxed text-zinc-400 font-serif">
                           Next action:{" "}
                           {
                             betaDiagnosticsSnapshot.brainArchitectureReadiness
@@ -5734,10 +5734,10 @@ export function AdminView() {
                               (group) => (
                                 <article
                                   key={group.id}
-                                  className="rounded-2xl border border-white/80 bg-white/80 px-3 py-2"
+                                  className="rounded-2xl border border-white/80 bg-[#14171D]/80 px-3 py-2"
                                 >
                                   <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                       {group.title}
                                     </div>
                                     <span
@@ -5746,12 +5746,12 @@ export function AdminView() {
                                       {group.status}
                                     </span>
                                   </div>
-                                  <ul className="mt-2 space-y-1 text-xs leading-relaxed text-zinc-600 font-serif">
+                                  <ul className="mt-2 space-y-1 text-xs leading-relaxed text-zinc-400 font-serif">
                                     {group.gaps.map((gap) => (
                                       <li key={`${group.id}-${gap}`}>{gap}</li>
                                     ))}
                                   </ul>
-                                  <p className="mt-2 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                                  <p className="mt-2 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                     {group.action}
                                   </p>
                                 </article>
@@ -5786,12 +5786,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -5799,16 +5799,16 @@ export function AdminView() {
                       </div>
                     </section>
 
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <BrainCircuit size={13} /> Brain Flow Coverage
                           </div>
-                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                             Chat, voice, tools, and memory proof
                           </h3>
-                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-500 font-serif">
+                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             This local verifier looks across context-injection
                             rows, retrieval rows, model runs, tool jobs, and
                             request-correlated evaluated mastery, transcript
@@ -5818,11 +5818,11 @@ export function AdminView() {
                             or inspect private model internals.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Coverage
                           </div>
-                          <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-100">
                             {betaDiagnosticsSnapshot.brainFlow.coveragePercent}%
                           </div>
                           <span
@@ -5848,11 +5848,11 @@ export function AdminView() {
                                 className={`rounded-2xl border p-3 ${
                                   signal.ready
                                     ? "border-green-200 bg-green-50"
-                                    : "border-zinc-200 bg-zinc-50"
+                                    : "border-white/10 bg-white/[0.04]"
                                 }`}
                               >
                                 <div className="flex items-center justify-between gap-2">
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                     {signal.title}
                                   </div>
                                   {signal.ready ? (
@@ -5867,13 +5867,13 @@ export function AdminView() {
                                     />
                                   )}
                                 </div>
-                                <div className="mt-2 text-xl font-semibold tabular-nums text-zinc-900">
+                                <div className="mt-2 text-xl font-semibold tabular-nums text-zinc-100">
                                   {signal.count}
                                 </div>
-                                <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-zinc-600 font-serif">
+                                <p className="mt-2 line-clamp-4 text-xs leading-relaxed text-zinc-400 font-serif">
                                   {signal.detail}
                                 </p>
-                                <div className="mt-3 rounded-xl border border-white/70 bg-white/70 px-3 py-2">
+                                <div className="mt-3 rounded-xl border border-white/70 bg-[#14171D]/70 px-3 py-2">
                                   <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                     Live anchors
                                   </div>
@@ -5881,7 +5881,7 @@ export function AdminView() {
                                     <div className="mt-2 flex flex-wrap gap-1.5">
                                       {typeof signal.evidence
                                         .latestTimestamp === "number" && (
-                                        <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                           latest{" "}
                                           {formatTime(
                                             signal.evidence.latestTimestamp,
@@ -5911,7 +5911,7 @@ export function AdminView() {
                                       {signal.evidence.sources.map((source) => (
                                         <span
                                           key={`source-${signal.id}-${source}`}
-                                          className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                          className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                                         >
                                           {source.replace(/_/g, " ")}
                                         </span>
@@ -5948,10 +5948,10 @@ export function AdminView() {
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-600/80">
                             <Flag size={13} /> Provider-Key Live Proof
                           </div>
-                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                             Deliberate beta-run checklist
                           </h3>
-                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-500 font-serif">
+                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             This checklist combines local provider-key presence
                             with live ledger anchors. Keys make a live run
                             possible; only request-correlated chat and voice
@@ -5974,7 +5974,7 @@ export function AdminView() {
                               <button
                                 type="button"
                                 onClick={clearLiveProofAttempt}
-                                className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50"
+                                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#14171D] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400 transition hover:border-white/15 hover:bg-white/[0.06]"
                               >
                                 <Trash2 size={13} />
                                 Clear attempt
@@ -5982,11 +5982,11 @@ export function AdminView() {
                             )}
                           </div>
                         </div>
-                        <div className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-right">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="rounded-2xl border border-blue-100 bg-[#14171D] px-4 py-3 text-right">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Ledger checks
                           </div>
-                          <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-1 text-2xl font-semibold tabular-nums text-zinc-100">
                             {providerKeyProofChecklist.completionPercent}%
                           </div>
                           <span
@@ -6008,7 +6008,7 @@ export function AdminView() {
                               : "keys/setup needed"}
                         </span>
                         <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerKeyProofChecklist.betaProofReady ? "border-green-200 bg-green-50 text-green-700" : providerKeyProofChecklist.proofComplete ? "border-amber-200 bg-amber-50 text-amber-700" : "border-zinc-200 bg-white text-zinc-500"}`}
+                          className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerKeyProofChecklist.betaProofReady ? "border-green-200 bg-green-50 text-green-700" : providerKeyProofChecklist.proofComplete ? "border-amber-200 bg-amber-50 text-amber-700" : "border-white/10 bg-[#14171D] text-zinc-400"}`}
                         >
                           {providerKeyProofChecklist.betaProofReady
                             ? "beta proof ready"
@@ -6017,7 +6017,7 @@ export function AdminView() {
                               : "proof pending"}
                         </span>
                         <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerKeyProofChecklist.chatModelKeyConfigured ? "border-green-200 bg-green-50 text-green-700" : "border-zinc-200 bg-white text-zinc-500"}`}
+                          className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerKeyProofChecklist.chatModelKeyConfigured ? "border-green-200 bg-green-50 text-green-700" : "border-white/10 bg-[#14171D] text-zinc-400"}`}
                         >
                           chat key{" "}
                           {providerKeyProofChecklist.chatModelKeyConfigured
@@ -6025,7 +6025,7 @@ export function AdminView() {
                             : "missing"}
                         </span>
                         <span
-                          className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerKeyProofChecklist.voiceRealtimeKeyConfigured ? "border-green-200 bg-green-50 text-green-700" : "border-zinc-200 bg-white text-zinc-500"}`}
+                          className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerKeyProofChecklist.voiceRealtimeKeyConfigured ? "border-green-200 bg-green-50 text-green-700" : "border-white/10 bg-[#14171D] text-zinc-400"}`}
                         >
                           voice key{" "}
                           {providerKeyProofChecklist.voiceRealtimeKeyConfigured
@@ -6037,12 +6037,12 @@ export function AdminView() {
                         >
                           provider meters {activityLabel.toLowerCase()}
                         </span>
-                        <span className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                        <span className="rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                           live coverage{" "}
                           {providerKeyProofChecklist.liveCoveragePercent}%
                         </span>
                         <span
-                          className={`max-w-full truncate rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${activeBetaProofAttemptId ? "border-blue-200 bg-blue-50 text-blue-700" : "border-zinc-200 bg-white text-zinc-500"}`}
+                          className={`max-w-full truncate rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${activeBetaProofAttemptId ? "border-blue-200 bg-blue-50 text-blue-700" : "border-white/10 bg-[#14171D] text-zinc-400"}`}
                         >
                           active attempt{" "}
                           {activeBetaProofAttemptId || "not started"}
@@ -6088,7 +6088,7 @@ export function AdminView() {
                         </span>
                       </div>
 
-                      <div className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                      <div className="rounded-2xl border border-blue-100 bg-[#14171D] px-4 py-3 text-sm leading-relaxed text-zinc-400 font-serif">
                         {providerKeyProofChecklist.summary}
                       </div>
 
@@ -6098,10 +6098,10 @@ export function AdminView() {
                             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">
                               External provider traffic
                             </div>
-                            <h4 className="mt-1 text-base font-semibold text-zinc-900">
+                            <h4 className="mt-1 text-base font-semibold text-zinc-100">
                               Approve this proof attempt before the real drill
                             </h4>
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                               Approval lets the exact proof prompts send the
                               active book context to OpenRouter and live voice
                               audio/context to Deepgram. It may use provider
@@ -6114,7 +6114,7 @@ export function AdminView() {
                               type="button"
                               onClick={approveLiveProofProviderTraffic}
                               disabled={!activeBetaProofAttemptId}
-                              className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700 transition hover:border-amber-400 hover:bg-amber-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-50 disabled:text-zinc-400"
+                              className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-[#14171D] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-amber-700 transition hover:border-amber-400 hover:bg-amber-50 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.04] disabled:text-zinc-400"
                             >
                               <ShieldCheck size={13} />
                               Approve provider traffic
@@ -6123,7 +6123,7 @@ export function AdminView() {
                               <button
                                 type="button"
                                 onClick={revokeLiveProofProviderTrafficApproval}
-                                className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-600 transition hover:border-zinc-300 hover:bg-zinc-50"
+                                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#14171D] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-zinc-400 transition hover:border-white/15 hover:bg-white/[0.06]"
                               >
                                 <Trash2 size={13} />
                                 Revoke approval
@@ -6133,7 +6133,7 @@ export function AdminView() {
                         </div>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <span
-                            className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerTrafficApprovalReady ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-white text-amber-700"}`}
+                            className={`rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] ${providerTrafficApprovalReady ? "border-green-200 bg-green-50 text-green-700" : "border-amber-200 bg-[#14171D] text-amber-700"}`}
                           >
                             {providerTrafficApprovalReady
                               ? "traffic approved"
@@ -6141,11 +6141,11 @@ export function AdminView() {
                                 ? "approval event pending"
                                 : "traffic locked"}
                           </span>
-                          <span className="max-w-full truncate rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-mono text-zinc-600">
+                          <span className="max-w-full truncate rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-mono text-zinc-400">
                             attempt {activeBetaProofAttemptId || "not started"}
                           </span>
                           {activeProviderTrafficApproval && (
-                            <span className="rounded-full border border-green-200 bg-white px-2.5 py-1 text-[11px] font-mono text-green-700">
+                            <span className="rounded-full border border-green-200 bg-[#14171D] px-2.5 py-1 text-[11px] font-mono text-green-700">
                               approved{" "}
                               {formatTime(
                                 activeProviderTrafficApproval.approvedAt,
@@ -6156,7 +6156,7 @@ export function AdminView() {
                             (eventId) => (
                               <span
                                 key={`provider-traffic-approval-event-${eventId}`}
-                                className="max-w-full truncate rounded-full border border-green-200 bg-white px-2.5 py-1 text-[11px] font-mono text-green-700"
+                                className="max-w-full truncate rounded-full border border-green-200 bg-[#14171D] px-2.5 py-1 text-[11px] font-mono text-green-700"
                               >
                                 approval event {eventId}
                               </span>
@@ -6171,15 +6171,15 @@ export function AdminView() {
                             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-600">
                               Local proof receipt
                             </div>
-                            <h4 className="mt-1 text-base font-semibold text-zinc-900">
+                            <h4 className="mt-1 text-base font-semibold text-zinc-100">
                               Export-ready chat and voice run summary
                             </h4>
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                               {liveProofReceipt.summary}
                             </p>
                           </div>
-                          <div className="shrink-0 rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-right">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="shrink-0 rounded-2xl border border-emerald-100 bg-[#14171D] px-4 py-3 text-right">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               Receipt
                             </div>
                             <span
@@ -6198,7 +6198,7 @@ export function AdminView() {
                               ? "receipt ready"
                               : "receipt pending"}
                           </span>
-                          <span className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                          <span className="rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                             provider captures{" "}
                             {liveProofReceipt.providerCaptureCount}
                           </span>
@@ -6221,7 +6221,7 @@ export function AdminView() {
                             (attemptId) => (
                               <span
                                 key={`receipt-attempt-${attemptId}`}
-                                className="max-w-full truncate rounded-full border border-emerald-100 bg-white px-2.5 py-1 text-[11px] font-mono text-emerald-700"
+                                className="max-w-full truncate rounded-full border border-emerald-100 bg-[#14171D] px-2.5 py-1 text-[11px] font-mono text-emerald-700"
                               >
                                 attempt {attemptId}
                               </span>
@@ -6229,7 +6229,7 @@ export function AdminView() {
                           )}
                           {typeof liveProofReceipt.latestTimestamp ===
                             "number" && (
-                            <span className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-mono text-zinc-600">
+                            <span className="rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-mono text-zinc-400">
                               latest{" "}
                               {formatTime(liveProofReceipt.latestTimestamp)}
                             </span>
@@ -6250,7 +6250,7 @@ export function AdminView() {
                         </div>
 
                         <div
-                          className={`mt-3 rounded-xl border px-3 py-2 text-[11px] leading-relaxed font-serif ${liveProofReceipt.sourceReadyForBeta ? "border-emerald-100 bg-white text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}
+                          className={`mt-3 rounded-xl border px-3 py-2 text-[11px] leading-relaxed font-serif ${liveProofReceipt.sourceReadyForBeta ? "border-emerald-100 bg-[#14171D] text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}
                         >
                           {liveProofReceipt.sourceSummary}
                         </div>
@@ -6267,7 +6267,7 @@ export function AdminView() {
                                 return (
                                   <div
                                     key={`receipt-provider-${capture.layer}-${capture.requestId || index}-${capture.timestamp || index}`}
-                                    className="rounded-xl border border-emerald-100 bg-white px-3 py-2"
+                                    className="rounded-xl border border-emerald-100 bg-[#14171D] px-3 py-2"
                                   >
                                     <div className="flex flex-wrap items-center justify-between gap-2">
                                       <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600">
@@ -6277,12 +6277,12 @@ export function AdminView() {
                                         {capture.provider}
                                       </span>
                                     </div>
-                                    <div className="mt-1 truncate text-xs font-semibold text-zinc-900">
+                                    <div className="mt-1 truncate text-xs font-semibold text-zinc-100">
                                       {capture.title}
                                     </div>
                                     <div className="mt-2 flex flex-wrap gap-1.5">
                                       {modelLabel && (
-                                        <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                        <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                           {modelLabel}
                                         </span>
                                       )}
@@ -6291,7 +6291,7 @@ export function AdminView() {
                                           req {capture.requestId}
                                         </span>
                                       )}
-                                      <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                         {capture.source.replace(/_/g, " ")}
                                       </span>
                                       {capture.runSource && (
@@ -6324,24 +6324,24 @@ export function AdminView() {
                         )}
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-blue-100 bg-white p-4">
+                      <div className="mt-4 rounded-2xl border border-blue-100 bg-[#14171D] p-4">
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                           <div>
                             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-500">
                               Live beta runbook
                             </div>
-                            <h4 className="mt-1 text-base font-semibold text-zinc-900">
+                            <h4 className="mt-1 text-base font-semibold text-zinc-100">
                               Ordered manual proof path
                             </h4>
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                               {liveProofRunbook.summary}
                             </p>
                           </div>
-                          <div className="shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               Runbook
                             </div>
-                            <div className="mt-1 text-xl font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
                               {liveProofRunbook.readySteps}/
                               {liveProofRunbook.totalSteps}
                             </div>
@@ -6367,7 +6367,7 @@ export function AdminView() {
                               {liveProofRunbook.nextStepId.replace(/_/g, " ")}
                             </span>
                           )}
-                          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                             local only
                           </span>
                         </div>
@@ -6395,16 +6395,16 @@ export function AdminView() {
                                     ? "border-green-200 bg-green-50"
                                     : runbookStep.status === "blocked"
                                       ? "border-red-200 bg-red-50"
-                                      : "border-zinc-200 bg-zinc-50"
+                                      : "border-white/10 bg-white/[0.04]"
                                 }`}
                               >
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <span className="rounded-full border border-white/70 bg-white/70 px-2 py-0.5 text-[10px] font-mono text-zinc-500">
+                                      <span className="rounded-full border border-white/70 bg-[#14171D]/70 px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                         {index + 1}
                                       </span>
-                                      <h5 className="m-0 text-sm font-semibold text-zinc-900">
+                                      <h5 className="m-0 text-sm font-semibold text-zinc-100">
                                         {runbookStep.title}
                                       </h5>
                                       <span
@@ -6413,7 +6413,7 @@ export function AdminView() {
                                         {runbookStep.status}
                                       </span>
                                     </div>
-                                    <p className="mt-2 text-xs leading-relaxed text-zinc-600 font-serif">
+                                    <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-serif">
                                       {runbookStep.summary}
                                     </p>
                                   </div>
@@ -6429,7 +6429,7 @@ export function AdminView() {
                                   />
                                 </div>
 
-                                <p className="mt-3 rounded-xl border border-white/80 bg-white/80 px-3 py-2 text-[11px] leading-relaxed text-zinc-600 font-serif">
+                                <p className="mt-3 rounded-xl border border-white/80 bg-[#14171D]/80 px-3 py-2 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                   {runbookStep.action}
                                 </p>
 
@@ -6437,7 +6437,7 @@ export function AdminView() {
                                   {runbookStep.evidenceNeeded.map((entry) => (
                                     <span
                                       key={`${runbookStep.id}-needed-${entry}`}
-                                      className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-zinc-600"
+                                      className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-semibold text-zinc-400"
                                     >
                                       {entry}
                                     </span>
@@ -6455,7 +6455,7 @@ export function AdminView() {
                                   <div className="mt-3 flex flex-wrap gap-1.5">
                                     {typeof runbookStep.evidence
                                       .latestTimestamp === "number" && (
-                                      <span className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                      <span className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                         latest{" "}
                                         {formatTime(
                                           runbookStep.evidence.latestTimestamp,
@@ -6477,7 +6477,7 @@ export function AdminView() {
                                     ).map((attemptId) => (
                                       <span
                                         key={`runbook-attempt-${runbookStep.id}-${attemptId}`}
-                                        className="rounded-full border border-blue-100 bg-white px-2 py-0.5 text-[10px] font-mono text-blue-700"
+                                        className="rounded-full border border-blue-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-blue-700"
                                       >
                                         attempt {attemptId}
                                       </span>
@@ -6506,15 +6506,15 @@ export function AdminView() {
                             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-600">
                               Live proof drill packet
                             </div>
-                            <h4 className="mt-1 text-base font-semibold text-zinc-900">
+                            <h4 className="mt-1 text-base font-semibold text-zinc-100">
                               Exact local prompts for chat and voice
                             </h4>
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                               {liveProofDrillPacket.summary}
                             </p>
                           </div>
-                          <div className="shrink-0 rounded-2xl border border-cyan-100 bg-white px-4 py-3 text-right">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="shrink-0 rounded-2xl border border-cyan-100 bg-[#14171D] px-4 py-3 text-right">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               Drill
                             </div>
                             <span
@@ -6533,7 +6533,7 @@ export function AdminView() {
                               ? "ready to run"
                               : "not runnable yet"}
                           </span>
-                          <span className="rounded-full border border-cyan-100 bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-700">
+                          <span className="rounded-full border border-cyan-100 bg-[#14171D] px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-cyan-700">
                             local only
                           </span>
                           {liveProofDrillPacket.activeAttemptRequired && (
@@ -6548,21 +6548,21 @@ export function AdminView() {
                           )}
                         </div>
 
-                        <div className="mt-4 rounded-2xl border border-white bg-white/85 p-3">
+                        <div className="mt-4 rounded-2xl border border-white bg-[#14171D]/85 p-3">
                           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                             <div>
                               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-600">
                                 Live drill preflight
                               </div>
-                              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-zinc-600 font-serif">
+                              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-zinc-400 font-serif">
                                 {liveProofPreflight.summary}
                               </p>
                             </div>
                             <div className="shrink-0 rounded-xl border border-cyan-100 bg-cyan-50 px-3 py-2 text-right">
-                              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                 Preflight
                               </div>
-                              <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                              <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                                 {liveProofPreflight.readyChecks}/
                                 {liveProofPreflight.totalChecks}
                               </div>
@@ -6588,7 +6588,7 @@ export function AdminView() {
                               ready PDFs {liveProofPreflight.readyDocumentCount}
                             </span>
                             {liveProofPreflight.activeBookId && (
-                              <span className="max-w-full truncate rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                              <span className="max-w-full truncate rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                 book {liveProofPreflight.activeBookId}
                               </span>
                             )}
@@ -6602,7 +6602,7 @@ export function AdminView() {
                               (documentId) => (
                                 <span
                                   key={`preflight-document-${documentId}`}
-                                  className="max-w-full truncate rounded-full border border-violet-100 bg-white px-2 py-0.5 text-[10px] font-mono text-violet-700"
+                                  className="max-w-full truncate rounded-full border border-violet-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-violet-700"
                                 >
                                   pdf {documentId}
                                 </span>
@@ -6623,18 +6623,18 @@ export function AdminView() {
                                 <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-700">
                                   Attempt audit
                                 </div>
-                                <p className="mt-1 max-w-2xl text-[11px] leading-relaxed text-zinc-600 font-serif">
+                                <p className="mt-1 max-w-2xl text-[11px] leading-relaxed text-zinc-400 font-serif">
                                   {liveProofAttemptAudit.summary}
                                 </p>
-                                <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                                <p className="mt-1 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                   {liveProofAttemptAudit.nextAction}
                                 </p>
                               </div>
                               <div className="shrink-0 text-left md:text-right">
-                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                   Audit
                                 </div>
-                                <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                                <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                                   {liveProofAttemptAudit.readyChecks}/
                                   {liveProofAttemptAudit.totalChecks}
                                 </div>
@@ -6647,7 +6647,7 @@ export function AdminView() {
                             </div>
                             <div className="mt-3 flex flex-wrap gap-1.5">
                               <span
-                                className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${liveProofAttemptAudit.canRunProviderTraffic ? "border-green-200 bg-green-50 text-green-700" : liveProofAttemptAudit.sourceReadyForBeta ? "border-blue-200 bg-white text-blue-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}
+                                className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${liveProofAttemptAudit.canRunProviderTraffic ? "border-green-200 bg-green-50 text-green-700" : liveProofAttemptAudit.sourceReadyForBeta ? "border-blue-200 bg-[#14171D] text-blue-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}
                               >
                                 {liveProofAttemptAudit.canRunProviderTraffic
                                   ? "provider run unlocked"
@@ -6655,22 +6655,22 @@ export function AdminView() {
                                     ? "receipt beta-ready"
                                     : "provider run locked"}
                               </span>
-                              <span className="rounded-full border border-blue-100 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700">
+                              <span className="rounded-full border border-blue-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700">
                                 captures{" "}
                                 {liveProofAttemptAudit.providerCaptureCount}
                               </span>
-                              <span className="rounded-full border border-violet-100 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700">
+                              <span className="rounded-full border border-violet-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700">
                                 ready PDFs{" "}
                                 {liveProofAttemptAudit.readyDocumentCount}
                               </span>
                               {liveProofAttemptAudit.activeProofAttemptId && (
-                                <span className="max-w-full truncate rounded-full border border-blue-100 bg-white px-2 py-0.5 text-[10px] font-mono text-blue-700">
+                                <span className="max-w-full truncate rounded-full border border-blue-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-blue-700">
                                   active{" "}
                                   {liveProofAttemptAudit.activeProofAttemptId}
                                 </span>
                               )}
                               {liveProofAttemptAudit.selectedLedgerProofAttemptId && (
-                                <span className="max-w-full truncate rounded-full border border-cyan-100 bg-white px-2 py-0.5 text-[10px] font-mono text-cyan-700">
+                                <span className="max-w-full truncate rounded-full border border-cyan-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-cyan-700">
                                   ledger{" "}
                                   {
                                     liveProofAttemptAudit.selectedLedgerProofAttemptId
@@ -6681,7 +6681,7 @@ export function AdminView() {
                                 (requestId) => (
                                   <span
                                     key={`attempt-audit-request-${requestId}`}
-                                    className="max-w-full truncate rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                    className="max-w-full truncate rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                                   >
                                     req {requestId}
                                   </span>
@@ -6691,7 +6691,7 @@ export function AdminView() {
                                 (attemptId) => (
                                   <span
                                     key={`attempt-audit-provider-${attemptId}`}
-                                    className="max-w-full truncate rounded-full border border-emerald-100 bg-white px-2 py-0.5 text-[10px] font-mono text-emerald-700"
+                                    className="max-w-full truncate rounded-full border border-emerald-100 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-emerald-700"
                                   >
                                     provider {attemptId}
                                   </span>
@@ -6718,12 +6718,12 @@ export function AdminView() {
                           ].map(([title, entries]) => (
                             <div
                               key={title as string}
-                              className="rounded-2xl border border-white bg-white/85 p-3"
+                              className="rounded-2xl border border-white bg-[#14171D]/85 p-3"
                             >
-                              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                 {title as string}
                               </div>
-                              <ol className="mt-2 space-y-1.5 text-xs leading-relaxed text-zinc-600 font-serif">
+                              <ol className="mt-2 space-y-1.5 text-xs leading-relaxed text-zinc-400 font-serif">
                                 {(entries as string[]).map((entry, index) => (
                                   <li
                                     key={`${title}-${entry}`}
@@ -6744,14 +6744,14 @@ export function AdminView() {
                           {liveProofDrillPacket.prompts.map((prompt) => (
                             <article
                               key={prompt.id}
-                              className="rounded-2xl border border-white bg-white/90 p-3"
+                              className="rounded-2xl border border-white bg-[#14171D]/90 p-3"
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div>
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                     {prompt.layer} agent layer
                                   </div>
-                                  <h5 className="mt-1 text-sm font-semibold text-zinc-900">
+                                  <h5 className="mt-1 text-sm font-semibold text-zinc-100">
                                     {prompt.title}
                                   </h5>
                                 </div>
@@ -6766,7 +6766,7 @@ export function AdminView() {
                                     loadLiveProofPrompt(prompt.prompt)
                                   }
                                   disabled={!liveProofPreflight.canRun}
-                                  className="mt-3 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-50 disabled:text-zinc-400"
+                                  className="mt-3 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.04] disabled:text-zinc-400"
                                 >
                                   Load in chat
                                 </button>
@@ -6778,25 +6778,25 @@ export function AdminView() {
                                     loadLiveProofPrompt(prompt.prompt)
                                   }
                                   disabled={!liveProofPreflight.canRun}
-                                  className="mt-3 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:bg-zinc-50 disabled:text-zinc-400"
+                                  className="mt-3 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.04] disabled:text-zinc-400"
                                 >
                                   Load voice script
                                 </button>
                               )}
-                              <p className="mt-3 rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-xs leading-relaxed text-zinc-700 font-serif">
+                              <p className="mt-3 rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-xs leading-relaxed text-zinc-300 font-serif">
                                 {prompt.prompt}
                               </p>
-                              <p className="mt-3 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                              <p className="mt-3 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                 {prompt.toolExpectation}
                               </p>
-                              <p className="mt-2 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                              <p className="mt-2 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                 {prompt.evidenceGoal}
                               </p>
                               <div className="mt-3 flex flex-wrap gap-1.5">
                                 {prompt.expectedRows.map((row) => (
                                   <span
                                     key={`${prompt.id}-${row}`}
-                                    className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-zinc-600"
+                                    className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-semibold text-zinc-400"
                                   >
                                     {row}
                                   </span>
@@ -6813,11 +6813,11 @@ export function AdminView() {
                           </div>
                         )}
 
-                        <div className="mt-4 rounded-2xl border border-white bg-white/85 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                        <div className="mt-4 rounded-2xl border border-white bg-[#14171D]/85 p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                             Export instructions
                           </div>
-                          <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-zinc-600 font-serif">
+                          <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-zinc-400 font-serif">
                             {liveProofDrillPacket.exportInstructions.map(
                               (instruction) => (
                                 <li
@@ -6833,27 +6833,27 @@ export function AdminView() {
                         </div>
                       </div>
 
-                      <div className="mt-4 rounded-2xl border border-blue-100 bg-white p-4">
+                      <div className="mt-4 rounded-2xl border border-blue-100 bg-[#14171D] p-4">
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                           <div>
                             <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-500">
                               Coherent live proof bundle
                             </div>
-                            <h4 className="mt-1 text-base font-semibold text-zinc-900">
+                            <h4 className="mt-1 text-base font-semibold text-zinc-100">
                               Same book, same thread, both agent layers
                             </h4>
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                               {
                                 providerKeyProofChecklist.coherentLiveProof
                                   .summary
                               }
                             </p>
                           </div>
-                          <div className="shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                          <div className="shrink-0 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               Bundle
                             </div>
-                            <div className="mt-1 text-xl font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-1 text-xl font-semibold tabular-nums text-zinc-100">
                               {
                                 providerKeyProofChecklist.coherentLiveProof
                                   .completionPercent
@@ -6906,7 +6906,7 @@ export function AdminView() {
                             (bookId) => (
                               <span
                                 key={`coherent-book-${bookId}`}
-                                className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                               >
                                 book {bookId}
                               </span>
@@ -6916,7 +6916,7 @@ export function AdminView() {
                             (conversationId) => (
                               <span
                                 key={`coherent-thread-${conversationId}`}
-                                className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                               >
                                 thread {conversationId}
                               </span>
@@ -6934,7 +6934,7 @@ export function AdminView() {
                           )}
                           {typeof providerKeyProofChecklist.coherentLiveProof
                             .latestTimestamp === "number" && (
-                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                               latest{" "}
                               {formatTime(
                                 providerKeyProofChecklist.coherentLiveProof
@@ -6944,7 +6944,7 @@ export function AdminView() {
                           )}
                           {typeof providerKeyProofChecklist.coherentLiveProof
                             .oldestTimestamp === "number" && (
-                            <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                               first{" "}
                               {formatTime(
                                 providerKeyProofChecklist.coherentLiveProof
@@ -6990,18 +6990,18 @@ export function AdminView() {
                                   className={`rounded-2xl border p-3 ${
                                     bundle.complete
                                       ? "border-green-200 bg-green-50"
-                                      : "border-zinc-200 bg-zinc-50"
+                                      : "border-white/10 bg-white/[0.04]"
                                   }`}
                                 >
                                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                     <div className="min-w-0">
-                                      <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                      <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                         Selected request rows
                                       </div>
-                                      <h5 className="mt-1 text-sm font-semibold text-zinc-900">
+                                      <h5 className="mt-1 text-sm font-semibold text-zinc-100">
                                         {bundle.title}
                                       </h5>
-                                      <div className="mt-1 max-w-full truncate text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-1 max-w-full truncate text-[10px] font-mono text-zinc-400">
                                         {bundle.requestId
                                           ? `req ${bundle.requestId}`
                                           : "no request selected yet"}
@@ -7018,12 +7018,12 @@ export function AdminView() {
                                     {rowMetrics.map(([label, value]) => (
                                       <div
                                         key={`${bundle.layer}-${label}`}
-                                        className="min-w-0 rounded-xl border border-white/80 bg-white/80 px-2 py-1.5"
+                                        className="min-w-0 rounded-xl border border-white/80 bg-[#14171D]/80 px-2 py-1.5"
                                       >
-                                        <div className="truncate text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                                        <div className="truncate text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                                           {label}
                                         </div>
-                                        <div className="mt-1 text-sm font-semibold tabular-nums text-zinc-900">
+                                        <div className="mt-1 text-sm font-semibold tabular-nums text-zinc-100">
                                           {value}
                                         </div>
                                       </div>
@@ -7041,14 +7041,14 @@ export function AdminView() {
                                           return (
                                             <div
                                               key={`${bundle.layer}-provider-${capture.source}-${capture.requestId || index}-${capture.timestamp || index}`}
-                                              className="rounded-xl border border-blue-100 bg-white px-3 py-2"
+                                              className="rounded-xl border border-blue-100 bg-[#14171D] px-3 py-2"
                                             >
                                               <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                                                 <div className="min-w-0">
                                                   <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-blue-500">
                                                     Provider capture
                                                   </div>
-                                                  <div className="mt-1 truncate text-xs font-semibold text-zinc-900">
+                                                  <div className="mt-1 truncate text-xs font-semibold text-zinc-100">
                                                     {capture.title}
                                                   </div>
                                                 </div>
@@ -7058,12 +7058,12 @@ export function AdminView() {
                                               </div>
                                               <div className="mt-2 flex flex-wrap gap-1.5">
                                                 {modelLabel && (
-                                                  <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                                     model {modelLabel}
                                                   </span>
                                                 )}
                                                 {capture.phase && (
-                                                  <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                                     phase {capture.phase}
                                                   </span>
                                                 )}
@@ -7074,7 +7074,7 @@ export function AdminView() {
                                                 )}
                                                 {typeof capture.timestamp ===
                                                   "number" && (
-                                                  <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                                     latest{" "}
                                                     {formatTime(
                                                       capture.timestamp,
@@ -7091,7 +7091,7 @@ export function AdminView() {
                                                     </span>
                                                   ),
                                                 )}
-                                                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                                   {capture.source.replace(
                                                     /_/g,
                                                     " ",
@@ -7125,7 +7125,7 @@ export function AdminView() {
                                     {bundle.bookIds.map((bookId) => (
                                       <span
                                         key={`${bundle.layer}-book-${bookId}`}
-                                        className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                        className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                                       >
                                         book {bookId}
                                       </span>
@@ -7134,7 +7134,7 @@ export function AdminView() {
                                       (conversationId) => (
                                         <span
                                           key={`${bundle.layer}-thread-${conversationId}`}
-                                          className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                          className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                                         >
                                           thread {conversationId}
                                         </span>
@@ -7142,7 +7142,7 @@ export function AdminView() {
                                     )}
                                     {typeof bundle.latestTimestamp ===
                                       "number" && (
-                                      <span className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                      <span className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                         latest{" "}
                                         {formatTime(bundle.latestTimestamp)}
                                       </span>
@@ -7171,11 +7171,11 @@ export function AdminView() {
                                     ? "border-green-200 bg-green-50"
                                     : check.status === "blocked"
                                       ? "border-red-200 bg-red-50"
-                                      : "border-zinc-200 bg-zinc-50"
+                                      : "border-white/10 bg-white/[0.04]"
                                 }`}
                               >
                                 <div className="flex items-start justify-between gap-2">
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                     {check.title}
                                   </div>
                                   {check.ready ? (
@@ -7190,7 +7190,7 @@ export function AdminView() {
                                     />
                                   )}
                                 </div>
-                                <p className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-zinc-600 font-serif">
+                                <p className="mt-2 line-clamp-3 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                   {check.summary}
                                 </p>
                               </div>
@@ -7220,15 +7220,15 @@ export function AdminView() {
                                   ? "border-green-200 bg-green-50"
                                   : check.status === "blocked"
                                     ? "border-red-200 bg-red-50"
-                                    : "border-zinc-200 bg-white"
+                                    : "border-white/10 bg-[#14171D]"
                               }`}
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div>
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                     {check.title}
                                   </div>
-                                  <span className="mt-1 inline-flex rounded-full border border-white/70 bg-white/70 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <span className="mt-1 inline-flex rounded-full border border-white/70 bg-[#14171D]/70 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                     {check.scope === "provider_key"
                                       ? "key setup"
                                       : "live ledger"}
@@ -7251,21 +7251,21 @@ export function AdminView() {
                                 >
                                   {check.status}
                                 </span>
-                                <span className="text-[10px] font-mono text-zinc-500">
+                                <span className="text-[10px] font-mono text-zinc-400">
                                   rows {check.count}
                                 </span>
                               </div>
-                              <p className="mt-2 text-xs leading-relaxed text-zinc-600 font-serif">
+                              <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-serif">
                                 {check.summary}
                               </p>
-                              <p className="mt-2 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                              <p className="mt-2 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                 {check.action}
                               </p>
                               {hasCheckEvidence && (
                                 <div className="mt-3 flex flex-wrap gap-1.5">
                                   {typeof check.evidence.latestTimestamp ===
                                     "number" && (
-                                    <span className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600">
+                                    <span className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400">
                                       latest{" "}
                                       {formatTime(
                                         check.evidence.latestTimestamp,
@@ -7305,7 +7305,7 @@ export function AdminView() {
                                   {check.evidence.sources.map((source) => (
                                     <span
                                       key={`proof-source-${check.id}-${source}`}
-                                      className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                      className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                                     >
                                       {source.replace(/_/g, " ")}
                                     </span>
@@ -7325,16 +7325,16 @@ export function AdminView() {
                       )}
                     </section>
 
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-cyan-600/80">
                             <Activity size={13} /> Background Job Ledger
                           </div>
-                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                             Local retry and dead-letter visibility
                           </h3>
-                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-500 font-serif">
+                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Memory workers now record interaction,
                             learning-book, and graph-concept jobs with queued,
                             running, completed, retry, and dead-letter states in
@@ -7360,12 +7360,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -7396,7 +7396,7 @@ export function AdminView() {
                           </div>
                         </>
                       ) : (
-                        <div className="mt-3 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-500">
+                        <div className="mt-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-zinc-400">
                           Run a chat turn, voice turn, document ingest, or graph
                           update to populate the local background memory queue.
                         </div>
@@ -7409,10 +7409,10 @@ export function AdminView() {
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-600/80">
                             <Sparkles size={13} /> Synthetic Wiring Rehearsal
                           </div>
-                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                             Exercise shared contracts without beta traffic
                           </h3>
-                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Runs a deterministic in-memory rehearsal through the
                             shared multi-PDF packet helpers, typed-chat tool
                             definitions, live-voice tool definitions, and the
@@ -7430,7 +7430,7 @@ export function AdminView() {
                               runLocalBrainWiringRehearsal(),
                             )
                           }
-                          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-white px-4 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50"
+                          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-blue-200 bg-[#14171D] px-4 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50"
                         >
                           <RefreshCw size={13} />
                           {brainWiringRehearsal
@@ -7441,7 +7441,7 @@ export function AdminView() {
 
                       {brainWiringRehearsal ? (
                         <div className="mt-4">
-                          <div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-white p-4 md:flex-row md:items-start md:justify-between">
+                          <div className="flex flex-col gap-3 rounded-2xl border border-blue-200 bg-[#14171D] p-4 md:flex-row md:items-start md:justify-between">
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
@@ -7449,25 +7449,25 @@ export function AdminView() {
                                 >
                                   synthetic {brainWiringRehearsal.status}
                                 </span>
-                                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                                   no durable rows
                                 </span>
-                                <span className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-500">
+                                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400">
                                   excluded from live coverage
                                 </span>
                               </div>
-                              <p className="mt-2 text-sm leading-relaxed text-zinc-700 font-serif">
+                              <p className="mt-2 text-sm leading-relaxed text-zinc-300 font-serif">
                                 {brainWiringRehearsal.summary}
                               </p>
                             </div>
                             <div className="shrink-0 text-right">
-                              <div className="text-2xl font-semibold tabular-nums text-zinc-900">
+                              <div className="text-2xl font-semibold tabular-nums text-zinc-100">
                                 {brainWiringRehearsal.coverage.coveragePercent}%
                               </div>
-                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 synthetic contract
                               </div>
-                              <div className="mt-1 text-[10px] font-mono text-zinc-500">
+                              <div className="mt-1 text-[10px] font-mono text-zinc-400">
                                 live remains{" "}
                                 {
                                   betaDiagnosticsSnapshot.brainFlow
@@ -7480,13 +7480,13 @@ export function AdminView() {
 
                           {brainWiringRehearsalGap && (
                             <div className="mt-3 grid gap-3 lg:grid-cols-[0.95fr_1.05fr]">
-                              <div className="rounded-2xl border border-blue-200 bg-white p-4">
+                              <div className="rounded-2xl border border-blue-200 bg-[#14171D] p-4">
                                 <div className="flex items-center justify-between gap-3">
                                   <div>
                                     <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
                                       Live beta gap
                                     </div>
-                                    <p className="mt-1 text-sm leading-relaxed text-zinc-600 font-serif">
+                                    <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                                       {brainWiringRehearsalGap.summary}
                                     </p>
                                   </div>
@@ -7499,31 +7499,31 @@ export function AdminView() {
                                   </span>
                                 </div>
                                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                       Synthetic
                                     </div>
-                                    <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                                    <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                                       {
                                         brainWiringRehearsalGap.syntheticCoveragePercent
                                       }
                                       %
                                     </div>
-                                    <div className="text-[10px] font-mono text-zinc-500">
+                                    <div className="text-[10px] font-mono text-zinc-400">
                                       {brainWiringRehearsalGap.syntheticStatus}
                                     </div>
                                   </div>
-                                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                       Live ledger
                                     </div>
-                                    <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-900">
+                                    <div className="mt-1 text-lg font-semibold tabular-nums text-zinc-100">
                                       {
                                         brainWiringRehearsalGap.liveCoveragePercent
                                       }
                                       %
                                     </div>
-                                    <div className="text-[10px] font-mono text-zinc-500">
+                                    <div className="text-[10px] font-mono text-zinc-400">
                                       {brainWiringRehearsalGap.liveStatus}
                                     </div>
                                   </div>
@@ -7545,16 +7545,16 @@ export function AdminView() {
                                 )}
                               </div>
 
-                              <div className="rounded-2xl border border-blue-200 bg-white p-4">
+                              <div className="rounded-2xl border border-blue-200 bg-[#14171D] p-4">
                                 <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
                                   Rehearsed contracts
                                 </div>
                                 <div className="mt-3 grid gap-2 md:grid-cols-2">
-                                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                       Request IDs
                                     </div>
-                                    <div className="mt-1 space-y-1 text-[10px] font-mono text-zinc-700">
+                                    <div className="mt-1 space-y-1 text-[10px] font-mono text-zinc-300">
                                       <div className="truncate">
                                         chat{" "}
                                         {brainWiringRehearsal.chatRequestId}
@@ -7565,8 +7565,8 @@ export function AdminView() {
                                       </div>
                                     </div>
                                   </div>
-                                  <div className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                  <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                       Context PDFs
                                     </div>
                                     <div className="mt-1 flex flex-wrap gap-1">
@@ -7574,7 +7574,7 @@ export function AdminView() {
                                         (documentId) => (
                                           <span
                                             key={documentId}
-                                            className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[10px] font-mono text-zinc-600"
+                                            className="rounded-full border border-white/10 bg-[#14171D] px-2 py-0.5 text-[10px] font-mono text-zinc-400"
                                           >
                                             {documentId}
                                           </span>
@@ -7597,9 +7597,9 @@ export function AdminView() {
                                   ].map(({ label, tools }) => (
                                     <div
                                       key={label}
-                                      className="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                      className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2"
                                     >
-                                      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                         {label}
                                       </div>
                                       <div className="mt-1 flex flex-wrap gap-1">
@@ -7615,8 +7615,8 @@ export function AdminView() {
                                     </div>
                                   ))}
                                 </div>
-                                <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                     Shared schema checks
                                   </div>
                                   <div className="mt-2 flex flex-wrap gap-1">
@@ -7637,8 +7637,8 @@ export function AdminView() {
                                     )}
                                   </div>
                                 </div>
-                                <div className="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                                <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-zinc-400">
                                     Voice-only context
                                   </div>
                                   <div className="mt-2 flex flex-wrap gap-1">
@@ -7658,7 +7658,7 @@ export function AdminView() {
                                       ),
                                     )}
                                   </div>
-                                  <p className="mt-2 text-[11px] leading-relaxed text-zinc-500 font-serif">
+                                  <p className="mt-2 text-[11px] leading-relaxed text-zinc-400 font-serif">
                                     Typed chat is checked through pre-stream
                                     context injection; live voice also keeps
                                     this local tool so it can inspect study
@@ -7680,7 +7680,7 @@ export function AdminView() {
                                 }`}
                               >
                                 <div className="flex items-center justify-between gap-2">
-                                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-600">
+                                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                     {check.title}
                                   </div>
                                   {check.ready ? (
@@ -7695,7 +7695,7 @@ export function AdminView() {
                                     />
                                   )}
                                 </div>
-                                <p className="mt-2 text-xs leading-relaxed text-zinc-600 font-serif">
+                                <p className="mt-2 text-xs leading-relaxed text-zinc-400 font-serif">
                                   {check.detail}
                                 </p>
                               </article>
@@ -7703,7 +7703,7 @@ export function AdminView() {
                           </div>
                         </div>
                       ) : (
-                        <div className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-white/80 p-4 text-sm leading-relaxed text-zinc-600 font-serif">
+                        <div className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-[#14171D]/80 p-4 text-sm leading-relaxed text-zinc-400 font-serif">
                           The live readiness meter remains authoritative. Run
                           this only to rehearse local wiring before deliberate
                           provider-key chat and voice turns.
@@ -7712,20 +7712,20 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Readiness gates
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               These are local beta review gates, not launch
                               certification. `Watch` means inspect before a
                               broader beta; `blocked` means fix the underlying
                               ledger failures first.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {new Date(
                               betaDiagnosticsSnapshot.generatedAt,
                             ).toLocaleTimeString([], {
@@ -7741,11 +7741,11 @@ export function AdminView() {
                           {betaDiagnosticsSnapshot.items.map((item, index) => (
                             <article
                               key={item.id}
-                              className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                              className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                             >
                               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                 <div className="flex min-w-0 gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-blue-600">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#14171D] text-blue-600">
                                     {item.status === "blocked" ? (
                                       <AlertTriangle size={17} />
                                     ) : item.status === "deferred" ? (
@@ -7756,7 +7756,7 @@ export function AdminView() {
                                   </div>
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                      <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                         {item.title}
                                       </h4>
                                       <span
@@ -7765,11 +7765,11 @@ export function AdminView() {
                                         {item.status.replace(/_/g, " ")}
                                       </span>
                                     </div>
-                                    <p className="mt-1 text-sm leading-relaxed text-zinc-600 font-serif">
+                                    <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                                       {item.summary}
                                     </p>
                                     {item.action && (
-                                      <p className="mt-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs leading-relaxed text-zinc-500 font-serif">
+                                      <p className="mt-2 rounded-xl border border-white/10 bg-[#14171D] px-3 py-2 text-xs leading-relaxed text-zinc-400 font-serif">
                                         {item.action}
                                       </p>
                                     )}
@@ -7777,10 +7777,10 @@ export function AdminView() {
                                 </div>
                                 {item.count !== undefined && (
                                   <div className="shrink-0 text-right">
-                                    <div className="text-lg font-semibold tabular-nums text-zinc-900">
+                                    <div className="text-lg font-semibold tabular-nums text-zinc-100">
                                       {item.count}
                                     </div>
-                                    <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-zinc-500">
+                                    <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-zinc-400">
                                       rows
                                     </div>
                                   </div>
@@ -7792,11 +7792,11 @@ export function AdminView() {
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Export contents
                           </h3>
-                          <p className="mt-1 text-sm leading-relaxed text-zinc-500 font-serif">
+                          <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                             The JSON export is capped to the local rows already
                             loaded in Admin. It is meant for beta review and
                             debugging, not for backup or cloud migration.
@@ -7826,12 +7826,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                               >
-                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </span>
-                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-900">
+                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-100">
                                   {value}
                                 </span>
                               </div>
@@ -7839,8 +7839,8 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Runtime context
                           </h3>
                           <div className="mt-4 space-y-2">
@@ -7863,12 +7863,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                               >
-                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </span>
-                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-900">
+                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-100">
                                   {value}
                                 </span>
                               </div>
@@ -7876,15 +7876,15 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Out of scope
                           </h3>
-                          <div className="mt-4 grid gap-2 text-sm text-zinc-600 font-serif">
+                          <div className="mt-4 grid gap-2 text-sm text-zinc-400 font-serif">
                             {betaDiagnosticsSnapshot.outOfScope.map((item) => (
                               <div
                                 key={item}
-                                className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                                className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                               >
                                 {item}
                               </div>
@@ -7896,16 +7896,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "retrieval" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <Search size={13} /> Semantic Memory Retrieval
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Retrieval context ledger
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Local records for semantic memory retrieval: query
                             summaries, active-book filters, selected concepts,
                             selected interactions, context size, latency, and
@@ -7913,11 +7913,11 @@ export function AdminView() {
                             context before a model request.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {retrievalEventCount}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Durable retrievals
                           </div>
                         </div>
@@ -7939,12 +7939,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -7953,25 +7953,25 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Recent retrievals
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Newest first. These rows explain which memory
                               candidates were available and which ones were
                               injected into Tutor's request context.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(latestRetrievalEvent?.timestamp)}
                           </div>
                         </div>
 
                         {retrievalEvents.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No retrieval records yet. Send a chat message and
                             Tutor will persist the memory context selection
                             before the model request starts.
@@ -7981,16 +7981,16 @@ export function AdminView() {
                             {retrievalEvents.map((event, index) => (
                               <article
                                 key={event.id}
-                                className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 16 ? "admin-animated-item" : ""}`}
+                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 16 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                                   <div className="flex min-w-0 gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-white text-blue-600">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-[#14171D] text-blue-600">
                                       <Search size={17} />
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                        <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                           {event.querySummary}
                                         </h4>
                                         <span
@@ -7999,11 +7999,11 @@ export function AdminView() {
                                           {event.status}
                                         </span>
                                       </div>
-                                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-600 font-serif">
+                                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-400 font-serif">
                                         {event.error ||
                                           `${event.selectedConceptIds.length} concepts and ${event.selectedInteractionIds.length} interactions selected from ${event.candidateConceptCount} concepts and ${event.candidateInteractionCount} interactions.`}
                                       </p>
-                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                         <span>{event.source}</span>
                                         {event.activeBookId && (
                                           <span className="max-w-[10rem] truncate">
@@ -8046,7 +8046,7 @@ export function AdminView() {
                                             (name) => (
                                               <span
                                                 key={`${event.id}-${name}`}
-                                                className="rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700"
+                                                className="rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-semibold text-zinc-300"
                                               >
                                                 {name}
                                               </span>
@@ -8056,7 +8056,7 @@ export function AdminView() {
                                       )}
                                     </div>
                                   </div>
-                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                     <div>{formatTime(event.timestamp)}</div>
                                     {event.pageNumber !== undefined && (
                                       <div className="mt-1">
@@ -8066,14 +8066,14 @@ export function AdminView() {
                                   </div>
                                 </div>
                                 <details className="group mt-3">
-                                  <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-800">
+                                  <summary className="flex cursor-pointer select-none items-center gap-1.5 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200">
                                     <ChevronRight
                                       size={14}
                                       className="transition-transform group-open:rotate-90"
                                     />
                                     Selected ids and metadata
                                   </summary>
-                                  <pre className="mt-3 overflow-x-auto rounded-xl border border-zinc-200 bg-white p-3 text-[11px] text-zinc-600 shadow-inner">
+                                  <pre className="mt-3 overflow-x-auto rounded-xl border border-white/10 bg-[#14171D] p-3 text-[11px] text-zinc-400 shadow-inner">
                                     {JSON.stringify(
                                       {
                                         selectedConceptIds:
@@ -8096,8 +8096,8 @@ export function AdminView() {
                       </div>
 
                       <div className="flex flex-col gap-4">
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Retrieval meters
                           </h3>
                           <div className="mt-4 space-y-2">
@@ -8121,12 +8121,12 @@ export function AdminView() {
                             ].map(([label, value]) => (
                               <div
                                 key={label}
-                                className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                                className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                               >
-                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                   {label}
                                 </span>
-                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-900">
+                                <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-100">
                                   {value}
                                 </span>
                               </div>
@@ -8134,20 +8134,20 @@ export function AdminView() {
                           </div>
                         </section>
 
-                        <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                        <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Boundary
                           </h3>
-                          <div className="mt-4 grid gap-2 text-sm text-zinc-600 font-serif">
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                          <div className="mt-4 grid gap-2 text-sm text-zinc-400 font-serif">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Retrieval Events describe local semantic memory
                               context selection, not web search results.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               Model-run rows still show how much memory context
                               was sent to the provider.
                             </div>
-                            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                               AWS/cloud synchronization remains deferred until
                               beta testing.
                             </div>
@@ -8158,16 +8158,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "evidence" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-violet-500/70">
                             <BrainCircuit size={13} /> Local Learner Evidence
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Evidence and mastery audit trail
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Durable local records for model-summary evidence,
                             flashcard reviews, evaluated learner answers, and
                             BKT mastery changes. Model summaries can explain why
@@ -8175,11 +8175,11 @@ export function AdminView() {
                             should create mastery deltas.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {verifiedEvidenceCount}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Verified events shown
                           </div>
                         </div>
@@ -8198,12 +8198,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                            <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -8219,11 +8219,11 @@ export function AdminView() {
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
                               <ShieldCheck size={15} />
                               Mastery ledger integrity
                             </div>
-                            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-600 font-serif">
+                            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-400 font-serif">
                               {masteryIntegrity.summary}
                             </p>
                             {masteryIntegrity.issues.length > 0 && (
@@ -8244,24 +8244,24 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[1fr_1fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Mastery deltas
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Changes created by validated flashcard or
                               evaluated-answer BKT evidence.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(latestMasteryDelta?.timestamp)}
                           </div>
                         </div>
 
                         {masteryDeltas.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No mastery deltas yet. Complete a flashcard review
                             or evaluated answer tied to a concept to create the
                             first audited BKT update.
@@ -8271,12 +8271,12 @@ export function AdminView() {
                             {masteryDeltas.map((delta, index) => (
                               <article
                                 key={delta.id}
-                                className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 12 ? "admin-animated-item" : ""}`}
+                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 12 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="flex items-start justify-between gap-4">
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                      <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                         {delta.conceptId}
                                       </h4>
                                       <span
@@ -8289,10 +8289,10 @@ export function AdminView() {
                                         {delta.correct ? "correct" : "review"}
                                       </span>
                                     </div>
-                                    <p className="mt-1 text-sm leading-relaxed text-zinc-600 font-serif">
+                                    <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                                       {delta.reason}
                                     </p>
-                                    <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                    <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                       <span>{delta.evidenceType}</span>
                                       <span>
                                         mastery{" "}
@@ -8308,7 +8308,7 @@ export function AdminView() {
                                       </span>
                                     </div>
                                   </div>
-                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                     {formatTime(delta.timestamp)}
                                   </div>
                                 </div>
@@ -8318,25 +8318,25 @@ export function AdminView() {
                         )}
                       </div>
 
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <div>
-                            <h3 className="text-xl font-serif font-medium text-zinc-900">
+                            <h3 className="text-xl font-serif font-medium text-zinc-100">
                               Evidence events
                             </h3>
-                            <p className="mt-1 text-sm text-zinc-500 font-serif">
+                            <p className="mt-1 text-sm text-zinc-400 font-serif">
                               Model summaries are retained as evidence, while
                               evaluated recall attempts carry the rubric and
                               score metadata needed for mastery.
                             </p>
                           </div>
-                          <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                          <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                             {formatTime(latestEvidence?.timestamp)}
                           </div>
                         </div>
 
                         {evidenceEvents.length === 0 ? (
-                          <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                          <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                             No durable evidence records yet. Chat graph updates,
                             learning-book updates, flashcard reviews, and
                             evaluated answers will appear here.
@@ -8346,12 +8346,12 @@ export function AdminView() {
                             {evidenceEvents.map((event, index) => (
                               <article
                                 key={event.id}
-                                className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 12 ? "admin-animated-item" : ""}`}
+                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 12 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="flex items-start justify-between gap-4">
                                   <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                      <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                         {event.conceptId ||
                                           event.bookId ||
                                           event.source}
@@ -8360,7 +8360,7 @@ export function AdminView() {
                                         className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
                                           event.verified
                                             ? "border-green-200 bg-green-50 text-green-700"
-                                            : "border-zinc-300 bg-zinc-100 text-zinc-600"
+                                            : "border-white/15 bg-white/[0.06] text-zinc-400"
                                         }`}
                                       >
                                         {event.verified
@@ -8368,10 +8368,10 @@ export function AdminView() {
                                           : "not mastery evidence"}
                                       </span>
                                     </div>
-                                    <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                                    <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-zinc-400 font-serif">
                                       {event.summary}
                                     </p>
-                                    <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                    <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                       <span>{event.evidenceType}</span>
                                       <span>{event.source}</span>
                                       {event.confidence !== undefined && (
@@ -8389,7 +8389,7 @@ export function AdminView() {
                                       )}
                                     </div>
                                   </div>
-                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                  <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                     {formatTime(event.timestamp)}
                                   </div>
                                 </div>
@@ -8400,29 +8400,29 @@ export function AdminView() {
                       </div>
                     </section>
 
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Misconception candidates
                           </h3>
-                          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-500 font-serif">
+                          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-zinc-400 font-serif">
                             Incorrect evaluated answers can create or
                             consolidate source-linked candidates for Socratic
                             follow-up. Candidates are auditable learner-state
                             hypotheses; they never mutate mastery by themselves.
                           </p>
                         </div>
-                        <div className="flex shrink-0 flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                        <div className="flex shrink-0 flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                           <span className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-orange-700">
                             {activeMisconceptions.length} active
                           </span>
-                          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1">
+                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
                             {sortedMisconceptions.length -
                               activeMisconceptions.length}{" "}
                             resolved
                           </span>
-                          <span className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1">
+                          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
                             {formatTime(
                               latestMisconception?.updatedAt ||
                                 latestMisconception?.createdAt,
@@ -8432,7 +8432,7 @@ export function AdminView() {
                       </div>
 
                       {sortedMisconceptions.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                           No misconception candidates yet. A validated incorrect
                           answer tied to a real concept will create the first
                           source-linked candidate here.
@@ -8442,12 +8442,12 @@ export function AdminView() {
                           {sortedMisconceptions.map((misconception, index) => (
                             <article
                               key={misconception.id}
-                              className={`rounded-2xl border border-zinc-200 bg-zinc-50 p-4 ${index < 12 ? "admin-animated-item" : ""}`}
+                              className={`rounded-2xl border border-white/10 bg-white/[0.04] p-4 ${index < 12 ? "admin-animated-item" : ""}`}
                             >
                               <div className="flex items-start justify-between gap-4">
                                 <div className="min-w-0">
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                    <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                       {misconception.concept_id}
                                     </h4>
                                     <span
@@ -8464,10 +8464,10 @@ export function AdminView() {
                                           : "active"}
                                     </span>
                                   </div>
-                                  <p className="mt-2 text-sm leading-relaxed text-zinc-600 font-serif">
+                                  <p className="mt-2 text-sm leading-relaxed text-zinc-400 font-serif">
                                     {misconception.description}
                                   </p>
-                                  <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                  <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                     <span>
                                       evidence {misconception.evidence.length}
                                     </span>
@@ -8508,7 +8508,7 @@ export function AdminView() {
                                     )}
                                   </div>
                                 </div>
-                                <div className="shrink-0 text-right text-[10px] font-mono text-zinc-500">
+                                <div className="shrink-0 text-right text-[10px] font-mono text-zinc-400">
                                   {formatTime(
                                     misconception.updatedAt ||
                                       misconception.createdAt,
@@ -8521,25 +8521,25 @@ export function AdminView() {
                       )}
                     </section>
 
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-4 flex items-center justify-between gap-3">
                         <div>
-                          <h3 className="text-xl font-serif font-medium text-zinc-900">
+                          <h3 className="text-xl font-serif font-medium text-zinc-100">
                             Tool jobs
                           </h3>
-                          <p className="mt-1 text-sm text-zinc-500 font-serif">
+                          <p className="mt-1 text-sm text-zinc-400 font-serif">
                             Durable local rows from chat-stream tool execution,
                             plus the schema for future retries and dead-letter
                             review.
                           </p>
                         </div>
-                        <div className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-[11px] font-mono text-zinc-500">
+                        <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-mono text-zinc-400">
                           {formatTime(latestToolJob?.timestamp)}
                         </div>
                       </div>
 
                       {toolJobs.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-6 text-center text-sm text-zinc-500">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-6 text-center text-sm text-zinc-400">
                           No durable tool jobs yet. Ask the tutor to use web
                           search, inspect a page, update the graph, or generate
                           flashcards and the chat stream will persist tool
@@ -8550,20 +8550,20 @@ export function AdminView() {
                           {toolJobs.map((job) => (
                             <article
                               key={job.id}
-                              className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4"
+                              className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
-                                  <h4 className="m-0 truncate text-sm font-semibold text-zinc-900">
+                                  <h4 className="m-0 truncate text-sm font-semibold text-zinc-100">
                                     {job.toolName}
                                   </h4>
-                                  <p className="mt-1 line-clamp-2 text-sm text-zinc-600 font-serif">
+                                  <p className="mt-1 line-clamp-2 text-sm text-zinc-400 font-serif">
                                     {job.outputSummary ||
                                       job.inputSummary ||
                                       job.error ||
                                       "No summary recorded."}
                                   </p>
-                                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-500">
+                                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono text-zinc-400">
                                     {job.requestId && (
                                       <span className="max-w-[9rem] truncate">
                                         {job.requestId}
@@ -8594,17 +8594,17 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "tuning" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                             <SlidersHorizontal size={13} /> Local Runtime
                             Controls
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             Tune the learner-brain runtime
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             These controls are stored locally and sent with chat
                             requests. They tune source-vs-web behavior, model
                             tool loops, memory context size, and Admin polling
@@ -8615,7 +8615,7 @@ export function AdminView() {
                           type="button"
                           onClick={resetBrainRuntimeSettings}
                           disabled={runtimeSettingsAreDefault}
-                          className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-600 transition-colors hover:bg-white hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-45"
+                          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-zinc-400 transition-colors hover:bg-[#1b1f27] hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-45"
                         >
                           <RotateCcw size={13} />
                           Reset defaults
@@ -8663,12 +8663,12 @@ export function AdminView() {
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3"
+                            className="rounded-2xl border border-white/10 bg-white/[0.04] p-3"
                           >
-                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                            <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                               {label}
                             </div>
-                            <div className="mt-2 truncate text-lg font-semibold capitalize tabular-nums text-zinc-900">
+                            <div className="mt-2 truncate text-lg font-semibold capitalize tabular-nums text-zinc-100">
                               {value}
                             </div>
                           </div>
@@ -8676,15 +8676,15 @@ export function AdminView() {
                       </div>
                     </section>
 
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5">
                         <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-blue-500/70">
                           <BrainCircuit size={13} /> Learner-Brain Logic
                         </div>
-                        <h3 className="mt-2 text-xl font-serif font-medium text-zinc-900">
+                        <h3 className="mt-2 text-xl font-serif font-medium text-zinc-100">
                           Evidence and BKT controls
                         </h3>
-                        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-500 font-serif">
+                        <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                           These local settings travel with chat tool metadata
                           and guide when the tutor may stage evaluated-answer
                           evidence. The current mastery engine still commits
@@ -8693,8 +8693,8 @@ export function AdminView() {
                       </div>
 
                       <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
-                        <div className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
-                          <h4 className="m-0 text-sm font-semibold text-zinc-900">
+                        <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
+                          <h4 className="m-0 text-sm font-semibold text-zinc-100">
                             Mastery evidence policy
                           </h4>
                           <div className="mt-3 grid gap-3">
@@ -8712,13 +8712,13 @@ export function AdminView() {
                                   brainRuntimeSettings.masteryEvidencePolicy ===
                                   option.id
                                     ? "border-blue-200 bg-blue-50 text-blue-900 shadow-sm"
-                                    : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50"
+                                    : "border-white/10 bg-[#14171D] text-zinc-300 hover:bg-white/[0.06]"
                                 }`}
                               >
                                 <div className="text-sm font-semibold">
                                   {option.label}
                                 </div>
-                                <div className="mt-1 text-xs leading-relaxed text-zinc-500 font-serif">
+                                <div className="mt-1 text-xs leading-relaxed text-zinc-400 font-serif">
                                   {option.description}
                                 </div>
                               </button>
@@ -8726,8 +8726,8 @@ export function AdminView() {
                           </div>
                         </div>
 
-                        <div className="rounded-[24px] border border-zinc-200 bg-zinc-50 p-4">
-                          <h4 className="m-0 text-sm font-semibold text-zinc-900">
+                        <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
+                          <h4 className="m-0 text-sm font-semibold text-zinc-100">
                             BKT prior knobs
                           </h4>
                           <div className="mt-4 grid gap-4 lg:grid-cols-3">
@@ -8766,13 +8766,13 @@ export function AdminView() {
                               return (
                                 <label
                                   key={key}
-                                  className="block rounded-2xl border border-zinc-200 bg-white p-4"
+                                  className="block rounded-2xl border border-white/10 bg-[#14171D] p-4"
                                 >
                                   <div className="flex items-center justify-between gap-3">
-                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                                    <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">
                                       {label}
                                     </span>
-                                    <span className="text-sm font-semibold tabular-nums text-zinc-900">
+                                    <span className="text-sm font-semibold tabular-nums text-zinc-100">
                                       {brainRuntimeSettings[settingKey].toFixed(
                                         2,
                                       )}
@@ -8789,7 +8789,7 @@ export function AdminView() {
                                     onChange={updateProbability}
                                     className="mt-3 w-full accent-blue-600"
                                   />
-                                  <div className="mt-2 text-xs text-zinc-500 font-serif">
+                                  <div className="mt-2 text-xs text-zinc-400 font-serif">
                                     {help}
                                   </div>
                                 </label>
@@ -8801,11 +8801,11 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-xl font-serif font-medium text-zinc-900">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-xl font-serif font-medium text-zinc-100">
                           Web and source policy
                         </h3>
-                        <p className="mt-1 text-sm leading-relaxed text-zinc-500 font-serif">
+                        <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                           Controls when Tutor is allowed to leave the local
                           reading context for live web retrieval.
                         </p>
@@ -8824,13 +8824,13 @@ export function AdminView() {
                                 brainRuntimeSettings.webSearchPolicy ===
                                 option.id
                                   ? "border-blue-200 bg-blue-50 text-blue-900 shadow-sm"
-                                  : "border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-white"
+                                  : "border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-[#1b1f27]"
                               }`}
                             >
                               <div className="text-sm font-semibold">
                                 {option.label}
                               </div>
-                              <div className="mt-1 text-xs leading-relaxed text-zinc-500 font-serif">
+                              <div className="mt-1 text-xs leading-relaxed text-zinc-400 font-serif">
                                 {option.description}
                               </div>
                             </button>
@@ -8838,23 +8838,23 @@ export function AdminView() {
                         </div>
                       </div>
 
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-xl font-serif font-medium text-zinc-900">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-xl font-serif font-medium text-zinc-100">
                           Runtime budgets
                         </h3>
-                        <p className="mt-1 text-sm leading-relaxed text-zinc-500 font-serif">
+                        <p className="mt-1 text-sm leading-relaxed text-zinc-400 font-serif">
                           Bounded local budgets keep tool calls and retrieved
                           concepts inspectable while preserving the tutor's
                           default behavior.
                         </p>
 
                         <div className="mt-5 space-y-5">
-                          <label className="block rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                          <label className="block rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 Tool iteration limit
                               </span>
-                              <span className="text-sm font-semibold tabular-nums text-zinc-900">
+                              <span className="text-sm font-semibold tabular-nums text-zinc-100">
                                 {brainRuntimeSettings.toolIterationLimit}
                               </span>
                             </div>
@@ -8881,18 +8881,18 @@ export function AdminView() {
                               }
                               className="mt-3 w-full accent-blue-600"
                             />
-                            <div className="mt-2 text-xs text-zinc-500 font-serif">
+                            <div className="mt-2 text-xs text-zinc-400 font-serif">
                               Sent to the server as the maximum model/tool
                               follow-up loop for a chat request.
                             </div>
                           </label>
 
-                          <label className="block rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                          <label className="block rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 Memory concept limit
                               </span>
-                              <span className="text-sm font-semibold tabular-nums text-zinc-900">
+                              <span className="text-sm font-semibold tabular-nums text-zinc-100">
                                 {brainRuntimeSettings.memoryConceptLimit}
                               </span>
                             </div>
@@ -8919,18 +8919,18 @@ export function AdminView() {
                               }
                               className="mt-3 w-full accent-blue-600"
                             />
-                            <div className="mt-2 text-xs text-zinc-500 font-serif">
+                            <div className="mt-2 text-xs text-zinc-400 font-serif">
                               Controls how many active-book concepts ChatPanel
                               includes in local memory context.
                             </div>
                           </label>
 
-                          <label className="block rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                          <label className="block rounded-2xl border border-white/10 bg-white/[0.04] p-4">
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <span className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 Activity refresh
                               </span>
-                              <span className="text-sm font-semibold tabular-nums text-zinc-900">
+                              <span className="text-sm font-semibold tabular-nums text-zinc-100">
                                 {Math.round(
                                   brainRuntimeSettings.activityRefreshMs / 1000,
                                 )}
@@ -8960,7 +8960,7 @@ export function AdminView() {
                               }
                               className="mt-3 w-full accent-blue-600"
                             />
-                            <div className="mt-2 text-xs text-zinc-500 font-serif">
+                            <div className="mt-2 text-xs text-zinc-400 font-serif">
                               Controls the System Activity polling interval in
                               this Admin session.
                             </div>
@@ -8970,8 +8970,8 @@ export function AdminView() {
                     </section>
 
                     <section className="grid gap-4 lg:grid-cols-2">
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-xl font-serif font-medium text-zinc-900">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-xl font-serif font-medium text-zinc-100">
                           Model behavior context
                         </h3>
                         <div className="mt-4 space-y-2">
@@ -9000,12 +9000,12 @@ export function AdminView() {
                           ].map(([label, value]) => (
                             <div
                               key={label}
-                              className="flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-2"
+                              className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
                             >
-                              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                                 {label}
                               </span>
-                              <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-900">
+                              <span className="min-w-0 truncate text-right text-xs font-semibold text-zinc-100">
                                 {value}
                               </span>
                             </div>
@@ -9013,21 +9013,21 @@ export function AdminView() {
                         </div>
                       </div>
 
-                      <div className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-xl font-serif font-medium text-zinc-900">
+                      <div className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
+                        <h3 className="text-xl font-serif font-medium text-zinc-100">
                           Local-only contract
                         </h3>
-                        <div className="mt-4 grid gap-2 text-sm text-zinc-600 font-serif">
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                        <div className="mt-4 grid gap-2 text-sm text-zinc-400 font-serif">
+                          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                             Runtime settings are persisted in the browser and
                             included in `/api/chat` request metadata.
                           </div>
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                             The server normalizes bounds before applying tool
                             iteration, web-search policy, evidence policy, and
                             BKT prior controls.
                           </div>
-                          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+                          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
                             AWS/cloud rollout remains deferred; this is a local
                             beta tuning surface.
                           </div>
@@ -9037,16 +9037,16 @@ export function AdminView() {
                   </div>
                 ) : activeTab === "traces" ? (
                   <div className="flex flex-col gap-8 font-sans">
-                    <section className="rounded-[28px] border border-zinc-200 bg-white p-5 shadow-sm">
+                    <section className="rounded-[28px] border border-white/10 bg-[#14171D] p-5 shadow-sm">
                       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-orange-500/70">
                             <Sparkles size={13} /> Trace Evidence
                           </div>
-                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-900">
+                          <h2 className="mt-2 text-2xl font-serif font-medium text-zinc-100">
                             {learnerName}'s DeepSeek Trace Ledger
                           </h2>
-                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 font-serif">
+                          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400 font-serif">
                             This ledger shows persisted learning-book updates,
                             concept maps, and saved trace explanations. It does
                             not expose hidden chain-of-thought; each item
@@ -9054,49 +9054,49 @@ export function AdminView() {
                             action completes.
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-right">
-                          <div className="text-2xl font-semibold text-zinc-900">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-right">
+                          <div className="text-2xl font-semibold text-zinc-100">
                             {learningBooks.length}
                           </div>
-                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                             Books mapped
                           </div>
                         </div>
                       </div>
 
                       <div className="mb-5 grid gap-3 md:grid-cols-4">
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Trace Events
                           </div>
-                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                             {traceCount}
                           </div>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Mapped Concepts
                           </div>
-                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                             {mappedConceptCount}
                           </div>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Books With Graphs
                           </div>
-                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-900">
+                          <div className="mt-2 text-2xl font-semibold tabular-nums text-zinc-100">
                             {tracedBookCount}
                           </div>
                         </div>
-                        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-500">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-400">
                             Latest Action
                           </div>
-                          <div className="mt-2 truncate font-mono text-sm font-semibold text-zinc-900">
+                          <div className="mt-2 truncate font-mono text-sm font-semibold text-zinc-100">
                             {latestTrace?.action || "none"}
                           </div>
-                          <div className="mt-1 font-mono text-[10px] text-zinc-500">
+                          <div className="mt-1 font-mono text-[10px] text-zinc-400">
                             {latestTrace?.timestamp
                               ? new Date(
                                   latestTrace.timestamp,
@@ -9112,7 +9112,7 @@ export function AdminView() {
                       </div>
 
                       {learningBooks.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-8 text-center text-sm text-zinc-500">
+                        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-8 text-center text-sm text-zinc-400">
                           No learning books yet. Complete a chat and the
                           learning-book agent will map it here.
                         </div>
@@ -9133,32 +9133,32 @@ export function AdminView() {
                             return (
                               <article
                                 key={book.id}
-                                className={`relative overflow-hidden rounded-[24px] border border-zinc-200 bg-white p-4 shadow-sm ${index < 12 ? "admin-animated-item" : ""}`}
+                                className={`relative overflow-hidden rounded-[24px] border border-white/10 bg-[#14171D] p-4 shadow-sm ${index < 12 ? "admin-animated-item" : ""}`}
                               >
                                 <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_10%_0%,rgba(255,110,0,0.04),transparent_34%),radial-gradient(circle_at_100%_100%,rgba(59,130,246,0.03),transparent_38%)]" />
                                 <div className="relative">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="flex items-start gap-3">
-                                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-orange-500">
+                                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-orange-500">
                                         <BookOpen size={18} />
                                       </div>
                                       <div>
-                                        <h3 className="text-lg font-semibold leading-tight text-zinc-900">
+                                        <h3 className="text-lg font-semibold leading-tight text-zinc-100">
                                           {book.title}
                                         </h3>
-                                        <div className="mt-1 text-[11px] font-mono uppercase tracking-[0.14em] text-zinc-500">
+                                        <div className="mt-1 text-[11px] font-mono uppercase tracking-[0.14em] text-zinc-400">
                                           {book.conversationCount} chats ·{" "}
                                           {book.agentModel ||
                                             "deepseek/deepseek-v4-flash"}
                                         </div>
                                       </div>
                                     </div>
-                                    <div className="rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[11px] font-semibold text-zinc-700">
+                                    <div className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold text-zinc-300">
                                       {Math.round(avgConfidence * 100)}%
                                     </div>
                                   </div>
 
-                                  <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-zinc-600 font-serif">
+                                  <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-zinc-400 font-serif">
                                     {book.overview ||
                                       book.knowledgeSummary ||
                                       book.summary ||
@@ -9166,8 +9166,8 @@ export function AdminView() {
                                   </p>
 
                                   {(book.chapters || []).length > 0 && (
-                                    <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
-                                      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+                                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+                                      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-400">
                                         Chapters
                                       </div>
                                       <div className="space-y-2">
@@ -9176,17 +9176,17 @@ export function AdminView() {
                                           .map((chapter, chapterIndex) => (
                                             <div
                                               key={chapter.id}
-                                              className="flex items-start gap-2 text-xs leading-relaxed text-zinc-600"
+                                              className="flex items-start gap-2 text-xs leading-relaxed text-zinc-400"
                                             >
-                                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white border border-zinc-200 text-[10px] text-orange-500 font-medium">
+                                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#14171D] border border-white/10 text-[10px] text-orange-500 font-medium">
                                                 {chapterIndex + 1}
                                               </span>
                                               <span>
-                                                <span className="text-zinc-800 font-medium">
+                                                <span className="text-zinc-200 font-medium">
                                                   {chapter.title}
                                                 </span>
                                                 {chapter.summary && (
-                                                  <span className="text-zinc-500">
+                                                  <span className="text-zinc-400">
                                                     {" "}
                                                     · {chapter.summary}
                                                   </span>
@@ -9200,14 +9200,14 @@ export function AdminView() {
 
                                   <div className="mt-4 flex flex-wrap gap-2">
                                     {concepts.length === 0 ? (
-                                      <span className="text-xs text-zinc-500 font-serif">
+                                      <span className="text-xs text-zinc-400 font-serif">
                                         No concepts mapped yet.
                                       </span>
                                     ) : (
                                       concepts.map((concept) => (
                                         <span
                                           key={concept.id}
-                                          className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-700 shadow-sm"
+                                          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#14171D] px-2.5 py-1 text-[11px] font-medium text-zinc-300 shadow-sm"
                                         >
                                           <Network
                                             size={11}
@@ -9224,7 +9224,7 @@ export function AdminView() {
                                       concept.childConcepts.length > 0 ||
                                       concept.parentConcepts.length > 0,
                                   ) && (
-                                    <div className="mt-4 space-y-2 border-t border-zinc-200 pt-3">
+                                    <div className="mt-4 space-y-2 border-t border-white/10 pt-3">
                                       {concepts
                                         .filter(
                                           (concept) =>
@@ -9235,9 +9235,9 @@ export function AdminView() {
                                         .map((concept) => (
                                           <div
                                             key={`${concept.id}-branch`}
-                                            className="text-xs text-zinc-500"
+                                            className="text-xs text-zinc-400"
                                           >
-                                            <span className="text-zinc-800 font-medium">
+                                            <span className="text-zinc-200 font-medium">
                                               {concept.name}
                                             </span>
                                             {concept.childConcepts.length >
@@ -9268,8 +9268,8 @@ export function AdminView() {
                                   )}
 
                                   {latestEntry && (
-                                    <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 text-xs leading-relaxed text-zinc-600 font-serif">
-                                      <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-500 font-sans">
+                                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-xs leading-relaxed text-zinc-400 font-serif">
+                                      <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400 font-sans">
                                         Latest update ·{" "}
                                         {new Date(
                                           latestEntry.timestamp,
@@ -9288,14 +9288,14 @@ export function AdminView() {
                     </section>
 
                     {!logs || logs.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-zinc-200 bg-white px-6 py-16 text-center">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-blue-600">
+                      <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-white/10 bg-[#14171D] px-6 py-16 text-center">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-blue-600">
                           <Activity size={20} />
                         </div>
-                        <div className="font-serif text-lg italic text-zinc-700">
+                        <div className="font-serif text-lg italic text-zinc-300">
                           No trace records yet.
                         </div>
-                        <div className="max-w-md text-sm leading-relaxed text-zinc-500">
+                        <div className="max-w-md text-sm leading-relaxed text-zinc-400">
                           Saved trace explanations will appear here after Tutor
                           writes a trace log from a completed learning action.
                         </div>
@@ -9309,34 +9309,34 @@ export function AdminView() {
                             className={`relative pl-8 pb-8 ${animateTraceRow ? "admin-animated-item" : ""}`}
                           >
                             <div
-                              className="absolute left-[0px] top-4 w-[2px] bg-zinc-200/60"
+                              className="absolute left-[0px] top-4 w-[2px] bg-white/10"
                               style={{ height: "100%" }}
                             />
-                            <div className="absolute w-3 h-3 rounded-full bg-blue-500 border-2 border-[#faf9f6] shadow-sm -left-[5px] top-1 z-10" />
+                            <div className="absolute w-3 h-3 rounded-full bg-blue-500 border-2 border-white/10 shadow-sm -left-[5px] top-1 z-10" />
 
                             <div className="flex items-center gap-3 mb-2">
                               <span className="text-xs font-mono text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200 font-medium">
                                 {log.action}
                               </span>
-                              <span className="text-xs text-zinc-500 flex items-center gap-1.5 font-mono">
+                              <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-mono">
                                 <Clock size={12} />{" "}
                                 {new Date(log.timestamp).toLocaleTimeString()}
                               </span>
                             </div>
 
-                            <div className="text-[15px] text-zinc-800 mb-4 leading-relaxed mt-3 bg-white p-5 rounded-xl border border-zinc-200 shadow-sm font-serif">
+                            <div className="text-[15px] text-zinc-200 mb-4 leading-relaxed mt-3 bg-[#14171D] p-5 rounded-xl border border-white/10 shadow-sm font-serif">
                               {log.llmExplanation}
                             </div>
 
                             <details className="group">
-                              <summary className="text-xs font-mono text-zinc-500 cursor-pointer hover:text-zinc-800 transition-colors flex items-center gap-1.5 select-none font-medium">
+                              <summary className="text-xs font-mono text-zinc-400 cursor-pointer hover:text-zinc-200 transition-colors flex items-center gap-1.5 select-none font-medium">
                                 <ChevronRight
                                   size={14}
                                   className="group-open:rotate-90 transition-transform"
                                 />
                                 Raw JSON Payload
                               </summary>
-                              <pre className="mt-3 text-[11px] text-zinc-600 bg-zinc-50 p-4 rounded-xl overflow-x-auto border border-zinc-200 font-mono shadow-inner">
+                              <pre className="mt-3 text-[11px] text-zinc-400 bg-white/[0.04] p-4 rounded-xl overflow-x-auto border border-white/10 font-mono shadow-inner">
                                 {JSON.stringify(log.payload, null, 2)}
                               </pre>
                             </details>
@@ -9351,7 +9351,7 @@ export function AdminView() {
                           onClick={() =>
                             setTraceLimit((limit) => limit + TRACE_PAGE_SIZE)
                           }
-                          className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-xs font-semibold text-zinc-600 shadow-sm transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+                          className="rounded-full border border-white/10 bg-[#14171D] px-4 py-2 text-xs font-semibold text-zinc-400 shadow-sm transition-colors hover:bg-white/[0.06] hover:text-zinc-100"
                         >
                           Load more traces
                         </button>
@@ -9364,7 +9364,7 @@ export function AdminView() {
                     className="bg-[#111] border border-zinc-800 rounded-2xl p-6 font-mono text-[11px] sm:text-xs leading-relaxed custom-scroll h-[600px] overflow-y-auto shadow-inner text-zinc-300"
                   >
                     {serverLogs.length === 0 ? (
-                      <div className="h-full flex items-center justify-center text-zinc-500 italic">
+                      <div className="h-full flex items-center justify-center text-zinc-400 italic">
                         Awaiting server output...
                       </div>
                     ) : (
@@ -9373,7 +9373,7 @@ export function AdminView() {
                           key={i}
                           className="mb-2 flex gap-4 hover:bg-white/5 px-2 py-1.5 rounded transition-colors"
                         >
-                          <span className="text-zinc-500 shrink-0 select-none">
+                          <span className="text-zinc-400 shrink-0 select-none">
                             {new Date(log.time).toLocaleTimeString([], {
                               hour12: false,
                               hour: "2-digit",

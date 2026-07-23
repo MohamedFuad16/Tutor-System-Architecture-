@@ -172,6 +172,34 @@ const emptyChatUsage: ChatUsage = {
 const DEFAULT_AI_MODEL = "deepseek/deepseek-v4-flash";
 const BRAIN_RUNTIME_SETTINGS_STORAGE_KEY = "brain_runtime_settings";
 const MISO_TTS_API_URL_STORAGE_KEY = "miso_tts_api_url";
+const VOICE_MODE_STORAGE_KEY = "voice_mode";
+
+// Runtime voice mode (chosen in Settings, no rebuild needed):
+// - deepgram-duplex: the default two-model "interaction" mimic — a fast
+//   foreground model keeps the conversation moving while an async background
+//   model does the heavy lifting. Runs in the same dev/start server, needs
+//   only a Deepgram key + an LLM key.
+// - deepgram-agent: the single Deepgram Voice Agent path.
+// - openai-realtime: a test/comparison-only speech-to-speech path (WebRTC,
+//   BYOK OpenAI key). Expensive; never the default.
+export type VoiceMode = "deepgram-duplex" | "deepgram-agent" | "openai-realtime";
+const VOICE_MODES: VoiceMode[] = [
+  "deepgram-duplex",
+  "deepgram-agent",
+  "openai-realtime",
+];
+const normalizeVoiceMode = (value: string | null | undefined): VoiceMode => {
+  if (value && (VOICE_MODES as string[]).includes(value)) {
+    return value as VoiceMode;
+  }
+  // Honor the legacy build-time flag as the initial default, but the two-model
+  // duplex is the intended forefront.
+  if (typeof import.meta !== "undefined") {
+    const legacy = import.meta.env?.VITE_VOICE_BROKER_MODE;
+    if (legacy === "deepgram") return "deepgram-agent";
+  }
+  return "deepgram-duplex";
+};
 
 const normalizeAiModel = (model: string | null) =>
   model === "deepseek/deepseek-chat"
@@ -349,6 +377,8 @@ interface AppState {
   setTtsVoice: (voice: string) => void;
   misoTtsApiUrl: string;
   setMisoTtsApiUrl: (url: string) => void;
+  voiceMode: VoiceMode;
+  setVoiceMode: (mode: VoiceMode) => void;
 
   aiModel: string;
   setAiModel: (model: string) => void;
@@ -515,6 +545,14 @@ export const useStore = create<AppState>()(
           localStorage.removeItem(MISO_TTS_API_URL_STORAGE_KEY);
         }
         set({ misoTtsApiUrl: cleanUrl });
+      },
+      voiceMode: normalizeVoiceMode(
+        localStorage.getItem(VOICE_MODE_STORAGE_KEY),
+      ),
+      setVoiceMode: (mode) => {
+        const normalized = normalizeVoiceMode(mode);
+        localStorage.setItem(VOICE_MODE_STORAGE_KEY, normalized);
+        set({ voiceMode: normalized });
       },
 
       aiModel: normalizeAiModel(localStorage.getItem("ai_model")),

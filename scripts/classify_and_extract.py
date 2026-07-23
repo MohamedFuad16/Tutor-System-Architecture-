@@ -69,6 +69,7 @@ def main():
         "total_pages": total_pages,
         "pages_with_text": pages_with_text,
         "content": "",
+        "pages": [],
         "images": [],
         "vision_page_limit": MAX_VISION_PAGES,
     }
@@ -77,8 +78,23 @@ def main():
         try:
             with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                 import pymupdf4llm
-                md_text = pymupdf4llm.to_markdown(doc)
-            result["content"] = md_text
+                # Single-pass, page-indexed extraction. page_chunks=True returns
+                # one dict per page so we can hand the model the exact page the
+                # learner is looking at, and it is no slower than the plain
+                # whole-document call.
+                page_chunks = pymupdf4llm.to_markdown(doc, page_chunks=True)
+            pages = []
+            content_parts = []
+            for index, chunk in enumerate(page_chunks):
+                page_text = (chunk.get("text") if isinstance(chunk, dict) else str(chunk)) or ""
+                meta = chunk.get("metadata", {}) if isinstance(chunk, dict) else {}
+                page_num = meta.get("page", index) if isinstance(meta, dict) else index
+                pages.append({"page_num": int(page_num), "text": page_text})
+                # Keep an explicit page marker in the joined markdown so the
+                # whole-document excerpt retains page boundaries.
+                content_parts.append(f"<!-- page {int(page_num) + 1} -->\n{page_text}")
+            result["pages"] = pages
+            result["content"] = "\n\n".join(content_parts)
         except Exception as e:
             doc.close()
             result["error"] = f"Failed to extract markdown: {str(e)}"

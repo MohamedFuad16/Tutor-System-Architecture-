@@ -89,8 +89,14 @@ import { buildBrainContextPacket } from "../memory/brain.context";
 import {
   buildVoiceFunctionCallResponse,
   parseVoiceFunctionArguments,
+  VOICE_AGENT_TOOL_DEFINITIONS,
   type VoiceAgentFunctionCall,
 } from "../lib/voiceAgentTools";
+import {
+  startRealtimeSession,
+  type RealtimeSessionHandle,
+  type RealtimeToolDefinition,
+} from "../lib/realtimeVoice";
 import {
   chatTitleFromMessageSet,
   flattenChatMessagesForPrompt,
@@ -293,48 +299,51 @@ const loadMermaid = () => {
       const mermaid = module.default;
       mermaid.initialize({
         startOnLoad: false,
+        // strict sanitizes model-generated diagram source (DOMPurify) and
+        // blocks in-diagram click/javascript directives — the diagram text is
+        // influenced by untrusted PDF/web content, so "loose" was an XSS path.
+        securityLevel: "strict",
         theme: "base",
-        securityLevel: "loose",
         fontFamily:
-          "'Geist Sans', Inter, 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', system-ui, sans-serif",
+          "'Geist', 'Geist Sans', Inter, 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', system-ui, sans-serif",
         themeVariables: {
           background: "transparent",
           fontSize: "14px",
-          // Node surfaces: one calm zinc family instead of mermaid's default
-          // olive/pink mix, with the app's orange reserved for focus states.
-          primaryColor: "#1f1f23",
-          primaryTextColor: "#f4f4f5",
-          primaryBorderColor: "#4b4b52",
-          secondaryColor: "#2a2a30",
-          secondaryTextColor: "#e4e4e7",
-          secondaryBorderColor: "#4b4b52",
-          tertiaryColor: "#232327",
-          tertiaryTextColor: "#e4e4e7",
-          tertiaryBorderColor: "#3f3f46",
-          mainBkg: "#1f1f23",
-          nodeBorder: "#4b4b52",
-          nodeTextColor: "#f4f4f5",
-          textColor: "#d4d4d8",
-          titleColor: "#f4f4f5",
-          lineColor: "#8a8a93",
-          arrowheadColor: "#8a8a93",
-          edgeLabelBackground: "#0f0f11",
-          clusterBkg: "rgba(42,42,48,0.45)",
-          clusterBorder: "#3f3f46",
+          // Calmer zinc family, lifted for legible contrast on the near-black
+          // card. Orange stays reserved for the click-to-focus highlight.
+          primaryColor: "#26262c",
+          primaryTextColor: "#fafafa",
+          primaryBorderColor: "#6b6b76",
+          secondaryColor: "#2f2f36",
+          secondaryTextColor: "#f4f4f5",
+          secondaryBorderColor: "#6b6b76",
+          tertiaryColor: "#28282e",
+          tertiaryTextColor: "#f4f4f5",
+          tertiaryBorderColor: "#57575f",
+          mainBkg: "#26262c",
+          nodeBorder: "#6b6b76",
+          nodeTextColor: "#fafafa",
+          textColor: "#e7e7ea",
+          titleColor: "#fafafa",
+          lineColor: "#a8a8b3",
+          arrowheadColor: "#a8a8b3",
+          edgeLabelBackground: "#18181b",
+          clusterBkg: "rgba(42,42,48,0.55)",
+          clusterBorder: "#57575f",
           noteBkgColor: "#292524",
           noteTextColor: "#fcd34d",
-          noteBorderColor: "#57534e",
-          actorBkg: "#1f1f23",
-          actorTextColor: "#f4f4f5",
-          actorBorder: "#4b4b52",
-          labelBoxBkgColor: "#1f1f23",
-          labelTextColor: "#f4f4f5",
+          noteBorderColor: "#78716c",
+          actorBkg: "#26262c",
+          actorTextColor: "#fafafa",
+          actorBorder: "#6b6b76",
+          labelBoxBkgColor: "#26262c",
+          labelTextColor: "#fafafa",
         },
         flowchart: {
           curve: "basis",
-          padding: 14,
-          nodeSpacing: 48,
-          rankSpacing: 58,
+          padding: 16,
+          nodeSpacing: 50,
+          rankSpacing: 60,
           htmlLabels: true,
           useMaxWidth: true,
         },
@@ -409,315 +418,264 @@ const Mermaid = ({
   const chartRef = useRef<HTMLDivElement>(null);
   const originalViewBoxRef = useRef<MermaidViewBox | null>(null);
   const viewBoxAnimationRef = useRef<number | null>(null);
-  const [tourNodes, setTourNodes] = useState<string[]>([]);
-  const [activeNodeIndex, setActiveNodeIndex] = useState(0);
+  const focusNodesRef = useRef<SVGGElement[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready">("loading");
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
   const isStage = variant === "stage";
+
+  const prefersReducedMotion = () =>
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
     let cancelled = false;
-    if (!chartRef.current) return;
-    chartRef.current.textContent = "";
-    originalViewBoxRef.current = null;
+    const container = chartRef.current;
+    if (!container) return;
+
     if (viewBoxAnimationRef.current !== null) {
       cancelAnimationFrame(viewBoxAnimationRef.current);
       viewBoxAnimationRef.current = null;
     }
-    setTourNodes([]);
-    setActiveNodeIndex(0);
+    focusNodesRef.current = [];
+    setFocusIndex(null);
 
-    loadMermaid()
-      .then((mermaid) =>
-        mermaid.render(
-          `mermaid-${Math.random().toString(36).substring(7)}`,
-          chart,
-        ),
-      )
-      .then((res) => {
-        if (cancelled || !chartRef.current) return;
-        chartRef.current.innerHTML = res.svg;
-        const svg = chartRef.current.querySelector<SVGSVGElement>("svg");
-        if (!svg) return;
-        svg.setAttribute("role", "img");
-        svg.setAttribute("aria-label", "Mermaid diagram with focus tour");
-        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-        svg.removeAttribute("width");
-        svg.removeAttribute("height");
-        svg.style.display = "block";
-        svg.style.width = "100%";
-        svg.style.maxWidth = "100%";
-        svg.style.maxHeight = isStage ? "72vh" : "70dvh";
-        svg.style.minWidth = "0";
-        svg.style.height = "auto";
-        svg.style.margin = "0 auto";
-        if (!svg.getAttribute("viewBox")) {
+    // Debounce so streaming tokens don't render on every keystroke, and only
+    // render once the source PARSES cleanly. This is what stops half-finished
+    // ```mermaid fences from flashing raw parser errors: while the block is
+    // still streaming (or genuinely invalid) we simply leave the last good
+    // diagram / skeleton in place instead of dumping an error string.
+    const timer = window.setTimeout(() => {
+      loadMermaid()
+        .then(async (mermaid) => {
+          if (cancelled) return;
+          let parseable = false;
           try {
-            const bounds = (svg as unknown as SVGGraphicsElement).getBBox();
-            svg.setAttribute(
-              "viewBox",
-              `${bounds.x} ${bounds.y} ${Math.max(bounds.width, 1)} ${Math.max(bounds.height, 1)}`,
+            parseable = Boolean(
+              await mermaid.parse(chart, { suppressErrors: true }),
             );
-          } catch {}
-        }
-        originalViewBoxRef.current = parseMermaidViewBox(svg);
-        const nodes = collectMermaidTourNodes(svg);
-        nodes.forEach((node, index) => {
-          node.setAttribute("data-mermaid-tour-node", "true");
-          node.setAttribute("data-mermaid-tour-index", String(index));
-          node.setAttribute("tabindex", "0");
-          node.addEventListener("click", () => setActiveNodeIndex(index));
-        });
-        setTourNodes(
-          nodes.map((node, index) => {
+          } catch {
+            parseable = false;
+          }
+          if (!parseable) return;
+          const res = await mermaid.render(
+            `mermaid-${Math.random().toString(36).slice(2)}`,
+            chart,
+          );
+          if (cancelled || !chartRef.current) return;
+          chartRef.current.innerHTML = res.svg;
+          const svg = chartRef.current.querySelector<SVGSVGElement>("svg");
+          if (!svg) return;
+          svg.setAttribute("role", "img");
+          svg.setAttribute("aria-label", "Diagram");
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+          svg.removeAttribute("width");
+          svg.removeAttribute("height");
+          svg.style.display = "block";
+          svg.style.width = "100%";
+          svg.style.maxWidth = "100%";
+          svg.style.maxHeight = isStage ? "72vh" : "70dvh";
+          svg.style.minWidth = "0";
+          svg.style.height = "auto";
+          svg.style.margin = "0 auto";
+          if (!svg.getAttribute("viewBox")) {
+            try {
+              const bounds = (svg as unknown as SVGGraphicsElement).getBBox();
+              svg.setAttribute(
+                "viewBox",
+                `${bounds.x} ${bounds.y} ${Math.max(bounds.width, 1)} ${Math.max(bounds.height, 1)}`,
+              );
+            } catch {}
+          }
+          originalViewBoxRef.current = parseMermaidViewBox(svg);
+          // Optional click-to-focus: clicking a node zooms to it. Nodes stay at
+          // full opacity by default — no perpetual dimming, no auto-panning.
+          const nodes = collectMermaidTourNodes(svg);
+          focusNodesRef.current = nodes;
+          nodes.forEach((node, index) => {
+            node.setAttribute("data-mermaid-node", "true");
+            node.setAttribute("tabindex", "0");
+            node.setAttribute("role", "button");
             const label = cleanMermaidTourLabel(node.textContent);
-            return label || `Step ${index + 1}`;
-          }),
-        );
-      })
-      .catch((error) => {
-        console.warn("Mermaid error", error);
-        if (!cancelled && chartRef.current) {
-          chartRef.current.textContent =
-            error instanceof Error ? error.message : String(error);
-          setTourNodes([]);
-        }
-      });
+            if (label) node.setAttribute("aria-label", `Focus ${label}`);
+            node.style.cursor = "zoom-in";
+            const toggleFocus = () =>
+              setFocusIndex((current) => (current === index ? null : index));
+            node.addEventListener("click", toggleFocus);
+            node.addEventListener("keydown", (event) => {
+              const key = (event as KeyboardEvent).key;
+              if (key === "Enter" || key === " ") {
+                event.preventDefault();
+                toggleFocus();
+              }
+            });
+          });
+          setStatus("ready");
+        })
+        .catch((error) => {
+          console.warn("Mermaid render error", error);
+        });
+    }, 120);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
       if (viewBoxAnimationRef.current !== null) {
         cancelAnimationFrame(viewBoxAnimationRef.current);
         viewBoxAnimationRef.current = null;
       }
     };
-  }, [chart]);
+  }, [chart, isStage]);
 
-  useEffect(() => {
-    if (tourNodes.length <= 1) return;
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduceMotion) return;
-    const timer = window.setInterval(
-      () => {
-        setActiveNodeIndex((current) => (current + 1) % tourNodes.length);
-      },
-      isStage ? 5600 : 4400,
-    );
-    return () => window.clearInterval(timer);
-  }, [isStage, tourNodes.length]);
-
+  // Animate the viewBox to the focused node, or back to the full diagram when
+  // focus is cleared. Focus is user-initiated (click/enter) only.
   useEffect(() => {
     const container = chartRef.current;
     const svg = container?.querySelector<SVGSVGElement>("svg");
-    if (!container || !svg || tourNodes.length <= 0) return;
-    const nodes = Array.from(
-      svg.querySelectorAll<SVGGElement>("[data-mermaid-tour-node='true']"),
-    );
-    nodes.forEach((node) => node.removeAttribute("data-mermaid-active"));
-    const activeNode = nodes[activeNodeIndex];
-    if (!activeNode) return;
-    activeNode.setAttribute("data-mermaid-active", "true");
     const original = originalViewBoxRef.current;
-    if (!original) return;
+    if (!svg || !original) return;
 
     if (viewBoxAnimationRef.current !== null) {
       cancelAnimationFrame(viewBoxAnimationRef.current);
       viewBoxAnimationRef.current = null;
     }
 
-    // Focus by animating the SVG viewBox rather than a CSS transform. The
-    // viewBox is in diagram coordinates, so the pan/zoom lands exactly on the
-    // node (no clamped-pixel drift, no mid-transition measurement races) and
-    // the diagram can never escape its container.
-    const current = parseMermaidViewBox(svg) || original;
-    const svgRect = svg.getBoundingClientRect();
-    const nodeRect = activeNode.getBoundingClientRect();
-    if (svgRect.width < 1 || svgRect.height < 1) return;
-    // Invert the xMidYMid-meet mapping to express the node in viewBox coords.
-    const renderScale = Math.min(
-      svgRect.width / current[2],
-      svgRect.height / current[3],
-    );
-    const contentLeft =
-      svgRect.left + (svgRect.width - current[2] * renderScale) / 2;
-    const contentTop =
-      svgRect.top + (svgRect.height - current[3] * renderScale) / 2;
-    const nodeX = current[0] + (nodeRect.left - contentLeft) / renderScale;
-    const nodeY = current[1] + (nodeRect.top - contentTop) / renderScale;
-    const nodeW = nodeRect.width / renderScale;
-    const nodeH = nodeRect.height / renderScale;
+    const nodes = focusNodesRef.current;
+    nodes.forEach((node) => node.removeAttribute("data-mermaid-active"));
 
-    const [origX, origY, origW, origH] = original;
-    const aspect = origW / origH;
-    // Zoom so the node fills roughly a third of the frame, but never zoom in
-    // past 2x or out past the full diagram.
-    let targetW = Math.min(
-      origW,
-      Math.max(nodeW * (isStage ? 2.6 : 3.1), origW * 0.5),
-    );
-    let targetH = targetW / aspect;
-    if (targetH < nodeH * 1.7) {
-      targetH = Math.min(origH, nodeH * 1.7);
-      targetW = targetH * aspect;
+    let target: MermaidViewBox = original;
+    if (focusIndex !== null && nodes[focusIndex]) {
+      const activeNode = nodes[focusIndex];
+      activeNode.setAttribute("data-mermaid-active", "true");
+      // Focus by animating the SVG viewBox (diagram coordinates) so the pan/zoom
+      // lands exactly on the node and the diagram can never escape its frame.
+      const current = parseMermaidViewBox(svg) || original;
+      const svgRect = svg.getBoundingClientRect();
+      const nodeRect = activeNode.getBoundingClientRect();
+      if (svgRect.width >= 1 && svgRect.height >= 1) {
+        const renderScale = Math.min(
+          svgRect.width / current[2],
+          svgRect.height / current[3],
+        );
+        const contentLeft =
+          svgRect.left + (svgRect.width - current[2] * renderScale) / 2;
+        const contentTop =
+          svgRect.top + (svgRect.height - current[3] * renderScale) / 2;
+        const nodeX = current[0] + (nodeRect.left - contentLeft) / renderScale;
+        const nodeY = current[1] + (nodeRect.top - contentTop) / renderScale;
+        const nodeW = nodeRect.width / renderScale;
+        const nodeH = nodeRect.height / renderScale;
+        const [origX, origY, origW, origH] = original;
+        const aspect = origW / origH;
+        let targetW = Math.min(
+          origW,
+          Math.max(nodeW * (isStage ? 2.6 : 3.1), origW * 0.45),
+        );
+        let targetH = targetW / aspect;
+        if (targetH < nodeH * 1.7) {
+          targetH = Math.min(origH, nodeH * 1.7);
+          targetW = targetH * aspect;
+        }
+        let targetX = nodeX + nodeW / 2 - targetW / 2;
+        let targetY = nodeY + nodeH / 2 - targetH / 2;
+        targetX = Math.max(origX, Math.min(origX + origW - targetW, targetX));
+        targetY = Math.max(origY, Math.min(origY + origH - targetH, targetY));
+        target = [targetX, targetY, targetW, targetH];
+      }
     }
-    let targetX = nodeX + nodeW / 2 - targetW / 2;
-    let targetY = nodeY + nodeH / 2 - targetH / 2;
-    targetX = Math.max(origX, Math.min(origX + origW - targetW, targetX));
-    targetY = Math.max(origY, Math.min(origY + origH - targetH, targetY));
-    const target: MermaidViewBox = [targetX, targetY, targetW, targetH];
 
     const applyViewBox = (box: MermaidViewBox) =>
       svg.setAttribute("viewBox", box.map((v) => v.toFixed(2)).join(" "));
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const from = parseMermaidViewBox(svg) || original;
+    if (prefersReducedMotion()) {
       applyViewBox(target);
       return;
     }
-
-    const durationMs = isStage ? 1050 : 800;
+    const durationMs = isStage ? 700 : 560;
     const startedAt = performance.now();
-    const from = current;
     const easeInOutCubic = (t: number) =>
       t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     const tick = (now: number) => {
       const progress = Math.min(1, (now - startedAt) / durationMs);
       const eased = easeInOutCubic(progress);
       applyViewBox(
-        from.map((value, i) => value + (target[i] - value) * eased) as MermaidViewBox,
+        from.map(
+          (value, i) => value + (target[i] - value) * eased,
+        ) as MermaidViewBox,
       );
       viewBoxAnimationRef.current =
         progress < 1 ? requestAnimationFrame(tick) : null;
     };
     viewBoxAnimationRef.current = requestAnimationFrame(tick);
-  }, [activeNodeIndex, isStage, tourNodes.length]);
-
-  const activeTourLabel = tourNodes[activeNodeIndex];
+  }, [focusIndex, isStage]);
 
   return (
     <div
-      className={`learningai-mermaid-tour w-full text-zinc-100 ${
+      className={`learningai-mermaid relative w-full text-zinc-100 ${
         isStage
           ? "my-0 max-w-none overflow-visible border-0 bg-transparent p-0 shadow-none"
-          : "my-4 max-w-none overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#101012] p-3 shadow-[0_20px_50px_rgba(0,0,0,0.22)]"
+          : "my-4 max-w-none overflow-hidden rounded-2xl border border-white/10 bg-[#121216] p-3 shadow-[0_18px_44px_rgba(0,0,0,0.28)]"
       }`}
-      data-mermaid-focus-tour
       data-mermaid-variant={variant}
     >
       <style>{`
-        .learningai-mermaid-tour [data-mermaid-tour-node='true'] {
-          opacity: 0.55;
-          cursor: pointer;
-          transition: opacity 500ms ease, filter 500ms ease, transform 500ms ease;
+        .learningai-mermaid [data-mermaid-node='true'] {
+          transition: filter 320ms ease;
         }
-        .learningai-mermaid-tour [data-mermaid-active='true'] {
-          opacity: 1;
-          filter: drop-shadow(0 0 14px rgba(255, 110, 0, 0.45));
+        .learningai-mermaid [data-mermaid-active='true'] {
+          filter: drop-shadow(0 0 12px rgba(255, 138, 42, 0.45));
         }
-        .learningai-mermaid-tour .node rect,
-        .learningai-mermaid-tour .node polygon {
-          rx: 10px;
-          ry: 10px;
+        .learningai-mermaid [data-mermaid-active='true'] rect,
+        .learningai-mermaid [data-mermaid-active='true'] polygon,
+        .learningai-mermaid [data-mermaid-active='true'] path,
+        .learningai-mermaid [data-mermaid-active='true'] circle,
+        .learningai-mermaid [data-mermaid-active='true'] ellipse {
+          stroke: #ff8a2a !important;
+          stroke-width: 2.25px !important;
         }
-        /* Edge labels: compact pills instead of raw text boxes colliding
-           with the arrows underneath. */
-        .learningai-mermaid-tour .edgeLabel {
-          border-radius: 8px;
-          line-height: 1.25;
-        }
-        .learningai-mermaid-tour .edgeLabel p,
-        .learningai-mermaid-tour .edgeLabel span {
-          background: #0f0f11 !important;
-          color: #d4d4d8 !important;
+        .learningai-mermaid .node rect,
+        .learningai-mermaid .node polygon { rx: 10px; ry: 10px; }
+        .learningai-mermaid .edgeLabel { border-radius: 8px; line-height: 1.25; }
+        .learningai-mermaid .edgeLabel p,
+        .learningai-mermaid .edgeLabel span {
+          background: #18181b !important;
+          color: #e7e7ea !important;
           border-radius: 8px;
           padding: 2px 7px;
           font-size: 11.5px;
           font-weight: 500;
         }
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] svg {
+        .learningai-mermaid[data-mermaid-variant='stage'] svg {
           background: transparent !important;
         }
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] .node rect,
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] .node polygon,
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] .node circle,
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] .node ellipse,
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] .stateGroup rect,
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] .entityBox {
-          fill: rgba(31, 31, 35, 0.92) !important;
-          stroke: rgba(148, 148, 158, 0.55) !important;
-        }
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] text,
-        .learningai-mermaid-tour[data-mermaid-variant='stage'] tspan {
-          fill: #f4f4f5 !important;
-        }
-        .learningai-mermaid-tour [data-mermaid-active='true'] rect,
-        .learningai-mermaid-tour [data-mermaid-active='true'] polygon,
-        .learningai-mermaid-tour [data-mermaid-active='true'] path,
-        .learningai-mermaid-tour [data-mermaid-active='true'] circle,
-        .learningai-mermaid-tour [data-mermaid-active='true'] ellipse {
-          stroke: #ff8a2a !important;
-          stroke-width: 2.5px !important;
-        }
         @media (prefers-reduced-motion: reduce) {
-          .learningai-mermaid-tour svg,
-          .learningai-mermaid-tour [data-mermaid-tour-node='true'] {
-            transition: none !important;
-          }
+          .learningai-mermaid [data-mermaid-node='true'] { transition: none !important; }
         }
       `}</style>
       <div
         ref={chartRef}
-        className={`flex justify-center ${
+        className={`relative flex justify-center ${
           isStage
             ? "min-h-[52vh] items-center overflow-visible p-0 sm:min-h-[72vh]"
-            : "min-h-[180px] overflow-hidden rounded-lg p-2"
+            : "min-h-[160px] items-center overflow-hidden rounded-lg p-2"
         }`}
       />
-      {tourNodes.length > 1 && !isStage && (
-        <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 px-2.5 py-2 text-xs text-zinc-200">
-          <button
-            type="button"
-            aria-label="Previous diagram step"
-            onClick={() =>
-              setActiveNodeIndex(
-                (current) =>
-                  (current - 1 + tourNodes.length) % tourNodes.length,
-              )
-            }
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-orange-300 hover:text-orange-100"
-          >
-            <ChevronLeft size={13} strokeWidth={2.5} />
-          </button>
-          <div className="min-w-0 flex-1 text-center">
-            <span
-              data-mermaid-focus-label
-              className="block truncate font-medium text-zinc-100"
-            >
-              {activeTourLabel || `Step ${activeNodeIndex + 1}`}
-            </span>
-            <span className="mt-1 flex items-center justify-center gap-1">
-              {tourNodes.map((node, index) => (
-                <span
-                  key={`${node}-${index}`}
-                  className={`h-1 rounded-full transition-[width,background-color] duration-300 ${
-                    index === activeNodeIndex
-                      ? "w-4 bg-orange-400"
-                      : "w-1 bg-white/25"
-                  }`}
-                />
-              ))}
-            </span>
+      {status === "loading" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-500" />
+            Rendering diagram…
           </div>
-          <button
-            type="button"
-            aria-label="Next diagram step"
-            onClick={() =>
-              setActiveNodeIndex((current) => (current + 1) % tourNodes.length)
-            }
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/15 text-zinc-300 transition-colors hover:border-orange-300 hover:text-orange-100"
-          >
-            <ChevronRight size={13} strokeWidth={2.5} />
-          </button>
         </div>
+      )}
+      {status === "ready" && focusIndex !== null && !isStage && (
+        <button
+          type="button"
+          onClick={() => setFocusIndex(null)}
+          className="absolute right-3 top-3 rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-[11px] font-medium text-zinc-200 backdrop-blur transition-colors hover:border-orange-300/60 hover:text-orange-100"
+        >
+          Reset view
+        </button>
       )}
     </div>
   );
@@ -3904,6 +3862,8 @@ export function ChatPanel({
     (state) => state.betaProofTrafficApproval,
   );
   const activeDocumentId = useStore((state) => state.activeDocumentId);
+  const pdfPage = useStore((state) => state.pdfPage);
+  const pdfTotalPages = useStore((state) => state.pdfTotalPages);
   const ttsVoice = useStore((state) => state.ttsVoice);
   const misoTtsApiUrl = useStore((state) => state.misoTtsApiUrl);
   const setActiveView = useStore((state) => state.setActiveView);
@@ -3959,9 +3919,15 @@ export function ChatPanel({
   const [thinkingStep, setThinkingStep] = useState(0);
   const [serverOpenRouterReady, setServerOpenRouterReady] = useState(false);
   const [serverDeepgramReady, setServerDeepgramReady] = useState(false);
-  const voiceBrokerMode =
-    import.meta.env.VITE_VOICE_BROKER_MODE === "custom" ? "custom" : "deepgram";
-  const usesCustomVoiceBroker = voiceBrokerMode === "custom";
+  // Voice mode is a runtime setting now (no rebuild to switch paths).
+  const voiceMode = useStore((state) => state.voiceMode);
+  const usesCustomVoiceBroker = voiceMode === "deepgram-duplex";
+  const usesOpenAiRealtime = voiceMode === "openai-realtime";
+  const voiceBrokerMode = usesOpenAiRealtime
+    ? "openai-realtime"
+    : usesCustomVoiceBroker
+      ? "custom"
+      : "deepgram";
   const voiceBrokerTtsModel =
     import.meta.env.VITE_VOICE_BROKER_TTS_MODEL || "aura-2-thalia-en";
   const usesBrowserVoiceTts =
@@ -4064,6 +4030,7 @@ export function ChatPanel({
     string | null
   >(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const realtimeHandleRef = useRef<RealtimeSessionHandle | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
@@ -5122,6 +5089,17 @@ export function ChatPanel({
       cancelAnimationFrame(outputRafRef.current);
       outputRafRef.current = null;
     }
+    // OpenAI Realtime (test mode) runs its own WebRTC peer connection; null the
+    // ref before stopping so the module's "closed" callback doesn't re-enter.
+    if (realtimeHandleRef.current) {
+      const realtime = realtimeHandleRef.current;
+      realtimeHandleRef.current = null;
+      try {
+        realtime.stop();
+      } catch {
+        /* ignore */
+      }
+    }
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -5234,6 +5212,19 @@ export function ChatPanel({
     setDismissedVoiceStageFocusId(null);
     setVoiceState("idle");
   };
+
+  // Ensure a live voice session is fully torn down if ChatPanel unmounts while
+  // it is active — otherwise the mic MediaStream, AudioContext, ScriptProcessor
+  // node and voice WebSocket leak, and the microphone stays hot. stopVoice is
+  // not memoized, so route the unmount call through a ref to always invoke the
+  // latest version without re-registering this effect on every render.
+  const stopVoiceRef = useRef(stopVoice);
+  stopVoiceRef.current = stopVoice;
+  useEffect(() => {
+    return () => {
+      stopVoiceRef.current?.();
+    };
+  }, []);
 
   const sendVoiceText = (text: string) => {
     const trimmed = text.trim();
@@ -5896,7 +5887,160 @@ export function ChatPanel({
     ],
   );
 
+  // OpenAI Realtime (WebRTC) — the test/comparison-only voice path. Runs
+  // entirely browser<->OpenAI, so it needs no persistent server (and works on
+  // Vercel). Isolated from the default Deepgram duplex flow above.
+  const startRealtimeVoice = async () => {
+    if (activeBetaProofTrafficLocked) {
+      alertProofTrafficApprovalNeeded();
+      return;
+    }
+    try {
+      endingRef.current = false;
+      voiceTurnsRef.current = [];
+      const sessionId = `voice-${Date.now()}`;
+      voiceSessionIdRef.current = sessionId;
+      voiceProofAttemptIdRef.current = activeBetaProofAttemptId || null;
+      voiceStartedAtRef.current = Date.now();
+      voiceSessionCountedRef.current = false;
+      voiceSessionErrorRef.current = null;
+      recordVoiceAgentEvent({
+        type: "session_started",
+        status: "started",
+        sessionId,
+        summary: `OpenAI Realtime (test) session starting for ${activeLearningBookTitle}.`,
+        metadata: {
+          language,
+          bookId: canonicalActiveBookId,
+          documentId: activeDocumentId,
+          voiceBrokerMode,
+          proofAttemptId: getVoiceProofAttemptId(),
+        },
+      });
+      recordVoiceModelRun("started", sessionId, {
+        phase: "session_started",
+        language,
+      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: sessionId,
+          requestId: sessionId,
+          role: "assistant",
+          content: "",
+          isVoice: true,
+          voiceSession: { turns: [], startedAt: Date.now(), durationSeconds: 0 },
+        },
+      ]);
+      setVoiceState("listening");
+
+      const voiceContextPayload = await buildVoiceStudyContext().catch(
+        (): null => null,
+      );
+      voiceStudyContextRef.current = voiceContextPayload;
+      const studyContext = voiceContextPayload?.studyContext || "";
+
+      const instructions = [
+        "You are Tutor, a warm and concise spoken tutor in a live full-duplex voice conversation. Keep replies short and natural for speech. Never read markdown, code fences, or bracketed citations aloud.",
+        "Always reply in the language the learner is speaking.",
+        studyContext
+          ? `Learner context packet (local book, memory, selected text, and current document):\n${studyContext.slice(0, 8000)}`
+          : "No additional local context is attached.",
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+      const tools: RealtimeToolDefinition[] = VOICE_AGENT_TOOL_DEFINITIONS.filter(
+        (tool) =>
+          tool.name === "look_at_study_context" || tool.name === "web_search",
+      ).map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+      }));
+
+      const onToolCall = async (
+        name: string,
+        args: Record<string, unknown>,
+      ): Promise<unknown> => {
+        if (name === "look_at_study_context") {
+          return {
+            context: studyContext || "No additional local context is attached.",
+          };
+        }
+        if (name === "web_search") {
+          const query = String((args as { query?: unknown }).query || "").trim();
+          if (!query) return { error: "web_search requires a query." };
+          try {
+            const response = await fetch("/api/web-search", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(serperApiKey ? { "X-Serper-API-Key": serperApiKey } : {}),
+              },
+              body: JSON.stringify({
+                query,
+                mode: "search",
+                maxResults: 5,
+                serperApiKey: serperApiKey || undefined,
+              }),
+            });
+            const data = await response.json();
+            return { sources: data?.sources || data?.results || [] };
+          } catch (searchError) {
+            return {
+              error:
+                searchError instanceof Error
+                  ? searchError.message
+                  : "web_search failed.",
+            };
+          }
+        }
+        return { note: `${name} is not available in the Realtime test mode.` };
+      };
+
+      const handle = await startRealtimeSession({
+        openAiKey: apiKey.trim(),
+        model: import.meta.env.VITE_OPENAI_REALTIME_MODEL || "gpt-realtime",
+        voice: "marin",
+        instructions,
+        tools,
+        onToolCall,
+        onUserTranscript: (text) => {
+          appendVoiceTurn("user", text);
+        },
+        onAssistantTranscript: (text, done) => {
+          setVoiceCaption({ role: "assistant", text });
+          if (done) appendVoiceTurn("assistant", text);
+        },
+        onStateChange: (state) => {
+          if (state === "live") setVoiceState("listening");
+          if (state === "closed" && realtimeHandleRef.current) {
+            realtimeHandleRef.current = null;
+            if (!endingRef.current) stopVoice();
+          }
+        },
+        onError: (message) => {
+          voiceSessionErrorRef.current = message;
+          console.warn("[Realtime] error:", message);
+        },
+      });
+      realtimeHandleRef.current = handle;
+    } catch (error) {
+      voiceSessionErrorRef.current =
+        error instanceof Error ? error.message : String(error);
+      alert(
+        `OpenAI Realtime voice (test mode) could not start: ${voiceSessionErrorRef.current}. Add an OpenAI API key in Settings, or enable a server key with ALLOW_SERVER_OPENAI_FALLBACK.`,
+      );
+      stopVoice();
+    }
+  };
+
   const startVoice = async () => {
+    if (usesOpenAiRealtime) {
+      await startRealtimeVoice();
+      return;
+    }
     if (!usesCustomVoiceBroker && !hasDeepgramRuntimeKey) {
       alert(
         "Please configure your Deepgram API Key in settings or expose the local server fallback before using Voice features.",
@@ -7165,6 +7309,12 @@ export function ChatPanel({
           activeProject: activeLearningBook?.title || activeProject,
           activeBookId: canonicalActiveBookId,
           activeDocumentId,
+          // The page the learner is currently viewing, so the tutor can be told
+          // exactly what is on screen rather than always the document's opening.
+          currentPage: activeDocumentId ? pdfPage : undefined,
+          currentPageTotal: activeDocumentId
+            ? pdfTotalPages || undefined
+            : undefined,
           documentContexts: orderedBookDocuments.map((document) => ({
             id: document.id,
             title: document.title,
