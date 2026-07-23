@@ -73,6 +73,29 @@ const VOICE_BACKGROUND_MODEL =
   process.env.VOICE_BACKGROUND_MODEL ||
   process.env.GPT55_MODEL ||
   "openai/gpt-5.5";
+
+// The two-model duplex broker can run its foreground/background LLM calls on a
+// raw OpenAI ("ChatGPT") key or on OpenRouter, chosen automatically from the
+// key shape: OpenRouter keys are "sk-or-...", OpenAI keys are "sk-..." only.
+// This lets the duplex work with just a Deepgram key + an OpenAI key, no
+// OpenRouter account required. OpenAI wants bare model ids, so the OpenRouter
+// "openai/" prefix is stripped, and OpenRouter-only hosted tools are dropped.
+const resolveBrokerLlmProvider = (apiKey: string, model: string) => {
+  const key = String(apiKey || "");
+  const isOpenAiDirect = /^sk-/.test(key) && !/^sk-or-/.test(key);
+  if (isOpenAiDirect) {
+    return {
+      baseURL: "https://api.openai.com/v1",
+      model: model.replace(/^openai\//, ""),
+      supportsOpenRouterTools: false,
+    };
+  }
+  return {
+    baseURL: "https://openrouter.ai/api/v1",
+    model,
+    supportsOpenRouterTools: true,
+  };
+};
 const VOICE_BROKER_FAST_ACK = /^(1|true|yes|on)$/i.test(
   String(process.env.VOICE_BROKER_FAST_ACK || "").trim(),
 );
@@ -1120,6 +1143,81 @@ export async function createTutorServerApp(
         deepgram: Boolean(getDeepgramServerFallbackKey()),
       },
     });
+  });
+
+  // Mint a short-lived OpenAI Realtime client secret for the browser's WebRTC
+  // handshake (the test/comparison voice mode). This is the ONLY server piece
+  // that path needs — a single POST, so it also runs on Vercel serverless. The
+  // standard key never reaches the browser: it stays here, and only the
+  // ephemeral secret is returned. BYOK (the browser's own key via Authorization)
+  // is preferred; the server key is used only when ALLOW_SERVER_OPENAI_FALLBACK
+  // is enabled.
+  app.post("/api/realtime/token", async (req, res) => {
+    const byokKey = sanitizeApiKey(
+      String(req.headers["authorization"] || "").replace(/^Bearer\s+/i, ""),
+    );
+    const allowServerOpenAi = /^(1|true|yes|on)$/i.test(
+      String(process.env.ALLOW_SERVER_OPENAI_FALLBACK || "").trim(),
+    );
+    const apiKey =
+      byokKey ||
+      (allowServerOpenAi ? sanitizeApiKey(process.env.OPENAI_API_KEY) : "");
+    if (!apiKey) {
+      return res.status(401).json({
+        error:
+          "An OpenAI API key is required for Realtime voice (test mode). Add it in Settings.",
+        code: "OPENAI_KEY_MISSING",
+      });
+    }
+    const model = String(req.body?.model || "gpt-realtime").slice(0, 100);
+    const voice = String(req.body?.voice || "marin").slice(0, 40);
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/realtime/client_secrets",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            session: {
+              type: "realtime",
+              model,
+              audio: { output: { voice } },
+            },
+          }),
+        },
+      );
+      const bodyText = await response.text();
+      if (!response.ok) {
+        return res.status(response.status).json({
+          error: "Failed to mint an OpenAI Realtime client secret.",
+          detail: bodyText.slice(0, 500),
+        });
+      }
+      let parsed: any = {};
+      try {
+        parsed = JSON.parse(bodyText);
+      } catch {
+        parsed = {};
+      }
+      const value = parsed?.value || parsed?.client_secret?.value || "";
+      if (!value) {
+        return res
+          .status(502)
+          .json({ error: "OpenAI did not return a client secret." });
+      }
+      return res.json({
+        value,
+        expiresAt: parsed?.expires_at || parsed?.expires_after || null,
+        model,
+      });
+    } catch (error: any) {
+      return res.status(502).json({
+        error: error?.message || "Realtime token mint failed.",
+      });
+    }
   });
 
   app.get("/api/learner/profile", (req, res) => {
@@ -4855,12 +4953,16 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
             return "I have the local learning book, previous context, and document memory loaded. I can answer the live part now, and any web, PDF, code, or pricing work is staged for the GPT-5.5 background layer once the provider key is connected.";
           }
           const startedAt = Date.now();
+          const fgProvider = resolveBrokerLlmProvider(
+            brokerOpenRouterApiKey,
+            foregroundModel,
+          );
           const openai = new OpenAI({
-            baseURL: "https://openrouter.ai/api/v1",
+            baseURL: fgProvider.baseURL,
             apiKey: brokerOpenRouterApiKey,
           });
           const response = await openai.chat.completions.create({
-            model: foregroundModel,
+            model: fgProvider.model,
             temperature: 0.35,
             max_tokens: 180,
             messages: [
@@ -4935,12 +5037,16 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
               );
             }
 
+            const bgProvider = resolveBrokerLlmProvider(
+              brokerBackgroundApiKey,
+              backgroundModel,
+            );
             const openai = new OpenAI({
-              baseURL: "https://openrouter.ai/api/v1",
+              baseURL: bgProvider.baseURL,
               apiKey: brokerBackgroundApiKey,
             });
             const modelResponse = await openai.chat.completions.create({
-              model: backgroundModel,
+              model: bgProvider.model,
               temperature: 0.18,
               max_tokens: 420,
               messages: [
@@ -4962,11 +5068,12 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
                     .join("\n\n"),
                 },
               ],
-              tools: [
-                {
-                  type: "openrouter:web_search",
-                },
-              ],
+              // OpenRouter's hosted web tool only exists on OpenRouter; on a
+              // direct OpenAI key the background model still reasons over the
+              // delegated request, just without hosted web search.
+              tools: bgProvider.supportsOpenRouterTools
+                ? [{ type: "openrouter:web_search" }]
+                : undefined,
             } as any);
             const responseMessage =
               (modelResponse.choices[0]?.message as Record<string, any>) ||

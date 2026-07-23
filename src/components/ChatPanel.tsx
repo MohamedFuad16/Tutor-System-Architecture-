@@ -89,8 +89,14 @@ import { buildBrainContextPacket } from "../memory/brain.context";
 import {
   buildVoiceFunctionCallResponse,
   parseVoiceFunctionArguments,
+  VOICE_AGENT_TOOL_DEFINITIONS,
   type VoiceAgentFunctionCall,
 } from "../lib/voiceAgentTools";
+import {
+  startRealtimeSession,
+  type RealtimeSessionHandle,
+  type RealtimeToolDefinition,
+} from "../lib/realtimeVoice";
 import {
   chatTitleFromMessageSet,
   flattenChatMessagesForPrompt,
@@ -3913,9 +3919,15 @@ export function ChatPanel({
   const [thinkingStep, setThinkingStep] = useState(0);
   const [serverOpenRouterReady, setServerOpenRouterReady] = useState(false);
   const [serverDeepgramReady, setServerDeepgramReady] = useState(false);
-  const voiceBrokerMode =
-    import.meta.env.VITE_VOICE_BROKER_MODE === "custom" ? "custom" : "deepgram";
-  const usesCustomVoiceBroker = voiceBrokerMode === "custom";
+  // Voice mode is a runtime setting now (no rebuild to switch paths).
+  const voiceMode = useStore((state) => state.voiceMode);
+  const usesCustomVoiceBroker = voiceMode === "deepgram-duplex";
+  const usesOpenAiRealtime = voiceMode === "openai-realtime";
+  const voiceBrokerMode = usesOpenAiRealtime
+    ? "openai-realtime"
+    : usesCustomVoiceBroker
+      ? "custom"
+      : "deepgram";
   const voiceBrokerTtsModel =
     import.meta.env.VITE_VOICE_BROKER_TTS_MODEL || "aura-2-thalia-en";
   const usesBrowserVoiceTts =
@@ -4018,6 +4030,7 @@ export function ChatPanel({
     string | null
   >(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const realtimeHandleRef = useRef<RealtimeSessionHandle | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
@@ -5076,6 +5089,17 @@ export function ChatPanel({
       cancelAnimationFrame(outputRafRef.current);
       outputRafRef.current = null;
     }
+    // OpenAI Realtime (test mode) runs its own WebRTC peer connection; null the
+    // ref before stopping so the module's "closed" callback doesn't re-enter.
+    if (realtimeHandleRef.current) {
+      const realtime = realtimeHandleRef.current;
+      realtimeHandleRef.current = null;
+      try {
+        realtime.stop();
+      } catch {
+        /* ignore */
+      }
+    }
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
@@ -5863,7 +5887,160 @@ export function ChatPanel({
     ],
   );
 
+  // OpenAI Realtime (WebRTC) — the test/comparison-only voice path. Runs
+  // entirely browser<->OpenAI, so it needs no persistent server (and works on
+  // Vercel). Isolated from the default Deepgram duplex flow above.
+  const startRealtimeVoice = async () => {
+    if (activeBetaProofTrafficLocked) {
+      alertProofTrafficApprovalNeeded();
+      return;
+    }
+    try {
+      endingRef.current = false;
+      voiceTurnsRef.current = [];
+      const sessionId = `voice-${Date.now()}`;
+      voiceSessionIdRef.current = sessionId;
+      voiceProofAttemptIdRef.current = activeBetaProofAttemptId || null;
+      voiceStartedAtRef.current = Date.now();
+      voiceSessionCountedRef.current = false;
+      voiceSessionErrorRef.current = null;
+      recordVoiceAgentEvent({
+        type: "session_started",
+        status: "started",
+        sessionId,
+        summary: `OpenAI Realtime (test) session starting for ${activeLearningBookTitle}.`,
+        metadata: {
+          language,
+          bookId: canonicalActiveBookId,
+          documentId: activeDocumentId,
+          voiceBrokerMode,
+          proofAttemptId: getVoiceProofAttemptId(),
+        },
+      });
+      recordVoiceModelRun("started", sessionId, {
+        phase: "session_started",
+        language,
+      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: sessionId,
+          requestId: sessionId,
+          role: "assistant",
+          content: "",
+          isVoice: true,
+          voiceSession: { turns: [], startedAt: Date.now(), durationSeconds: 0 },
+        },
+      ]);
+      setVoiceState("listening");
+
+      const voiceContextPayload = await buildVoiceStudyContext().catch(
+        (): null => null,
+      );
+      voiceStudyContextRef.current = voiceContextPayload;
+      const studyContext = voiceContextPayload?.studyContext || "";
+
+      const instructions = [
+        "You are Tutor, a warm and concise spoken tutor in a live full-duplex voice conversation. Keep replies short and natural for speech. Never read markdown, code fences, or bracketed citations aloud.",
+        "Always reply in the language the learner is speaking.",
+        studyContext
+          ? `Learner context packet (local book, memory, selected text, and current document):\n${studyContext.slice(0, 8000)}`
+          : "No additional local context is attached.",
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+      const tools: RealtimeToolDefinition[] = VOICE_AGENT_TOOL_DEFINITIONS.filter(
+        (tool) =>
+          tool.name === "look_at_study_context" || tool.name === "web_search",
+      ).map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+      }));
+
+      const onToolCall = async (
+        name: string,
+        args: Record<string, unknown>,
+      ): Promise<unknown> => {
+        if (name === "look_at_study_context") {
+          return {
+            context: studyContext || "No additional local context is attached.",
+          };
+        }
+        if (name === "web_search") {
+          const query = String((args as { query?: unknown }).query || "").trim();
+          if (!query) return { error: "web_search requires a query." };
+          try {
+            const response = await fetch("/api/web-search", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(serperApiKey ? { "X-Serper-API-Key": serperApiKey } : {}),
+              },
+              body: JSON.stringify({
+                query,
+                mode: "search",
+                maxResults: 5,
+                serperApiKey: serperApiKey || undefined,
+              }),
+            });
+            const data = await response.json();
+            return { sources: data?.sources || data?.results || [] };
+          } catch (searchError) {
+            return {
+              error:
+                searchError instanceof Error
+                  ? searchError.message
+                  : "web_search failed.",
+            };
+          }
+        }
+        return { note: `${name} is not available in the Realtime test mode.` };
+      };
+
+      const handle = await startRealtimeSession({
+        openAiKey: apiKey.trim(),
+        model: import.meta.env.VITE_OPENAI_REALTIME_MODEL || "gpt-realtime",
+        voice: "marin",
+        instructions,
+        tools,
+        onToolCall,
+        onUserTranscript: (text) => {
+          appendVoiceTurn("user", text);
+        },
+        onAssistantTranscript: (text, done) => {
+          setVoiceCaption({ role: "assistant", text });
+          if (done) appendVoiceTurn("assistant", text);
+        },
+        onStateChange: (state) => {
+          if (state === "live") setVoiceState("listening");
+          if (state === "closed" && realtimeHandleRef.current) {
+            realtimeHandleRef.current = null;
+            if (!endingRef.current) stopVoice();
+          }
+        },
+        onError: (message) => {
+          voiceSessionErrorRef.current = message;
+          console.warn("[Realtime] error:", message);
+        },
+      });
+      realtimeHandleRef.current = handle;
+    } catch (error) {
+      voiceSessionErrorRef.current =
+        error instanceof Error ? error.message : String(error);
+      alert(
+        `OpenAI Realtime voice (test mode) could not start: ${voiceSessionErrorRef.current}. Add an OpenAI API key in Settings, or enable a server key with ALLOW_SERVER_OPENAI_FALLBACK.`,
+      );
+      stopVoice();
+    }
+  };
+
   const startVoice = async () => {
+    if (usesOpenAiRealtime) {
+      await startRealtimeVoice();
+      return;
+    }
     if (!usesCustomVoiceBroker && !hasDeepgramRuntimeKey) {
       alert(
         "Please configure your Deepgram API Key in settings or expose the local server fallback before using Voice features.",

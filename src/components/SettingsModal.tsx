@@ -21,7 +21,7 @@ import {
   TimerReset,
   UserCog,
 } from "lucide-react";
-import { useStore } from "../store";
+import { useStore, type VoiceMode } from "../store";
 import { useTranslation } from "../lib/translations";
 import { useMotionPreference } from "../hooks/useMotionPreference";
 import {
@@ -488,6 +488,8 @@ export function SettingsButton() {
     setTtsVoice,
     misoTtsApiUrl,
     setMisoTtsApiUrl,
+    voiceMode,
+    setVoiceMode,
     aiModel,
     setAiModel,
     animationsEnabled,
@@ -1049,6 +1051,38 @@ export function SettingsButton() {
                             Stored locally and sent only to this app's backend
                             when live web search is needed. Server environment
                             keys still work as a fallback.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <Mic size={14} className="text-zinc-400" />
+                            Voice mode
+                          </label>
+                          <select
+                            value={voiceMode}
+                            onChange={(e) =>
+                              setVoiceMode(e.target.value as VoiceMode)
+                            }
+                            disabled={isValidating}
+                            className="bg-[#121214] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6e00]/45 focus:ring-1 focus:ring-[#ff6e00]/30 transition-[color,background-color,border-color,box-shadow,transform,opacity] appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <option value="deepgram-duplex">
+                              Deepgram duplex — two-model (default)
+                            </option>
+                            <option value="deepgram-agent">
+                              Deepgram Voice Agent — single model
+                            </option>
+                            <option value="openai-realtime">
+                              OpenAI Realtime — test / comparison
+                            </option>
+                          </select>
+                          <p className="text-xs text-zinc-500 leading-relaxed">
+                            {voiceMode === "deepgram-duplex"
+                              ? "Default. A fast foreground model keeps the conversation moving while a background model does the heavy lifting. Needs a Deepgram key plus an OpenAI or OpenRouter key; runs in this app's own server — no separate host."
+                              : voiceMode === "deepgram-agent"
+                                ? "A single Deepgram Voice Agent handles speech and reasoning end to end."
+                                : "Test / comparison only — connects your browser straight to OpenAI's Realtime API over WebRTC for true full-duplex speech. Uses your OpenAI key and is billed at premium realtime rates."}
                           </p>
                         </div>
 
