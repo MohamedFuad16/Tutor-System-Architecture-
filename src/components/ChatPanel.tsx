@@ -3904,6 +3904,8 @@ export function ChatPanel({
     (state) => state.betaProofTrafficApproval,
   );
   const activeDocumentId = useStore((state) => state.activeDocumentId);
+  const pdfPage = useStore((state) => state.pdfPage);
+  const pdfTotalPages = useStore((state) => state.pdfTotalPages);
   const ttsVoice = useStore((state) => state.ttsVoice);
   const misoTtsApiUrl = useStore((state) => state.misoTtsApiUrl);
   const setActiveView = useStore((state) => state.setActiveView);
@@ -5234,6 +5236,19 @@ export function ChatPanel({
     setDismissedVoiceStageFocusId(null);
     setVoiceState("idle");
   };
+
+  // Ensure a live voice session is fully torn down if ChatPanel unmounts while
+  // it is active — otherwise the mic MediaStream, AudioContext, ScriptProcessor
+  // node and voice WebSocket leak, and the microphone stays hot. stopVoice is
+  // not memoized, so route the unmount call through a ref to always invoke the
+  // latest version without re-registering this effect on every render.
+  const stopVoiceRef = useRef(stopVoice);
+  stopVoiceRef.current = stopVoice;
+  useEffect(() => {
+    return () => {
+      stopVoiceRef.current?.();
+    };
+  }, []);
 
   const sendVoiceText = (text: string) => {
     const trimmed = text.trim();
@@ -7165,6 +7180,12 @@ export function ChatPanel({
           activeProject: activeLearningBook?.title || activeProject,
           activeBookId: canonicalActiveBookId,
           activeDocumentId,
+          // The page the learner is currently viewing, so the tutor can be told
+          // exactly what is on screen rather than always the document's opening.
+          currentPage: activeDocumentId ? pdfPage : undefined,
+          currentPageTotal: activeDocumentId
+            ? pdfTotalPages || undefined
+            : undefined,
           documentContexts: orderedBookDocuments.map((document) => ({
             id: document.id,
             title: document.title,

@@ -34,10 +34,27 @@ const SERPER_ENDPOINTS: Record<WebSearchMode, string> = {
 const CACHE_TTL_MS = 10 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 8000;
 const MAX_ATTEMPTS = 2;
+// Cap the number of cached queries so a long-lived host doesn't grow this Map
+// once per unique (mode, key, query, maxResults) combination forever.
+const MAX_CACHE_ENTRIES = 500;
 const cache = new Map<
   string,
   { expiresAt: number; results: NormalizedWebSource[] }
 >();
+
+// Drop expired entries, then enforce the size cap by evicting oldest-first
+// (Map preserves insertion order). Called on every write.
+const pruneCache = () => {
+  const now = Date.now();
+  for (const [key, entry] of cache) {
+    if (entry.expiresAt <= now) cache.delete(key);
+  }
+  while (cache.size > MAX_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value;
+    if (oldest === undefined) break;
+    cache.delete(oldest);
+  }
+};
 
 const abortError = () =>
   new DOMException("The operation was aborted.", "AbortError");
@@ -235,6 +252,7 @@ export async function searchSerper(
   const cacheKey = `${mode}:${apiKeyFingerprint}:${query.toLowerCase()}:${maxResults}`;
   const cached = cache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.results;
+  if (cached) cache.delete(cacheKey);
 
   if (options.signal?.aborted) throw abortError();
 
@@ -263,6 +281,7 @@ export async function searchSerper(
       const payload = await response.json();
       const results = normalizeRows(payload, mode, maxResults);
       cache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, results });
+      pruneCache();
       return results;
     } catch (error) {
       if (options.signal?.aborted) throw error;
