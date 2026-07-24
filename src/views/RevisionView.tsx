@@ -48,6 +48,7 @@ import {
 } from "../memory/longterm.memory";
 import { PatternCard, themes } from "../components/PatternCard";
 import { SvgBeige } from "../components/PatternSVGs";
+import { DiagramMermaid } from "../components/DiagramMermaid";
 import tutorBook from "../lib/tutorBook.json";
 import userBrainArchitectureBook from "../lib/userBrainArchitectureBook";
 import {
@@ -70,177 +71,6 @@ type BuiltInBook = {
     audioOverview?: ChapterAudioOverview;
   }[];
   renderChapter?: (chapterIndex: number) => React.ReactNode;
-};
-
-type MermaidApi = typeof import("mermaid").default;
-
-let revisionMermaidPromise: Promise<MermaidApi> | null = null;
-
-const mermaidGeminiThemeVariables = {
-  background: "#f6f7f9",
-  primaryColor: "#ffffff",
-  primaryTextColor: "#1f2933",
-  primaryBorderColor: "#d8dadd",
-  lineColor: "#a1a5ab",
-  secondaryColor: "#ffffff",
-  tertiaryColor: "#f6f7f9",
-  fontFamily: "Inter, system-ui, sans-serif",
-};
-
-const mermaidGeminiInitDirective = `%%{init: ${JSON.stringify({
-  theme: "base",
-  themeVariables: mermaidGeminiThemeVariables,
-})}}%%`;
-
-const loadRevisionMermaid = () => {
-  if (!revisionMermaidPromise) {
-    revisionMermaidPromise = import("mermaid").then((module) => {
-      const mermaid = module.default;
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: "base",
-        securityLevel: "strict",
-        fontFamily:
-          "'Geist Sans', Inter, 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', system-ui, sans-serif",
-        themeVariables: {
-          background: "transparent",
-          fontSize: "14px",
-          primaryColor: "#ffffff",
-          primaryTextColor: "#18181b",
-          primaryBorderColor: "#d4d4d8",
-          secondaryColor: "#f4f4f5",
-          secondaryTextColor: "#27272a",
-          secondaryBorderColor: "#d4d4d8",
-          tertiaryColor: "#fafafa",
-          tertiaryTextColor: "#3f3f46",
-          tertiaryBorderColor: "#e4e4e7",
-          mainBkg: "#ffffff",
-          nodeBorder: "#d4d4d8",
-          nodeTextColor: "#18181b",
-          textColor: "#3f3f46",
-          titleColor: "#18181b",
-          lineColor: "#a1a1aa",
-          arrowheadColor: "#a1a1aa",
-          edgeLabelBackground: "#fafaf9",
-          clusterBkg: "#fafafa",
-          clusterBorder: "#e4e4e7",
-          noteBkgColor: "#fef3c7",
-          noteTextColor: "#78350f",
-          noteBorderColor: "#fcd34d",
-        },
-        flowchart: {
-          curve: "basis",
-          padding: 12,
-          nodeSpacing: 44,
-          rankSpacing: 54,
-          htmlLabels: true,
-          useMaxWidth: true,
-        },
-        sequence: { useMaxWidth: true },
-      });
-      return mermaid;
-    });
-  }
-  return revisionMermaidPromise;
-};
-
-type RevisionMermaidVariant = "default" | "gemini";
-
-const readableMermaidWidth = (svg: SVGSVGElement) => {
-  const [, , viewBoxWidth = 0, viewBoxHeight = 0] =
-    svg.getAttribute("viewBox")?.trim().split(/\s+/).map(Number) || [];
-  if (!Number.isFinite(viewBoxWidth) || viewBoxWidth <= 0) return 720;
-
-  const aspectRatio =
-    Number.isFinite(viewBoxHeight) && viewBoxHeight > 0
-      ? viewBoxWidth / viewBoxHeight
-      : 1;
-  const readableScale = aspectRatio > 10 ? 0.74 : aspectRatio > 4 ? 0.86 : 1;
-
-  return Math.round(
-    Math.min(Math.max(viewBoxWidth * readableScale, 720), 1280),
-  );
-};
-
-const RevisionMermaid = ({
-  chart,
-  variant = "default",
-}: {
-  chart: string;
-  variant?: RevisionMermaidVariant;
-}) => {
-  const chartRef = useRef<HTMLDivElement>(null);
-  const isGemini = variant === "gemini";
-  const chartId = useId().replace(/:/g, "");
-  const renderedChart = isGemini
-    ? `${mermaidGeminiInitDirective}\n${chart}`
-    : chart;
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!chartRef.current) return;
-    chartRef.current.textContent = "";
-    const chartForViewport = window.matchMedia?.("(max-width: 640px)").matches
-      ? renderedChart
-          .replace(/\bflowchart\s+LR\b/g, "flowchart TB")
-          .replace(/\bgraph\s+LR\b/g, "graph TB")
-      : renderedChart;
-
-    loadRevisionMermaid()
-      .then((mermaid) =>
-        mermaid.render(`revision-mermaid-${chartId}`, chartForViewport),
-      )
-      .then((result) => {
-        if (!cancelled && chartRef.current) {
-          chartRef.current.innerHTML = result.svg;
-          const svg = chartRef.current.querySelector<SVGSVGElement>("svg");
-          if (svg) {
-            const readableWidth = readableMermaidWidth(svg);
-            svg.style.width = "100%";
-            svg.style.minWidth = "0";
-            svg.style.maxWidth = `${readableWidth}px`;
-            svg.style.height = "auto";
-            svg.style.display = "block";
-            svg.style.margin = "0 auto";
-            svg.setAttribute("preserveAspectRatio", "xMinYMin meet");
-          }
-        }
-      })
-      .catch((error) => {
-        console.warn("Revision Mermaid error", error);
-        if (!cancelled && chartRef.current) {
-          chartRef.current.textContent =
-            error instanceof Error ? error.message : String(error);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [chartId, renderedChart]);
-
-  return (
-    <div
-      className={`not-prose my-6 overflow-x-auto overflow-y-hidden sm:my-8 ${
-        isGemini
-          ? "rounded-xl border border-zinc-200 bg-[#f6f7f9] p-2 shadow-[0_18px_46px_rgba(15,23,42,0.08)] sm:rounded-2xl sm:p-3"
-          : "rounded-xl border border-zinc-200 bg-white/70 p-2 shadow-sm sm:p-3"
-      }`}
-    >
-      <div
-        ref={chartRef}
-        role="img"
-        aria-label={
-          isGemini ? "User Brain Architecture chart" : "Revision diagram"
-        }
-        className={`min-w-full rounded-xl p-2 sm:p-4 [&_.edgeLabel]:rounded-md [&_.label]:font-sans [&_svg]:h-auto ${
-          isGemini
-            ? "bg-[#f6f7f9] [&_.edgeLabel]:bg-[#f6f7f9]"
-            : "bg-white [&_.edgeLabel]:bg-white"
-        }`}
-      />
-    </div>
-  );
 };
 
 const InteractionRuntimeDiagram = () => {
@@ -3146,19 +2976,47 @@ export function RevisionView() {
     localStorage.removeItem("revision_open_book_id");
   }, [scopedLearningBooks, setActiveLearningBookId, setActiveProject]);
 
-  const cleanRevisionNote = React.useCallback(
-    (value?: string) =>
-      String(value || "")
-        .replace(/\bPrompt:\s*/gi, "")
-        .replace(/\bLearning note:\s*/gi, "")
-        .replace(
-          /\bReview hook:\s*restate the idea in your own words, identify the key mechanism, and test it with a fresh example\.?/gi,
-          "",
-        )
-        .replace(/\n{3,}/g, "\n\n")
-        .trim(),
-    [],
-  );
+  const cleanRevisionNote = React.useCallback((value?: string) => {
+    let text = String(value || "");
+    // Some stored summaries are JSON-encoded (a quoted string or an object with
+    // a summary/text field) or carry literal escape sequences; unwrap/unescape
+    // them so notes don't render as one garbled run-on line.
+    const trimmed = text.trim();
+    if (
+      (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (typeof parsed === "string") {
+          text = parsed;
+        } else if (parsed && typeof parsed === "object") {
+          const candidate =
+            parsed.summary ||
+            parsed.text ||
+            parsed.content ||
+            parsed.note ||
+            parsed.value;
+          if (typeof candidate === "string") text = candidate;
+        }
+      } catch {
+        /* not valid JSON — keep the original text */
+      }
+    }
+    return text
+      .replace(/\\r\\n|\\n/g, "\n")
+      .replace(/\\t/g, "  ")
+      .replace(/\\"/g, '"')
+      .replace(/\bPrompt:\s*/gi, "")
+      .replace(/\bLearning note:\s*/gi, "")
+      .replace(
+        /\bReview hook:\s*restate the idea in your own words, identify the key mechanism, and test it with a fresh example\.?/gi,
+        "",
+      )
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }, []);
 
   const learningBookMarkdown = React.useCallback(
     (book: LearningBook) => {
@@ -3171,20 +3029,31 @@ export function RevisionView() {
               const chapterConcepts = conceptsForBook
                 .filter((concept) => chapterConceptIds.has(concept.id))
                 .map((concept) => concept.name);
-              return `### Chapter ${index + 1}: ${chapter.title}\n${cleanRevisionNote(chapter.summary) || "Chapter summary pending."}${chapterConcepts.length ? `\n\nConcepts: ${chapterConcepts.join(", ")}` : ""}`;
+              return `### Chapter ${index + 1}: ${chapter.title}\n\n${cleanRevisionNote(chapter.summary) || "Chapter summary pending."}${chapterConcepts.length ? `\n\nConcepts: ${chapterConcepts.join(", ")}` : ""}`;
             })
             .join("\n\n")
         : "No chapters mapped yet.";
       const conceptText = conceptsForBook.length
         ? conceptsForBook
             .map((concept) => {
-              const branches = concept.childConcepts.length
-                ? `\n  - Branches: ${concept.childConcepts.join(", ")}`
+              // Build parent/branch relations as a real markdown list with a
+              // blank line before it, so remark-gfm renders bullets instead of
+              // gluing them into the preceding paragraph (lazy continuation).
+              const relationLines: string[] = [];
+              if (concept.parentConcepts.length) {
+                relationLines.push(
+                  `- Parent concepts: ${concept.parentConcepts.join(", ")}`,
+                );
+              }
+              if (concept.childConcepts.length) {
+                relationLines.push(
+                  `- Branches: ${concept.childConcepts.join(", ")}`,
+                );
+              }
+              const relations = relationLines.length
+                ? `\n\n${relationLines.join("\n")}`
                 : "";
-              const parents = concept.parentConcepts.length
-                ? `\n  - Parent concepts: ${concept.parentConcepts.join(", ")}`
-                : "";
-              return `### ${concept.name}\n${cleanRevisionNote(concept.summary) || "Summary pending."}${parents}${branches}`;
+              return `### ${concept.name}\n\n${cleanRevisionNote(concept.summary) || "Summary pending."}${relations}`;
             })
             .join("\n\n")
         : "No concepts mapped yet.";
@@ -3192,10 +3061,10 @@ export function RevisionView() {
         .slice(0, 5)
         .map(
           (entry, index) =>
-            `### Page ${index + 1}\n${cleanRevisionNote(entry.conversationSummary || entry.assistantSummary) || "Learning note pending."}`,
+            `### Page ${index + 1}\n\n${cleanRevisionNote(entry.conversationSummary || entry.assistantSummary) || "Learning note pending."}`,
         )
         .join("\n\n");
-      return `## Overview\n${cleanRevisionNote(book.overview) || "Overview pending."}\n\n## Knowledge Summary\n${cleanRevisionNote(book.knowledgeSummary || book.summary) || "Summary pending."}\n\n## Chapters\n${chapterText}\n\n## Mapped Concepts\n${conceptText}\n\n## Learning Pages\n${entryText || "No learning notes recorded yet."}`;
+      return `## Overview\n\n${cleanRevisionNote(book.overview) || "Overview pending."}\n\n## Knowledge Summary\n\n${cleanRevisionNote(book.knowledgeSummary || book.summary) || "Summary pending."}\n\n## Chapters\n\n${chapterText}\n\n## Mapped Concepts\n\n${conceptText}\n\n## Learning Pages\n\n${entryText || "No learning notes recorded yet."}`;
     },
     [cleanRevisionNote, conceptsByBookId, entriesByBookId],
   );
@@ -3216,10 +3085,19 @@ export function RevisionView() {
         ? conceptsForChapter
             .map(
               (concept) =>
-                `### ${concept.name}\n${cleanRevisionNote(concept.summary) || "A fuller explanation will be added after the next supported lesson."}`,
+                `### ${concept.name}\n\n${cleanRevisionNote(concept.summary) || "A fuller explanation will be added after the next supported lesson."}`,
             )
             .join("\n\n")
         : "This chapter has not yet separated its main idea into smaller concepts.";
+      // Node labels are used inside `["…"]`; strip characters that would break
+      // the Mermaid parser and surface as a raw error under "Visual Map".
+      const sanitizeMermaidLabel = (raw: string) =>
+        String(raw || "")
+          .replace(/[[\]{}()#"|<>]/g, " ")
+          .replace(/[\r\n]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 60) || "Concept";
       const chapterEntries = (entriesByBookId.get(book.id) || []).filter(
         (entry) =>
           entry.learnedConcepts.some((conceptId) =>
@@ -3237,10 +3115,10 @@ export function RevisionView() {
         ? [
             "```mermaid",
             "flowchart LR",
-            `  idea["${chapter.title.replace(/"/g, "'")}"]`,
+            `  idea["${sanitizeMermaidLabel(chapter.title)}"]`,
             ...diagramNodes.map(
               (concept, conceptIndex) =>
-                `  concept${conceptIndex}["${concept.name.replace(/"/g, "'")}"]`,
+                `  concept${conceptIndex}["${sanitizeMermaidLabel(concept.name)}"]`,
             ),
             ...diagramNodes.map(
               (_, conceptIndex) => `  idea --> concept${conceptIndex}`,
@@ -3523,7 +3401,7 @@ export function RevisionView() {
                           const code = String(children).replace(/\n$/, "");
                           if (language === "mermaid") {
                             return (
-                              <RevisionMermaid
+                              <DiagramMermaid
                                 chart={code}
                                 variant={
                                   activeBuiltInBook?.id ===

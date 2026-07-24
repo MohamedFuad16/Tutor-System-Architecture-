@@ -54,6 +54,7 @@ import { gsap } from "gsap";
 import { useLiveQuery } from "dexie-react-hooks";
 import { audio } from "../lib/audio";
 import { SiriLiquidGlass } from "./SiriLiquidGlass";
+import { DiagramMermaid } from "./DiagramMermaid";
 import { useStore, type NormalizedWebSource } from "../store";
 import { brainOrchestrator } from "../memory/memory.orchestrator";
 import { db, GENERAL_STUDY_BOOK_ID } from "../memory/longterm.memory";
@@ -289,396 +290,6 @@ type StreamingAssistantDraft = {
   id: string;
   content: string;
   usage?: NonNullable<Message["usage"]>;
-};
-
-let mermaidPromise: Promise<MermaidApi> | null = null;
-
-const loadMermaid = () => {
-  if (!mermaidPromise) {
-    mermaidPromise = import("mermaid").then((module) => {
-      const mermaid = module.default;
-      mermaid.initialize({
-        startOnLoad: false,
-        // strict sanitizes model-generated diagram source (DOMPurify) and
-        // blocks in-diagram click/javascript directives — the diagram text is
-        // influenced by untrusted PDF/web content, so "loose" was an XSS path.
-        securityLevel: "strict",
-        theme: "base",
-        fontFamily:
-          "'Geist', 'Geist Sans', Inter, 'Hiragino Sans', 'Yu Gothic UI', 'Noto Sans JP', system-ui, sans-serif",
-        themeVariables: {
-          background: "transparent",
-          fontSize: "14px",
-          // Calmer zinc family, lifted for legible contrast on the near-black
-          // card. Orange stays reserved for the click-to-focus highlight.
-          primaryColor: "#26262c",
-          primaryTextColor: "#fafafa",
-          primaryBorderColor: "#6b6b76",
-          secondaryColor: "#2f2f36",
-          secondaryTextColor: "#f4f4f5",
-          secondaryBorderColor: "#6b6b76",
-          tertiaryColor: "#28282e",
-          tertiaryTextColor: "#f4f4f5",
-          tertiaryBorderColor: "#57575f",
-          mainBkg: "#26262c",
-          nodeBorder: "#6b6b76",
-          nodeTextColor: "#fafafa",
-          textColor: "#e7e7ea",
-          titleColor: "#fafafa",
-          lineColor: "#a8a8b3",
-          arrowheadColor: "#a8a8b3",
-          edgeLabelBackground: "#18181b",
-          clusterBkg: "rgba(42,42,48,0.55)",
-          clusterBorder: "#57575f",
-          noteBkgColor: "#292524",
-          noteTextColor: "#fcd34d",
-          noteBorderColor: "#78716c",
-          actorBkg: "#26262c",
-          actorTextColor: "#fafafa",
-          actorBorder: "#6b6b76",
-          labelBoxBkgColor: "#26262c",
-          labelTextColor: "#fafafa",
-        },
-        flowchart: {
-          curve: "basis",
-          padding: 16,
-          nodeSpacing: 50,
-          rankSpacing: 60,
-          htmlLabels: true,
-          useMaxWidth: true,
-        },
-        sequence: { useMaxWidth: true },
-      });
-      return mermaid;
-    });
-  }
-  return mermaidPromise;
-};
-
-const cleanMermaidTourLabel = (value: string | null | undefined) =>
-  (value || "")
-    .replace(/\s+/g, " ")
-    .replace(/\b(node|label)\b/gi, "")
-    .trim()
-    .slice(0, 80);
-
-const collectMermaidTourNodes = (svg: SVGSVGElement) => {
-  const seen = new Set<Element>();
-  const preferredCandidates = Array.from(
-    svg.querySelectorAll<SVGGElement>(
-      [
-        "g.node",
-        "g[class*='state']",
-        "g[class*='entity']",
-        "g[class*='relationship']",
-        "g[class*='classGroup']",
-        "g[id*='flowchart'][class*='node']",
-        "g[id*='state'][class*='node']",
-        "g[id*='entity']",
-      ].join(", "),
-    ),
-  );
-  const candidates = preferredCandidates.length
-    ? preferredCandidates
-    : Array.from(svg.querySelectorAll<SVGGElement>("g"));
-  return candidates
-    .filter((node) => {
-      if (seen.has(node)) return false;
-      seen.add(node);
-      const hasShape = Boolean(
-        node.querySelector("rect, polygon, path, circle, ellipse"),
-      );
-      const label = cleanMermaidTourLabel(node.textContent);
-      return hasShape && label.length > 0;
-    })
-    .slice(0, 16);
-};
-
-type MermaidViewBox = [number, number, number, number];
-
-const parseMermaidViewBox = (svg: SVGSVGElement): MermaidViewBox | null => {
-  const parts = (svg.getAttribute("viewBox") || "")
-    .trim()
-    .split(/[\s,]+/)
-    .map(Number);
-  if (parts.length !== 4 || parts.some((part) => !Number.isFinite(part))) {
-    return null;
-  }
-  if (parts[2] <= 0 || parts[3] <= 0) return null;
-  return parts as MermaidViewBox;
-};
-
-const Mermaid = ({
-  chart,
-  variant = "inline",
-}: {
-  chart: string;
-  variant?: "inline" | "stage";
-}) => {
-  const chartRef = useRef<HTMLDivElement>(null);
-  const originalViewBoxRef = useRef<MermaidViewBox | null>(null);
-  const viewBoxAnimationRef = useRef<number | null>(null);
-  const focusNodesRef = useRef<SVGGElement[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready">("loading");
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
-  const isStage = variant === "stage";
-
-  const prefersReducedMotion = () =>
-    typeof window !== "undefined" &&
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  useEffect(() => {
-    let cancelled = false;
-    const container = chartRef.current;
-    if (!container) return;
-
-    if (viewBoxAnimationRef.current !== null) {
-      cancelAnimationFrame(viewBoxAnimationRef.current);
-      viewBoxAnimationRef.current = null;
-    }
-    focusNodesRef.current = [];
-    setFocusIndex(null);
-
-    // Debounce so streaming tokens don't render on every keystroke, and only
-    // render once the source PARSES cleanly. This is what stops half-finished
-    // ```mermaid fences from flashing raw parser errors: while the block is
-    // still streaming (or genuinely invalid) we simply leave the last good
-    // diagram / skeleton in place instead of dumping an error string.
-    const timer = window.setTimeout(() => {
-      loadMermaid()
-        .then(async (mermaid) => {
-          if (cancelled) return;
-          let parseable = false;
-          try {
-            parseable = Boolean(
-              await mermaid.parse(chart, { suppressErrors: true }),
-            );
-          } catch {
-            parseable = false;
-          }
-          if (!parseable) return;
-          const res = await mermaid.render(
-            `mermaid-${Math.random().toString(36).slice(2)}`,
-            chart,
-          );
-          if (cancelled || !chartRef.current) return;
-          chartRef.current.innerHTML = res.svg;
-          const svg = chartRef.current.querySelector<SVGSVGElement>("svg");
-          if (!svg) return;
-          svg.setAttribute("role", "img");
-          svg.setAttribute("aria-label", "Diagram");
-          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-          svg.removeAttribute("width");
-          svg.removeAttribute("height");
-          svg.style.display = "block";
-          svg.style.width = "100%";
-          svg.style.maxWidth = "100%";
-          svg.style.maxHeight = isStage ? "72vh" : "70dvh";
-          svg.style.minWidth = "0";
-          svg.style.height = "auto";
-          svg.style.margin = "0 auto";
-          if (!svg.getAttribute("viewBox")) {
-            try {
-              const bounds = (svg as unknown as SVGGraphicsElement).getBBox();
-              svg.setAttribute(
-                "viewBox",
-                `${bounds.x} ${bounds.y} ${Math.max(bounds.width, 1)} ${Math.max(bounds.height, 1)}`,
-              );
-            } catch {}
-          }
-          originalViewBoxRef.current = parseMermaidViewBox(svg);
-          // Optional click-to-focus: clicking a node zooms to it. Nodes stay at
-          // full opacity by default — no perpetual dimming, no auto-panning.
-          const nodes = collectMermaidTourNodes(svg);
-          focusNodesRef.current = nodes;
-          nodes.forEach((node, index) => {
-            node.setAttribute("data-mermaid-node", "true");
-            node.setAttribute("tabindex", "0");
-            node.setAttribute("role", "button");
-            const label = cleanMermaidTourLabel(node.textContent);
-            if (label) node.setAttribute("aria-label", `Focus ${label}`);
-            node.style.cursor = "zoom-in";
-            const toggleFocus = () =>
-              setFocusIndex((current) => (current === index ? null : index));
-            node.addEventListener("click", toggleFocus);
-            node.addEventListener("keydown", (event) => {
-              const key = (event as KeyboardEvent).key;
-              if (key === "Enter" || key === " ") {
-                event.preventDefault();
-                toggleFocus();
-              }
-            });
-          });
-          setStatus("ready");
-        })
-        .catch((error) => {
-          console.warn("Mermaid render error", error);
-        });
-    }, 120);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-      if (viewBoxAnimationRef.current !== null) {
-        cancelAnimationFrame(viewBoxAnimationRef.current);
-        viewBoxAnimationRef.current = null;
-      }
-    };
-  }, [chart, isStage]);
-
-  // Animate the viewBox to the focused node, or back to the full diagram when
-  // focus is cleared. Focus is user-initiated (click/enter) only.
-  useEffect(() => {
-    const container = chartRef.current;
-    const svg = container?.querySelector<SVGSVGElement>("svg");
-    const original = originalViewBoxRef.current;
-    if (!svg || !original) return;
-
-    if (viewBoxAnimationRef.current !== null) {
-      cancelAnimationFrame(viewBoxAnimationRef.current);
-      viewBoxAnimationRef.current = null;
-    }
-
-    const nodes = focusNodesRef.current;
-    nodes.forEach((node) => node.removeAttribute("data-mermaid-active"));
-
-    let target: MermaidViewBox = original;
-    if (focusIndex !== null && nodes[focusIndex]) {
-      const activeNode = nodes[focusIndex];
-      activeNode.setAttribute("data-mermaid-active", "true");
-      // Focus by animating the SVG viewBox (diagram coordinates) so the pan/zoom
-      // lands exactly on the node and the diagram can never escape its frame.
-      const current = parseMermaidViewBox(svg) || original;
-      const svgRect = svg.getBoundingClientRect();
-      const nodeRect = activeNode.getBoundingClientRect();
-      if (svgRect.width >= 1 && svgRect.height >= 1) {
-        const renderScale = Math.min(
-          svgRect.width / current[2],
-          svgRect.height / current[3],
-        );
-        const contentLeft =
-          svgRect.left + (svgRect.width - current[2] * renderScale) / 2;
-        const contentTop =
-          svgRect.top + (svgRect.height - current[3] * renderScale) / 2;
-        const nodeX = current[0] + (nodeRect.left - contentLeft) / renderScale;
-        const nodeY = current[1] + (nodeRect.top - contentTop) / renderScale;
-        const nodeW = nodeRect.width / renderScale;
-        const nodeH = nodeRect.height / renderScale;
-        const [origX, origY, origW, origH] = original;
-        const aspect = origW / origH;
-        let targetW = Math.min(
-          origW,
-          Math.max(nodeW * (isStage ? 2.6 : 3.1), origW * 0.45),
-        );
-        let targetH = targetW / aspect;
-        if (targetH < nodeH * 1.7) {
-          targetH = Math.min(origH, nodeH * 1.7);
-          targetW = targetH * aspect;
-        }
-        let targetX = nodeX + nodeW / 2 - targetW / 2;
-        let targetY = nodeY + nodeH / 2 - targetH / 2;
-        targetX = Math.max(origX, Math.min(origX + origW - targetW, targetX));
-        targetY = Math.max(origY, Math.min(origY + origH - targetH, targetY));
-        target = [targetX, targetY, targetW, targetH];
-      }
-    }
-
-    const applyViewBox = (box: MermaidViewBox) =>
-      svg.setAttribute("viewBox", box.map((v) => v.toFixed(2)).join(" "));
-    const from = parseMermaidViewBox(svg) || original;
-    if (prefersReducedMotion()) {
-      applyViewBox(target);
-      return;
-    }
-    const durationMs = isStage ? 700 : 560;
-    const startedAt = performance.now();
-    const easeInOutCubic = (t: number) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    const tick = (now: number) => {
-      const progress = Math.min(1, (now - startedAt) / durationMs);
-      const eased = easeInOutCubic(progress);
-      applyViewBox(
-        from.map(
-          (value, i) => value + (target[i] - value) * eased,
-        ) as MermaidViewBox,
-      );
-      viewBoxAnimationRef.current =
-        progress < 1 ? requestAnimationFrame(tick) : null;
-    };
-    viewBoxAnimationRef.current = requestAnimationFrame(tick);
-  }, [focusIndex, isStage]);
-
-  return (
-    <div
-      className={`learningai-mermaid relative w-full text-zinc-100 ${
-        isStage
-          ? "my-0 max-w-none overflow-visible border-0 bg-transparent p-0 shadow-none"
-          : "my-4 max-w-none overflow-hidden rounded-2xl border border-white/10 bg-[#121216] p-3 shadow-[0_18px_44px_rgba(0,0,0,0.28)]"
-      }`}
-      data-mermaid-variant={variant}
-    >
-      <style>{`
-        .learningai-mermaid [data-mermaid-node='true'] {
-          transition: filter 320ms ease;
-        }
-        .learningai-mermaid [data-mermaid-active='true'] {
-          filter: drop-shadow(0 0 12px rgba(255, 138, 42, 0.45));
-        }
-        .learningai-mermaid [data-mermaid-active='true'] rect,
-        .learningai-mermaid [data-mermaid-active='true'] polygon,
-        .learningai-mermaid [data-mermaid-active='true'] path,
-        .learningai-mermaid [data-mermaid-active='true'] circle,
-        .learningai-mermaid [data-mermaid-active='true'] ellipse {
-          stroke: #ff8a2a !important;
-          stroke-width: 2.25px !important;
-        }
-        .learningai-mermaid .node rect,
-        .learningai-mermaid .node polygon { rx: 10px; ry: 10px; }
-        .learningai-mermaid .edgeLabel { border-radius: 8px; line-height: 1.25; }
-        .learningai-mermaid .edgeLabel p,
-        .learningai-mermaid .edgeLabel span {
-          background: #18181b !important;
-          color: #e7e7ea !important;
-          border-radius: 8px;
-          padding: 2px 7px;
-          font-size: 11.5px;
-          font-weight: 500;
-        }
-        .learningai-mermaid[data-mermaid-variant='stage'] svg {
-          background: transparent !important;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .learningai-mermaid [data-mermaid-node='true'] { transition: none !important; }
-        }
-      `}</style>
-      <div
-        ref={chartRef}
-        className={`relative flex justify-center ${
-          isStage
-            ? "min-h-[52vh] items-center overflow-visible p-0 sm:min-h-[72vh]"
-            : "min-h-[160px] items-center overflow-hidden rounded-lg p-2"
-        }`}
-      />
-      {status === "loading" && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-xs text-zinc-500">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-500" />
-            Rendering diagram…
-          </div>
-        </div>
-      )}
-      {status === "ready" && focusIndex !== null && !isStage && (
-        <button
-          type="button"
-          onClick={() => setFocusIndex(null)}
-          className="absolute right-3 top-3 rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-[11px] font-medium text-zinc-200 backdrop-blur transition-colors hover:border-orange-300/60 hover:text-orange-100"
-        >
-          Reset view
-        </button>
-      )}
-    </div>
-  );
 };
 
 type VoiceCaption = {
@@ -1243,7 +854,7 @@ const VoiceVisualStage = ({
           data-voice-stage-mermaid
           className="flex h-full w-full items-center justify-center"
         >
-          <Mermaid chart={focus.mermaid || ""} variant="stage" />
+          <DiagramMermaid chart={focus.mermaid || ""} variant="gemini" />
         </div>
       ) : focus.kind === "web_search" ? (
         <div className="custom-scroll max-h-full w-full max-w-6xl overflow-auto rounded-2xl border border-white/10 bg-[#050505]/92 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.58)] backdrop-blur-2xl sm:p-5">
@@ -1618,7 +1229,7 @@ const InteractiveCodeBlock = React.memo(
     const code = String(children).replace(/\n$/, "");
 
     if (!inline && language === "mermaid") {
-      return <Mermaid chart={code} />;
+      return <DiagramMermaid chart={code} variant="gemini" streaming />;
     }
 
     // Interactive runnable JS
@@ -2869,7 +2480,7 @@ const VoiceVisualFocusPanel = ({
           )}
           {focus.kind === "diagram" && focus.mermaid ? (
             <div className="mt-3" data-voice-mermaid-diagram>
-              <Mermaid chart={focus.mermaid} />
+              <DiagramMermaid chart={focus.mermaid} variant="gemini" />
             </div>
           ) : null}
           {focus.sources?.length ? (
@@ -3269,6 +2880,31 @@ const ThinkingPanel = ({
   );
 };
 
+// While a response streams, markdown syntax arrives sliced mid-token, so a naive
+// renderer flashes raw `**`, `` ` ``, `[`… before the closing marker arrives. This
+// auto-closes dangling constructs on the copy fed to the parser (the raw content is
+// untouched) so streamed text keeps its real formatting instead of flashing source.
+const closeIncompleteMarkdown = (text: string): string => {
+  if (!text) return text;
+  // 1) Unterminated fenced code block → close it.
+  const fenceCount = (text.match(/```/g) || []).length;
+  if (fenceCount % 2 === 1) return `${text}\n\`\`\``;
+  // 2) Balance simple inline markers on the streamed tail (the segment after the
+  //    last fence, which is outside any code block since fences are balanced).
+  const parts = text.split("```");
+  const lastIndex = parts.length - 1;
+  let tail = parts[lastIndex];
+  if ((tail.match(/\*\*/g) || []).length % 2 === 1) tail += "**";
+  if ((tail.replace(/\*\*/g, "").match(/\*/g) || []).length % 2 === 1) tail += "*";
+  if ((tail.match(/`/g) || []).length % 2 === 1) tail += "`";
+  if ((tail.match(/~~/g) || []).length % 2 === 1) tail += "~~";
+  const opens = (tail.match(/\[/g) || []).length;
+  const closes = (tail.match(/\]/g) || []).length;
+  if (opens > closes) tail += "]".repeat(opens - closes);
+  parts[lastIndex] = tail;
+  return parts.join("```");
+};
+
 const markdownComponents = {
   p: ({ children, ...props }: any) => (
     <div className="mb-2 last:mb-0" {...props}>
@@ -3281,6 +2917,13 @@ const markdownComponents = {
   h3: ({ children, ...props }: any) => <h3 {...props}>{children}</h3>,
   blockquote: ({ children, ...props }: any) => (
     <blockquote {...props}>{children}</blockquote>
+  ),
+  // Wide GFM tables scroll inside their own container instead of overflowing the
+  // paper chat column.
+  table: ({ children, ...props }: any) => (
+    <div className="my-2 w-full overflow-x-auto">
+      <table {...props}>{children}</table>
+    </div>
   ),
   code: InteractiveCodeBlock,
 };
@@ -3385,11 +3028,19 @@ const AnimatedMarkdown = React.memo(
         ? useSmoothStreamingText(content, isStreaming)
         : content;
 
+    // Feed the parser a syntax-complete copy while streaming so half-typed
+    // markdown never renders as raw source.
+    const renderContent = isStreaming
+      ? closeIncompleteMarkdown(smoothContent)
+      : smoothContent;
+
     const showCursor =
       animationsEnabled && !isVoice && isStreaming && smoothContent.length > 0;
 
     return (
-      <div className={`streaming-text ${showCursor ? "typing-active" : ""}`}>
+      <div
+        className={`streaming-text min-w-0 break-words ${showCursor ? "typing-active" : ""}`}
+      >
         <style>{`
         .streaming-text {
           overflow-wrap: anywhere;
@@ -3419,7 +3070,7 @@ const AnimatedMarkdown = React.memo(
           remarkPlugins={[remarkGfm]}
           components={markdownComponents}
         >
-          {smoothContent}
+          {renderContent}
         </ReactMarkdown>
       </div>
     );
@@ -4167,6 +3818,27 @@ export function ChatPanel({
     },
     [],
   );
+
+  // ChatGPT/Claude-style anchor: bring a message's top just below the sticky
+  // header so a new question sits near the top and its answer streams below,
+  // read from the start — instead of yanking the view to the absolute bottom.
+  const anchorMessageToTop = useCallback((messageId: string) => {
+    requestAnimationFrame(() => {
+      const scrollEl = scrollRef.current;
+      if (!scrollEl || !messageId) return;
+      const bubble = scrollEl.querySelector<HTMLElement>(
+        `[data-message-id="${CSS.escape(messageId)}"]`,
+      );
+      if (!bubble) return;
+      const target =
+        scrollEl.scrollTop +
+        bubble.getBoundingClientRect().top -
+        scrollEl.getBoundingClientRect().top -
+        96;
+      scrollEl.scrollTo({ top: Math.max(0, target), behavior: "smooth" });
+    });
+  }, []);
+  const [showJumpToBottom, setShowJumpToBottom] = useState(false);
 
   useEffect(() => {
     setIsVoiceActive(voiceState !== "idle" || isPlayingTTS !== null);
@@ -7185,8 +6857,12 @@ export function ChatPanel({
       },
     ]);
     clearStreamingAssistant();
-    isAutoScrollPaused.current = false;
-    forceScrollToBottom("smooth");
+    // Anchor the just-sent question near the top and let the answer stream
+    // below it. We're intentionally not at the bottom now, so mark auto-follow
+    // paused until the user scrolls down themselves.
+    isAutoScrollPaused.current = true;
+    setShowJumpToBottom(false);
+    anchorMessageToTop(newMessages[newMessages.length - 1].id);
     setIsTyping(true);
     recordLearnerBackgroundTask({
       taskId: chatTaskId,
@@ -8138,48 +7814,48 @@ export function ChatPanel({
     if (!lastMessage) return;
     const isNewMessage =
       lastMessage.id !== lastAutoScrolledMessageIdRef.current;
-    if (isNewMessage) {
-      lastAutoScrolledMessageIdRef.current = lastMessage.id;
-      isAutoScrollPaused.current = false;
+    if (!isNewMessage) return;
+    lastAutoScrolledMessageIdRef.current = lastMessage.id;
+    // A brand-new question anchors near the top (its answer streams below);
+    // a new assistant/voice turn only follows if the user is already at the
+    // bottom. The primary send path anchors in sendMessage; this covers other
+    // flows (voice turns, restored threads).
+    if (lastMessage.role === "user") {
+      isAutoScrollPaused.current = true;
+      anchorMessageToTop(lastMessage.id);
+    } else if (!isAutoScrollPaused.current) {
       forceScrollToBottom("smooth");
-      return;
-    }
-    if (sendState !== "idle" && !isAutoScrollPaused.current) {
-      forceScrollToBottom("auto");
     }
   }, [
+    anchorMessageToTop,
     forceScrollToBottom,
     lastMessage?.id,
-    lastMessage?.phase,
     lastMessage?.role,
-    sendState,
   ]);
 
   useEffect(() => {
     const scrollEl = scrollRef.current;
     if (!scrollEl) return;
 
-    // Track manual scrolling to pause auto-scroll
+    // Track whether the user is near the bottom; this is the single "should I
+    // follow the stream" signal, and it drives the jump-to-bottom pill.
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollEl;
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 150;
-      isAutoScrollPaused.current = !isNearBottom;
+      const nearBottom = scrollHeight - scrollTop - clientHeight < 120;
+      isAutoScrollPaused.current = !nearBottom;
+      setShowJumpToBottom(!nearBottom && scrollHeight - clientHeight > 40);
     };
-
+    handleScroll();
     scrollEl.addEventListener("scroll", handleScroll, { passive: true });
 
     let scrollFrame: number | null = null;
-    // Use ResizeObserver to detect content height changes (like streaming text)
+    // Follow the growing answer ONLY when the user is already near the bottom;
+    // a deliberate scroll-up is respected even while streaming (no more yank).
     const resizeObserver = new ResizeObserver(() => {
-      if ((isAutoScrollPaused.current && sendState === "idle") || scrollFrame) {
-        return;
-      }
+      if (isAutoScrollPaused.current || scrollFrame) return;
       scrollFrame = requestAnimationFrame(() => {
         scrollFrame = null;
-        scrollEl.scrollTo({
-          top: scrollEl.scrollHeight,
-          behavior: "auto",
-        });
+        scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: "auto" });
       });
     });
 
@@ -8193,7 +7869,7 @@ export function ChatPanel({
       resizeObserver.disconnect();
       if (scrollFrame) cancelAnimationFrame(scrollFrame);
     };
-  }, [lastMessage?.id, sendState]);
+  }, [lastMessage?.id, displayMessages.length]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -8486,6 +8162,23 @@ export function ChatPanel({
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Jump-to-bottom pill (ChatGPT-style): shown when the user has scrolled
+          away from the latest content. */}
+      {showJumpToBottom && (
+        <button
+          type="button"
+          onClick={() => {
+            isAutoScrollPaused.current = false;
+            setShowJumpToBottom(false);
+            forceScrollToBottom("smooth");
+          }}
+          aria-label="Scroll to latest"
+          className="absolute bottom-24 left-1/2 z-50 flex h-9 w-9 -translate-x-1/2 items-center justify-center rounded-full border border-black/10 bg-white text-zinc-700 shadow-[0_6px_20px_rgba(0,0,0,0.18)] transition-transform hover:scale-105 hover:text-zinc-900"
+        >
+          <ChevronDown size={18} strokeWidth={2.5} />
+        </button>
+      )}
 
       {/* Input Area */}
       <div className="absolute bottom-0 w-full p-4 shrink-0 bg-gradient-to-t from-[#fdfdfd] via-[#fdfdfd]/90 to-transparent z-40">
