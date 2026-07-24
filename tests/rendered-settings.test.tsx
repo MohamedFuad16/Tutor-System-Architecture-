@@ -27,7 +27,6 @@ const resetSettingsStore = () => {
     deepgramApiKey: "",
     learnerName: "Learner",
     ttsVoice: "aura-asteria-en",
-    misoTtsApiUrl: "http://127.0.0.1:8080",
     aiModel: "deepseek/deepseek-v4-flash",
     animationsEnabled: true,
     systemPrompt: "",
@@ -281,8 +280,8 @@ describe("rendered SettingsModal", () => {
     expect(screen.queryByText("Serper API Key")).toBeNull();
     expect(screen.queryByText("Deepgram API Key")).toBeNull();
     expect(screen.queryByText("TTS Voice Selection")).toBeNull();
-    expect(screen.queryByText("MisoTTS API URL")).toBeNull();
-    expect(screen.queryByText("AI Model")).toBeNull();
+    expect(screen.queryByText("Voice mode")).toBeNull();
+    expect(screen.queryByText("Chat model")).toBeNull();
   });
 
   it("shows the compact user allowance summary on the General tab", async () => {
@@ -330,8 +329,8 @@ describe("rendered SettingsModal", () => {
     expect(screen.getByText("Serper API Key")).toBeInTheDocument();
     expect(screen.getByText("Deepgram API Key")).toBeInTheDocument();
     expect(screen.getByText("TTS Voice Selection")).toBeInTheDocument();
-    expect(screen.getByText("MisoTTS API URL")).toBeInTheDocument();
-    expect(screen.getByText("AI Model")).toBeInTheDocument();
+    expect(screen.getByText("Voice mode")).toBeInTheDocument();
+    expect(screen.getByText("Chat model")).toBeInTheDocument();
   });
 
   it("renders admin provider inputs with safe input types and placeholders", async () => {
@@ -351,9 +350,6 @@ describe("rendered SettingsModal", () => {
       "type",
       "password",
     );
-    expect(
-      screen.getByPlaceholderText("http://127.0.0.1:8080"),
-    ).toHaveAttribute("type", "url");
   });
 
   it("renders all expected admin voice and model choices", async () => {
@@ -362,17 +358,16 @@ describe("rendered SettingsModal", () => {
     await openSettings();
 
     expect(
-      screen.getByRole("option", { name: "MisoTTS 8B (Vast local API)" }),
-    ).toBeInTheDocument();
-    expect(
       screen.getByRole("option", { name: "OpenAI gpt-4o-mini-tts (Premium)" }),
     ).toBeInTheDocument();
+    // The DeepSeek and GPT-4o options appear in each of the three model
+    // selectors (chat / voice foreground / background).
     expect(
-      screen.getByRole("option", { name: "DeepSeek V4 Flash" }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("option", { name: /DeepSeek V4 Flash/ }).length,
+    ).toBeGreaterThan(0);
     expect(
-      screen.getByRole("option", { name: "GPT-4o (Smart)" }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("option", { name: /GPT-4o \(smart\)/ }).length,
+    ).toBeGreaterThan(0);
   });
 
   it("saves user-mode language, learner name, and animation preference without provider validation", async () => {
@@ -424,14 +419,9 @@ describe("rendered SettingsModal", () => {
       screen.getByPlaceholderText("DEEPGRAM_API_KEY"),
       "deepgram-live",
     );
-    await user.clear(screen.getByPlaceholderText("http://127.0.0.1:8080"));
-    await user.type(
-      screen.getByPlaceholderText("http://127.0.0.1:8080"),
-      "http://127.0.0.1:9090",
-    );
     // Select each control by an option it uniquely owns, so the assertion is
-    // robust to added selects (e.g. the voice-mode picker) rather than pinned
-    // to a brittle combobox index.
+    // robust to the multiple model selects rather than pinned to a brittle
+    // combobox index.
     const comboboxes = screen.getAllByRole("combobox");
     const selectWithOption = (optionValue: string) =>
       comboboxes.find((combobox) =>
@@ -440,7 +430,10 @@ describe("rendered SettingsModal", () => {
         ),
       )!;
     await user.selectOptions(selectWithOption("aura-luna-en"), "aura-luna-en");
-    await user.selectOptions(selectWithOption("gpt-4o"), "gpt-4o");
+    await user.selectOptions(
+      selectWithOption("openai/gpt-4o"),
+      "openai/gpt-4o",
+    );
     await user.click(screen.getByRole("button", { name: "Persona Studio" }));
     await user.type(
       screen.getByPlaceholderText(/You are a precise, professional tutor/i),
@@ -452,9 +445,8 @@ describe("rendered SettingsModal", () => {
     expect(useStore.getState().apiKey).toBe("");
     expect(useStore.getState().serperApiKey).toBe("serper-live");
     expect(useStore.getState().deepgramApiKey).toBe("deepgram-live");
-    expect(useStore.getState().misoTtsApiUrl).toBe("http://127.0.0.1:9090");
     expect(useStore.getState().ttsVoice).toBe("aura-luna-en");
-    expect(useStore.getState().aiModel).toBe("gpt-4o");
+    expect(useStore.getState().aiModel).toBe("openai/gpt-4o");
     expect(useStore.getState().systemPrompt).toBe("Use crisp Socratic hints.");
   });
 

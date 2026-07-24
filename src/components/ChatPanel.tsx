@@ -3106,7 +3106,6 @@ const MessageUsageFooter = ({
 };
 
 const READ_ALOUD_VOICE_LABELS: Record<string, string> = {
-  "miso-tts-8b": "MisoTTS 8B",
   "gpt-4o-mini-tts": "OpenAI TTS",
   "aura-asteria-en": "Asteria",
   "aura-luna-en": "Luna",
@@ -3120,9 +3119,6 @@ const getReadAloudVoiceLabel = (voice?: string) => {
 
 const getReadAloudVoiceTooltip = (voice?: string) => {
   const label = getReadAloudVoiceLabel(voice);
-  if (voice === "miso-tts-8b") {
-    return "Read Aloud voice: MisoTTS 8B via local HTTP TTS. Custom Live Voice uses Deepgram Aura streaming TTS when configured.";
-  }
   return `Read Aloud voice: ${label}.`;
 };
 
@@ -3161,7 +3157,6 @@ const MessageItem = React.memo(
     const [isVoiceSessionOpen, setIsVoiceSessionOpen] = React.useState(false);
     const readAloudVoiceLabel = getReadAloudVoiceLabel(ttsVoice);
     const readAloudVoiceTooltip = getReadAloudVoiceTooltip(ttsVoice);
-    const isMisoReadAloudVoice = ttsVoice === "miso-tts-8b";
 
     const handleGenerateFlashcards = async () => {
       setIsGeneratingFlashcards(true);
@@ -3453,13 +3448,7 @@ const MessageItem = React.memo(
                   </>
                 )}
               </span>
-              <span
-                className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold leading-none ${
-                  isMisoReadAloudVoice
-                    ? "border-orange-200 bg-orange-50 text-orange-600"
-                    : "border-black/5 bg-zinc-50 text-zinc-400"
-                }`}
-              >
+              <span className="rounded-full border border-black/5 bg-zinc-50 px-1.5 py-0.5 text-[10px] font-bold leading-none text-zinc-400">
                 {readAloudVoiceLabel}
               </span>
             </button>
@@ -3516,9 +3505,10 @@ export function ChatPanel({
   const pdfPage = useStore((state) => state.pdfPage);
   const pdfTotalPages = useStore((state) => state.pdfTotalPages);
   const ttsVoice = useStore((state) => state.ttsVoice);
-  const misoTtsApiUrl = useStore((state) => state.misoTtsApiUrl);
   const setActiveView = useStore((state) => state.setActiveView);
   const aiModel = useStore((state) => state.aiModel);
+  const voiceForegroundModel = useStore((state) => state.voiceForegroundModel);
+  const backgroundModel = useStore((state) => state.backgroundModel);
   const animationsEnabled = useStore((state) => state.animationsEnabled);
   const systemPrompt = useStore((state) => state.systemPrompt);
   const brainRuntimeSettings = useStore((state) => state.brainRuntimeSettings);
@@ -6042,14 +6032,10 @@ export function ChatPanel({
             inputSampleRate,
             language,
             voiceBrokerMode,
-            foregroundModel: "openai/gpt-4o-mini",
-            backgroundModel: "openai/gpt-5.5",
+            foregroundModel: voiceForegroundModel,
+            backgroundModel: backgroundModel,
             ttsModel: voiceBrokerTtsModel,
             browserTts: usesBrowserVoiceTts,
-            misoTtsApiUrl:
-              usesCustomVoiceBroker && misoTtsApiUrl.trim()
-                ? misoTtsApiUrl.trim()
-                : "",
             studyContext: voiceContextPayload?.studyContext || "",
             activeBookId: canonicalActiveBookId || "",
             activeBookTitle: activeLearningBookTitle || activeProject,
@@ -6069,8 +6055,8 @@ export function ChatPanel({
               mode: "voice",
               agentLayer: "voice_realtime",
               voiceBrokerMode,
-              foregroundModel: "openai/gpt-4o-mini",
-              backgroundModel: "openai/gpt-5.5",
+              foregroundModel: voiceForegroundModel,
+              backgroundModel: backgroundModel,
               ttsModel: voiceBrokerTtsModel,
               proofAttemptId,
               documentIds: voiceContextPayload?.documentIds || [],
@@ -6703,9 +6689,6 @@ export function ChatPanel({
       if (deepgramApiKey) {
         ttsHeaders["x-deepgram-key"] = deepgramApiKey;
       }
-      if (ttsVoice === "miso-tts-8b" && misoTtsApiUrl.trim()) {
-        ttsHeaders["x-miso-tts-api-url"] = misoTtsApiUrl.trim();
-      }
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: {
@@ -6979,6 +6962,9 @@ export function ChatPanel({
             contextCompacted: brainContextPacket.compacted,
           },
           aiModel,
+          // Smart model the foreground chat can delegate heavy sub-tasks to
+          // (mirrors the voice interaction/background split).
+          backgroundModel,
           customPrompt: systemPrompt,
           runtimeSettings: brainRuntimeSettings,
           webSearchExplicit: isSearchSkillActive,

@@ -486,12 +486,14 @@ export function SettingsButton() {
     setLearnerName,
     ttsVoice,
     setTtsVoice,
-    misoTtsApiUrl,
-    setMisoTtsApiUrl,
     voiceMode,
     setVoiceMode,
     aiModel,
     setAiModel,
+    voiceForegroundModel,
+    setVoiceForegroundModel,
+    backgroundModel,
+    setBackgroundModel,
     animationsEnabled,
     setAnimationsEnabled,
     systemPrompt,
@@ -506,10 +508,12 @@ export function SettingsButton() {
   const [inputDeepgramKey, setInputDeepgramKey] = useState(deepgramApiKey);
   const [inputLearnerName, setInputLearnerName] = useState(learnerName);
   const [inputVoice, setInputVoice] = useState(ttsVoice || "gpt-4o-mini-tts");
-  const [inputMisoTtsApiUrl, setInputMisoTtsApiUrl] = useState(
-    misoTtsApiUrl || "http://127.0.0.1:8080",
-  );
   const [inputModel, setInputModel] = useState(aiModel || "gpt-4o-mini");
+  const [inputVoiceForegroundModel, setInputVoiceForegroundModel] = useState(
+    voiceForegroundModel,
+  );
+  const [inputBackgroundModel, setInputBackgroundModel] =
+    useState(backgroundModel);
   const [inputAnimations, setInputAnimations] = useState(animationsEnabled);
   const [inputPrompt, setInputPrompt] = useState(systemPrompt || "");
   const [inputLanguage, setInputLanguage] = useState(language || "en");
@@ -540,7 +544,6 @@ export function SettingsButton() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const TTS_VOICES = [
-    { id: "miso-tts-8b", name: "MisoTTS 8B (Vast local API)" },
     { id: "gpt-4o-mini-tts", name: "OpenAI gpt-4o-mini-tts (Premium)" },
     { id: "aura-asteria-en", name: "Asteria (Clear)" },
     { id: "aura-luna-en", name: "Luna (Warm)" },
@@ -556,6 +559,17 @@ export function SettingsButton() {
     { id: "aura-zeus-en", name: "Zeus (Bold)" },
   ];
 
+  // One OpenRouter key powers all three model selectors below. Ids are
+  // OpenRouter-valid (provider-prefixed).
+  const MODEL_OPTIONS = [
+    { id: "deepseek/deepseek-v4-flash", name: "DeepSeek V4 Flash (fast/cheap)" },
+    { id: "openai/gpt-4o-mini", name: "GPT-4o mini (fast)" },
+    { id: "openai/gpt-4o", name: "GPT-4o (smart)" },
+    { id: "openai/gpt-5.5", name: "GPT-5.5 (frontier)" },
+    { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
+    { id: "google/gemini-2.5-flash", name: "Gemini 2.5 Flash" },
+  ];
+
   // Sync state when opened
   useEffect(() => {
     if (isOpen) {
@@ -564,8 +578,9 @@ export function SettingsButton() {
       setInputDeepgramKey(deepgramApiKey);
       setInputLearnerName(learnerName);
       setInputVoice(ttsVoice || "gpt-4o-mini-tts");
-      setInputMisoTtsApiUrl(misoTtsApiUrl || "http://127.0.0.1:8080");
       setInputModel(aiModel || "gpt-4o-mini");
+      setInputVoiceForegroundModel(voiceForegroundModel);
+      setInputBackgroundModel(backgroundModel);
       setInputAnimations(animationsEnabled);
       setInputPrompt(systemPrompt || "");
       setInputLanguage(language || "en");
@@ -580,8 +595,9 @@ export function SettingsButton() {
     deepgramApiKey,
     learnerName,
     ttsVoice,
-    misoTtsApiUrl,
     aiModel,
+    voiceForegroundModel,
+    backgroundModel,
     animationsEnabled,
     systemPrompt,
     language,
@@ -716,7 +732,6 @@ export function SettingsButton() {
     setValidationError(null);
     const trimmedSerperKey = inputSerperKey.trim();
     const trimmedDeepgramKey = inputDeepgramKey.trim();
-    const trimmedMisoTtsApiUrl = inputMisoTtsApiUrl.trim();
 
     if (accessMode === "user") {
       setLearnerName(inputLearnerName);
@@ -733,8 +748,9 @@ export function SettingsButton() {
       setDeepgramApiKey(trimmedDeepgramKey);
       setLearnerName(inputLearnerName);
       setTtsVoice(inputVoice);
-      setMisoTtsApiUrl(trimmedMisoTtsApiUrl);
       setAiModel(inputModel);
+      setVoiceForegroundModel(inputVoiceForegroundModel);
+      setBackgroundModel(inputBackgroundModel);
       setAnimationsEnabled(inputAnimations);
       setSystemPrompt(inputPrompt);
       setLanguage(inputLanguage);
@@ -766,8 +782,9 @@ export function SettingsButton() {
       setDeepgramApiKey(trimmedDeepgramKey);
       setLearnerName(inputLearnerName);
       setTtsVoice(inputVoice);
-      setMisoTtsApiUrl(trimmedMisoTtsApiUrl);
       setAiModel(inputModel);
+      setVoiceForegroundModel(inputVoiceForegroundModel);
+      setBackgroundModel(inputBackgroundModel);
       setAnimationsEnabled(inputAnimations);
       setSystemPrompt(inputPrompt);
       setLanguage(inputLanguage);
@@ -1070,19 +1087,14 @@ export function SettingsButton() {
                             <option value="deepgram-duplex">
                               Deepgram duplex — two-model (default)
                             </option>
-                            <option value="deepgram-agent">
-                              Deepgram Voice Agent — single model
-                            </option>
                             <option value="openai-realtime">
                               OpenAI Realtime — test / comparison
                             </option>
                           </select>
                           <p className="text-xs text-zinc-500 leading-relaxed">
                             {voiceMode === "deepgram-duplex"
-                              ? "Default. A fast foreground model keeps the conversation moving while a background model does the heavy lifting. Needs a Deepgram key plus an OpenAI or OpenRouter key; runs in this app's own server — no separate host."
-                              : voiceMode === "deepgram-agent"
-                                ? "A single Deepgram Voice Agent handles speech and reasoning end to end."
-                                : "Test / comparison only — connects your browser straight to OpenAI's Realtime API over WebRTC for true full-duplex speech. Uses your OpenAI key and is billed at premium realtime rates."}
+                              ? "Default. Deepgram STT/TTS gives full-duplex speech; the Voice foreground model keeps the conversation moving while the Background smart model does the heavy lifting. Hosted on the voice WebSocket server."
+                              : "Test / comparison only — connects your browser straight to OpenAI's Realtime API over WebRTC for true full-duplex speech. Uses your OpenAI key and is billed at premium realtime rates."}
                           </p>
                         </div>
 
@@ -1126,37 +1138,15 @@ export function SettingsButton() {
                             ))}
                           </select>
                           <p className="text-xs text-zinc-500 leading-relaxed">
-                            MisoTTS uses the same Read Aloud button through the
-                            local server.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                          <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                            <Globe2 size={14} className="text-zinc-400" />
-                            MisoTTS API URL
-                          </label>
-                          <input
-                            type="url"
-                            value={inputMisoTtsApiUrl}
-                            onChange={(e) =>
-                              setInputMisoTtsApiUrl(e.target.value)
-                            }
-                            placeholder="http://127.0.0.1:8080"
-                            disabled={isValidating}
-                            className="bg-[#121214] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#ff6e00]/45 focus:ring-1 focus:ring-[#ff6e00]/30 transition-[color,background-color,border-color,box-shadow,transform,opacity] font-mono disabled:opacity-50"
-                          />
-                          <p className="text-xs text-zinc-500 leading-relaxed">
-                            Use `http://127.0.0.1:8080` for the Vast tunnel, or
-                            paste any compatible cloud endpoint. Blank falls
-                            back to `MISO_TTS_API_URL` on the server.
+                            Voice for the Read Aloud button and Deepgram voice
+                            output.
                           </p>
                         </div>
 
                         <div className="flex flex-col gap-2">
                           <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
                             <Settings size={14} className="text-zinc-400" />
-                            {t("ai_model")}
+                            Chat model
                           </label>
                           <select
                             value={inputModel}
@@ -1164,20 +1154,66 @@ export function SettingsButton() {
                             disabled={isValidating}
                             className="bg-[#121214] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6e00]/45 focus:ring-1 focus:ring-[#ff6e00]/30 transition-[color,background-color,border-color,box-shadow,transform,opacity] appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <option value="gpt-4o-mini">
-                              GPT-4o Mini (Fast/Cheap)
-                            </option>
-                            <option value="gpt-4o">GPT-4o (Smart)</option>
-                            <option value="anthropic/claude-3.5-sonnet">
-                              Claude 3.5 Sonnet
-                            </option>
-                            <option value="google/gemini-1.5-pro">
-                              Gemini 1.5 Pro
-                            </option>
-                            <option value="deepseek/deepseek-v4-flash">
-                              DeepSeek V4 Flash
-                            </option>
+                            {MODEL_OPTIONS.map((model) => (
+                              <option key={model.id} value={model.id}>
+                                {model.name}
+                              </option>
+                            ))}
                           </select>
+                          <p className="text-xs text-zinc-500 leading-relaxed">
+                            The everyday typed-chat model. Runs on your OpenRouter
+                            key.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <Mic size={14} className="text-zinc-400" />
+                            Voice foreground model
+                          </label>
+                          <select
+                            value={inputVoiceForegroundModel}
+                            onChange={(e) =>
+                              setInputVoiceForegroundModel(e.target.value)
+                            }
+                            disabled={isValidating}
+                            className="bg-[#121214] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6e00]/45 focus:ring-1 focus:ring-[#ff6e00]/30 transition-[color,background-color,border-color,box-shadow,transform,opacity] appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {MODEL_OPTIONS.map((model) => (
+                              <option key={model.id} value={model.id}>
+                                {model.name}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-zinc-500 leading-relaxed">
+                            The fast "interaction tutor" that keeps the live voice
+                            conversation moving. Keep this cheap.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                          <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                            <Settings size={14} className="text-zinc-400" />
+                            Background smart model
+                          </label>
+                          <select
+                            value={inputBackgroundModel}
+                            onChange={(e) =>
+                              setInputBackgroundModel(e.target.value)
+                            }
+                            disabled={isValidating}
+                            className="bg-[#121214] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#ff6e00]/45 focus:ring-1 focus:ring-[#ff6e00]/30 transition-[color,background-color,border-color,box-shadow,transform,opacity] appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {MODEL_OPTIONS.map((model) => (
+                              <option key={model.id} value={model.id}>
+                                {model.name}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-zinc-500 leading-relaxed">
+                            The stronger model both chat and voice delegate heavy
+                            reasoning, web, and PDF work to.
+                          </p>
                         </div>
                       </>
                     )}

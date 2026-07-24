@@ -2760,7 +2760,12 @@ Use a Markdown table when comparing 2+ things. Keep every section scannable; whi
         activeDocumentId: bodyActiveDocumentId,
         currentPage: bodyCurrentPage,
         currentPageTotal: bodyCurrentPageTotal,
+        backgroundModel: bodyBackgroundModel,
       } = req.body;
+      const backgroundModel =
+        typeof bodyBackgroundModel === "string" && bodyBackgroundModel.trim()
+          ? bodyBackgroundModel.trim()
+          : "";
       // Resolve the extracted text of the page the learner is currently viewing
       // so it can be injected as an explicit "CURRENT PAGE" block below.
       const currentPageContext = (() => {
@@ -3132,6 +3137,31 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
         includeCurrentPage: Boolean(currentPageImage),
       });
 
+      // Let the everyday chat model delegate heavy/complex sub-tasks to the
+      // stronger background model (mirrors the voice interaction/background
+      // split), sharing the same OpenRouter key.
+      if (backgroundModel) {
+        tools.push({
+          type: "function",
+          function: {
+            name: "delegate_to_background",
+            description:
+              "Delegate a heavy, slow, or complex sub-task (deep multi-step reasoning, or synthesizing a lot of source material) to a stronger background model and get back a concise result to weave into your answer. Use sparingly — only when the task genuinely exceeds a quick answer.",
+            parameters: {
+              type: "object",
+              properties: {
+                task: {
+                  type: "string",
+                  description:
+                    "A self-contained description of the sub-task, including any context the background model needs.",
+                },
+              },
+              required: ["task"],
+            },
+          },
+        });
+      }
+
       // Eager vision pre-fetch removed to drastically improve latency.
       // The AI can still use the 'look_at_current_page' tool if it needs to see the document.
 
@@ -3449,6 +3479,95 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
                 model: "openai/gpt-4o-mini",
                 durationMs: Date.now() - toolStartedAt,
                 metadata: { toolCallId: toolCall.id },
+              });
+            }
+          } else if (
+            functionName === "delegate_to_background" &&
+            backgroundModel
+          ) {
+            try {
+              sendEvent("reasoning_summary", {
+                content: "Delegating to the background model",
+              });
+              const args = JSON.parse(functionArguments || "{}");
+              const task = String(args.task || "").trim();
+              let resultText = "";
+              if (task) {
+                const bgProvider = resolveBrokerLlmProvider(
+                  apiKey,
+                  backgroundModel,
+                );
+                const bgClient = new OpenAI({
+                  baseURL: bgProvider.baseURL,
+                  apiKey,
+                });
+                const bgResponse = await bgClient.chat.completions.create({
+                  model: bgProvider.model,
+                  temperature: 0.2,
+                  max_tokens: 700,
+                  messages: [
+                    {
+                      role: "system",
+                      content:
+                        "You are the background reasoning model for a tutor. Complete the delegated sub-task thoroughly and return a concise, well-structured result the foreground tutor can weave into its answer. No preamble.",
+                    },
+                    ...(memoryContext
+                      ? [
+                          {
+                            role: "system" as const,
+                            content: String(memoryContext).slice(0, 6000),
+                          },
+                        ]
+                      : []),
+                    { role: "user" as const, content: task },
+                  ],
+                });
+                resultText =
+                  bgResponse.choices?.[0]?.message?.content?.trim() || "";
+              }
+              formattedMessages.push({
+                role: "tool",
+                tool_call_id: toolCall.id,
+                content:
+                  resultText ||
+                  "The background model returned no result. Answer from your own reasoning.",
+              });
+              recordSystemActivity({
+                kind: "tool",
+                status: "completed",
+                title: "Background delegation completed",
+                detail: `${backgroundModel} handled a delegated sub-task.`,
+                requestId,
+                toolName: functionName,
+                model: backgroundModel,
+                phase: "tool_execution",
+                durationMs: Date.now() - toolStartedAt,
+              });
+              sendToolJobEvent({
+                status: "completed",
+                toolName: functionName,
+                inputSummary,
+                outputSummary: resultText.slice(0, 200),
+                model: backgroundModel,
+                durationMs: Date.now() - toolStartedAt,
+                metadata: { toolCallId: toolCall.id },
+              });
+            } catch (delegateError: any) {
+              formattedMessages.push({
+                role: "tool",
+                tool_call_id: toolCall.id,
+                content:
+                  "Background delegation failed. Answer from your own reasoning.",
+              });
+              recordSystemActivity({
+                kind: "tool",
+                status: "failed",
+                title: "Background delegation failed",
+                detail: String(delegateError?.message || delegateError),
+                requestId,
+                toolName: functionName,
+                phase: "tool_execution",
+                durationMs: Date.now() - toolStartedAt,
               });
             }
           } else if (functionName === "web_search") {

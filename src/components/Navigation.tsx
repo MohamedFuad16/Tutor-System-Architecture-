@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { useStore, ViewState } from "../store";
 import { BookOpen, Zap, Activity, ShieldCheck } from "lucide-react";
 import { gsap } from "gsap";
@@ -11,7 +11,6 @@ export function Navigation() {
   const motionEnabled = useMotionPreference();
   const navContainerRef = useRef<HTMLDivElement>(null);
   const activePillRef = useRef<HTMLDivElement>(null);
-  const borderSpinRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<
     Partial<Record<ViewState, HTMLButtonElement | null>>
   >({});
@@ -45,23 +44,6 @@ export function Navigation() {
         ]
       : []),
   ];
-
-  useEffect(() => {
-    const border = borderSpinRef.current;
-    if (!border) return;
-    gsap.killTweensOf(border);
-    gsap.set(border, { rotate: 0 });
-    if (!motionEnabled) return;
-    const tween = gsap.to(border, {
-      rotate: 360,
-      duration: 4,
-      repeat: -1,
-      ease: "none",
-    });
-    return () => {
-      tween.kill();
-    };
-  }, [motionEnabled]);
 
   useLayoutEffect(() => {
     const updateActivePill = () => {
@@ -118,47 +100,28 @@ export function Navigation() {
       >
         <div
           ref={activePillRef}
-          className="pointer-events-none absolute left-0 top-0 z-[8] rounded-full border border-white/10 bg-white/[0.1] opacity-0 shadow-[0_2px_10px_rgba(0,0,0,0.45)] mix-blend-screen"
+          className="pointer-events-none absolute left-0 top-0 z-[8] rounded-full border border-white/15 bg-white/[0.12] opacity-0 shadow-[0_1px_6px_rgba(0,0,0,0.25)]"
         />
 
-        {/* Animated Liquid Metal Border */}
+        {/* Clean rounded hairline ring — inset box-shadow follows the pill's
+            rounded-full shape exactly, so there are no boxy corners at the ends. */}
         <div
-          className="absolute inset-0 rounded-full pointer-events-none overflow-hidden"
+          className="pointer-events-none absolute inset-0 rounded-full"
           style={{
-            padding: "1px",
-            WebkitMask:
-              "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-            WebkitMaskComposite: "xor",
-            maskComposite: "exclude",
+            boxShadow:
+              "inset 0 0 0 1px rgba(255,255,255,0.10), inset 0 1px 1px rgba(255,255,255,0.08)",
           }}
-        >
-          <div
-            ref={borderSpinRef}
-            className="absolute inset-[-50%] w-[200%] h-[200%]"
-            style={{
-              background:
-                "conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.1) 60%, transparent 100%)",
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent mix-blend-overlay" />
-        </div>
+        />
 
-        {/* Mouse Tracking Metallic Spotlight Glow */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Mouse-tracking spotlight — a single soft highlight, clipped to the
+            rounded pill so it never reads as a square glow at the edges. */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-full">
           <div
-            className="absolute inset-0 transition-opacity duration-300 mix-blend-screen"
+            className="absolute inset-0 transition-opacity"
             style={{
               opacity: spotlight.active ? 1 : 0,
               transitionDuration: motionEnabled ? "300ms" : "0ms",
-              background: `radial-gradient(150px circle at ${spotlight.x}px ${spotlight.y}px, rgba(255,255,255,0.15), transparent 100%)`,
-            }}
-          />
-          <div
-            className="absolute inset-0 transition-opacity duration-300 mix-blend-overlay"
-            style={{
-              opacity: spotlight.active ? 1 : 0,
-              transitionDuration: motionEnabled ? "300ms" : "0ms",
-              background: `radial-gradient(100px circle at ${spotlight.x}px ${spotlight.y}px, rgba(10,61,207,0.4), transparent 100%)`,
+              background: `radial-gradient(140px circle at ${spotlight.x}px ${spotlight.y}px, rgba(255,255,255,0.10), transparent 70%)`,
             }}
           />
         </div>

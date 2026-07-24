@@ -171,35 +171,30 @@ const emptyChatUsage: ChatUsage = {
 
 const DEFAULT_AI_MODEL = "deepseek/deepseek-v4-flash";
 const BRAIN_RUNTIME_SETTINGS_STORAGE_KEY = "brain_runtime_settings";
-const MISO_TTS_API_URL_STORAGE_KEY = "miso_tts_api_url";
 const VOICE_MODE_STORAGE_KEY = "voice_mode";
 
 // Runtime voice mode (chosen in Settings, no rebuild needed):
 // - deepgram-duplex: the default two-model "interaction" mimic — a fast
-//   foreground model keeps the conversation moving while an async background
-//   model does the heavy lifting. Runs in the same dev/start server, needs
-//   only a Deepgram key + an LLM key.
-// - deepgram-agent: the single Deepgram Voice Agent path.
+//   foreground model keeps the conversation moving via Deepgram STT/TTS while an
+//   async background model does the heavy lifting. Runs on the voice server.
 // - openai-realtime: a test/comparison-only speech-to-speech path (WebRTC,
 //   BYOK OpenAI key). Expensive; never the default.
-export type VoiceMode = "deepgram-duplex" | "deepgram-agent" | "openai-realtime";
-const VOICE_MODES: VoiceMode[] = [
-  "deepgram-duplex",
-  "deepgram-agent",
-  "openai-realtime",
-];
+export type VoiceMode = "deepgram-duplex" | "openai-realtime";
+const VOICE_MODES: VoiceMode[] = ["deepgram-duplex", "openai-realtime"];
 const normalizeVoiceMode = (value: string | null | undefined): VoiceMode => {
   if (value && (VOICE_MODES as string[]).includes(value)) {
     return value as VoiceMode;
   }
-  // Honor the legacy build-time flag as the initial default, but the two-model
-  // duplex is the intended forefront.
-  if (typeof import.meta !== "undefined") {
-    const legacy = import.meta.env?.VITE_VOICE_BROKER_MODE;
-    if (legacy === "deepgram") return "deepgram-agent";
-  }
   return "deepgram-duplex";
 };
+
+// One OpenRouter key powers several models. Defaults: a cheap/fast model for the
+// chat and voice foreground ("interaction tutor"), and a stronger model shared
+// as the background/smart worker for both chat delegation and voice.
+const VOICE_FOREGROUND_MODEL_STORAGE_KEY = "voice_foreground_model";
+const BACKGROUND_MODEL_STORAGE_KEY = "background_model";
+const DEFAULT_VOICE_FOREGROUND_MODEL = "deepseek/deepseek-v4-flash";
+const DEFAULT_BACKGROUND_MODEL = "openai/gpt-5.5";
 
 const normalizeAiModel = (model: string | null) =>
   model === "deepseek/deepseek-chat"
@@ -375,13 +370,15 @@ interface AppState {
 
   ttsVoice: string;
   setTtsVoice: (voice: string) => void;
-  misoTtsApiUrl: string;
-  setMisoTtsApiUrl: (url: string) => void;
   voiceMode: VoiceMode;
   setVoiceMode: (mode: VoiceMode) => void;
 
   aiModel: string;
   setAiModel: (model: string) => void;
+  voiceForegroundModel: string;
+  setVoiceForegroundModel: (model: string) => void;
+  backgroundModel: string;
+  setBackgroundModel: (model: string) => void;
 
   animationsEnabled: boolean;
   setAnimationsEnabled: (enabled: boolean) => void;
@@ -534,18 +531,6 @@ export const useStore = create<AppState>()(
         localStorage.setItem("tts_voice", voice);
         set({ ttsVoice: voice });
       },
-      misoTtsApiUrl:
-        localStorage.getItem(MISO_TTS_API_URL_STORAGE_KEY) ||
-        "http://127.0.0.1:8080",
-      setMisoTtsApiUrl: (url) => {
-        const cleanUrl = url.trim();
-        if (cleanUrl) {
-          localStorage.setItem(MISO_TTS_API_URL_STORAGE_KEY, cleanUrl);
-        } else {
-          localStorage.removeItem(MISO_TTS_API_URL_STORAGE_KEY);
-        }
-        set({ misoTtsApiUrl: cleanUrl });
-      },
       voiceMode: normalizeVoiceMode(
         localStorage.getItem(VOICE_MODE_STORAGE_KEY),
       ),
@@ -560,6 +545,22 @@ export const useStore = create<AppState>()(
         const normalizedModel = normalizeAiModel(model);
         localStorage.setItem("ai_model", normalizedModel);
         set({ aiModel: normalizedModel });
+      },
+      voiceForegroundModel:
+        localStorage.getItem(VOICE_FOREGROUND_MODEL_STORAGE_KEY) ||
+        DEFAULT_VOICE_FOREGROUND_MODEL,
+      setVoiceForegroundModel: (model) => {
+        const clean = model.trim() || DEFAULT_VOICE_FOREGROUND_MODEL;
+        localStorage.setItem(VOICE_FOREGROUND_MODEL_STORAGE_KEY, clean);
+        set({ voiceForegroundModel: clean });
+      },
+      backgroundModel:
+        localStorage.getItem(BACKGROUND_MODEL_STORAGE_KEY) ||
+        DEFAULT_BACKGROUND_MODEL,
+      setBackgroundModel: (model) => {
+        const clean = model.trim() || DEFAULT_BACKGROUND_MODEL;
+        localStorage.setItem(BACKGROUND_MODEL_STORAGE_KEY, clean);
+        set({ backgroundModel: clean });
       },
 
       animationsEnabled: localStorage.getItem("animations_enabled") !== "false",

@@ -11324,6 +11324,15 @@
       "id": "learningai_tutor_architecture_codeblock_2",
       "community": 18,
       "norm_label": "code:bash (npm run lint)"
+    },
+    {
+      "label": "DiagramMermaid.tsx",
+      "file_type": "code",
+      "source_file": "src/components/DiagramMermaid.tsx",
+      "source_location": "L1",
+      "id": "src_components_diagrammermaid_tsx",
+      "community": 19,
+      "norm_label": "diagrammermaid.tsx"
     }
   ],
   "links": [

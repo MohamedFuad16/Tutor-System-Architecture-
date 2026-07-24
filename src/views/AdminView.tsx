@@ -482,7 +482,6 @@ export function AdminView() {
     apiKey,
     deepgramApiKey,
     ttsVoice,
-    misoTtsApiUrl,
     activeLearningBookId,
     activeProject,
     pricing,
@@ -803,9 +802,6 @@ export function AdminView() {
             cache: "no-store",
             headers: {
               ...(debugToken ? { "X-Debug-Token": debugToken } : {}),
-              ...(misoTtsApiUrl.trim()
-                ? { "x-miso-tts-api-url": misoTtsApiUrl.trim() }
-                : {}),
             },
           },
         );
@@ -844,7 +840,6 @@ export function AdminView() {
   }, [
     shouldLoadActivityPayload,
     activityRefreshKey,
-    misoTtsApiUrl,
     brainRuntimeSettings.activityRefreshMs,
   ]);
 

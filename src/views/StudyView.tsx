@@ -1463,7 +1463,7 @@ export function StudyView() {
           <div
             key="chat-panel"
             ref={chatPanelFrameRef}
-            className={`min-h-0 flex-1 overflow-hidden border border-black/5 bg-[#fdfdfd] text-[#050505] shadow-[0_20px_60px_rgba(0,0,0,0.15)] origin-bottom ${
+            className={`min-h-0 flex-1 overflow-hidden bg-[#fdfdfd] text-[#050505] ring-1 ring-white/10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] origin-bottom ${
               isChatFullscreen ? "rounded-2xl" : "rounded-3xl"
             }`}
           >

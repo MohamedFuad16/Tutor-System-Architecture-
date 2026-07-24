@@ -222,30 +222,12 @@ describe("Navigation rendered route contract", () => {
 });
 
 describe("Navigation motion and active-pill behavior", () => {
-  it("does not spin the liquid border when animations are disabled", () => {
-    renderNavigation({ animationsEnabled: false });
+  it("never spins a rotating border (the liquid border was removed)", () => {
+    renderNavigation({ animationsEnabled: true });
 
-    expect(gsap.killTweensOf).toHaveBeenCalledWith(expect.any(HTMLDivElement));
-    expect(gsap.set).toHaveBeenCalledWith(expect.any(HTMLDivElement), {
-      rotate: 0,
-    });
     expect(gsap.to).not.toHaveBeenCalledWith(
       expect.any(HTMLDivElement),
       expect.objectContaining({ rotate: 360 }),
-    );
-  });
-
-  it("spins the liquid border when animations are enabled", () => {
-    renderNavigation({ animationsEnabled: true });
-
-    expect(gsap.to).toHaveBeenCalledWith(
-      expect.any(HTMLDivElement),
-      expect.objectContaining({
-        rotate: 360,
-        duration: 4,
-        repeat: -1,
-        ease: "none",
-      }),
     );
   });
 
@@ -332,39 +314,6 @@ describe("Navigation motion and active-pill behavior", () => {
       expect.objectContaining({ autoAlpha: 1 }),
     );
   });
-
-  it("kills the border tween when the component unmounts", () => {
-    const tween = { kill: vi.fn() };
-    vi.mocked(gsap.to).mockImplementation(((
-      _target: unknown,
-      vars: { rotate?: number } | undefined,
-    ) => {
-      if (typeof vars === "object" && vars && "rotate" in vars) {
-        return tween;
-      }
-      return { kill: vi.fn() };
-    }) as never);
-
-    const { unmount } = renderNavigation({ animationsEnabled: true });
-    unmount();
-
-    expect(tween.kill).toHaveBeenCalledTimes(1);
-  });
-
-  it("restarts border motion when animations are toggled on", () => {
-    const { rerender } = renderNavigation({ animationsEnabled: false });
-
-    act(() => {
-      useStore.setState({ animationsEnabled: true });
-    });
-    rerender(<Navigation />);
-
-    expect(gsap.killTweensOf).toHaveBeenCalledTimes(2);
-    expect(gsap.to).toHaveBeenCalledWith(
-      expect.any(HTMLDivElement),
-      expect.objectContaining({ rotate: 360 }),
-    );
-  });
 });
 
 describe("Navigation pointer spotlight behavior", () => {
@@ -393,7 +342,7 @@ describe("Navigation pointer spotlight behavior", () => {
     });
   });
 
-  it("tracks fine-pointer mouse position in both spotlight gradients", () => {
+  it("tracks fine-pointer mouse position in the spotlight gradient", () => {
     renderNavigation();
     vi.spyOn(navShell(), "getBoundingClientRect").mockReturnValue({
       x: 0,
@@ -414,11 +363,7 @@ describe("Navigation pointer spotlight behavior", () => {
     );
     expect(gradients[0]).toHaveStyle({
       background:
-        "radial-gradient(150px circle at 50px 30px, rgba(255,255,255,0.15), transparent 100%)",
-    });
-    expect(gradients[1]).toHaveStyle({
-      background:
-        "radial-gradient(100px circle at 50px 30px, rgba(10,61,207,0.4), transparent 100%)",
+        "radial-gradient(140px circle at 50px 30px, rgba(255,255,255,0.10), transparent 70%)",
     });
   });
 
@@ -433,7 +378,7 @@ describe("Navigation pointer spotlight behavior", () => {
     );
     expect(gradients[0]).toHaveStyle({
       background:
-        "radial-gradient(150px circle at 0px 0px, rgba(255,255,255,0.15), transparent 100%)",
+        "radial-gradient(140px circle at 0px 0px, rgba(255,255,255,0.10), transparent 70%)",
     });
   });
 
@@ -444,7 +389,6 @@ describe("Navigation pointer spotlight behavior", () => {
       "div[style*='radial-gradient']",
     );
     expect(gradients[0]).toHaveStyle({ transitionDuration: "0ms" });
-    expect(gradients[1]).toHaveStyle({ transitionDuration: "0ms" });
   });
 
   it("uses the animated spotlight transition timing when motion is enabled", () => {
@@ -454,7 +398,6 @@ describe("Navigation pointer spotlight behavior", () => {
       "div[style*='radial-gradient']",
     );
     expect(gradients[0]).toHaveStyle({ transitionDuration: "300ms" });
-    expect(gradients[1]).toHaveStyle({ transitionDuration: "300ms" });
   });
 });
 

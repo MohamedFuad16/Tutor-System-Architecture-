@@ -998,22 +998,6 @@ describe("rendered ChatPanel expanded suite", () => {
     expect(readButton).toHaveAttribute("title", "Read Aloud voice: Asteria.");
   });
 
-  it("uses the MisoTTS read-aloud label and tooltip when configured", async () => {
-    useStore.setState({ ttsVoice: "miso-tts-8b" });
-    await seedThread([completeAssistant()]);
-    renderChatPanel();
-
-    const readButton = await screen.findByRole("button", {
-      name: "Read aloud with MisoTTS 8B",
-    });
-
-    expect(readButton).toHaveAttribute(
-      "title",
-      "Read Aloud voice: MisoTTS 8B via local HTTP TTS. Custom Live Voice uses Deepgram Aura streaming TTS when configured.",
-    );
-    expect(screen.getAllByText("MisoTTS 8B").length).toBeGreaterThanOrEqual(1);
-  });
-
   it("fetches TTS audio and toggles the read-aloud button into stop state", async () => {
     await seedThread([completeAssistant()]);
     renderChatPanel();

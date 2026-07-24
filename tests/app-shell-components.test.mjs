@@ -78,7 +78,7 @@ test("Navigation component exposes accessible page buttons and motion gating", (
     navigationSource,
     /const motionEnabled = useMotionPreference\(\);/,
   );
-  assert.match(navigationSource, /if \(!motionEnabled\) return;/);
+  // Motion gating is on the active-pill tween (the rotating border was removed).
   assert.match(navigationSource, /duration: motionEnabled \? 0\.42 : 0,/);
   assert.match(
     navigationSource,

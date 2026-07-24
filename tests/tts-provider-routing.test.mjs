@@ -56,22 +56,21 @@ const startMisoStub = async () => {
   return { server, requests, baseUrl: `http://127.0.0.1:${port}` };
 };
 
-test("MisoTTS read-aloud option is available in settings", () => {
-  assert.match(settingsSource, /miso-tts-8b/);
-  assert.match(settingsSource, /MisoTTS 8B \(Vast local API\)/);
-  assert.match(settingsSource, /MisoTTS API URL/);
-  assert.match(settingsSource, /setMisoTtsApiUrl/);
-  assert.match(settingsSource, /http:\/\/127\.0\.0\.1:8080/);
-  assert.match(settingsSource, /MISO_TTS_API_URL/);
+test("MisoTTS client settings have been removed", () => {
+  // Miso is no longer offered in the client; the settings expose the three
+  // model selectors and the two voice modes instead.
+  assert.doesNotMatch(settingsSource, /miso-tts-8b/);
+  assert.doesNotMatch(settingsSource, /setMisoTtsApiUrl/);
+  assert.doesNotMatch(settingsSource, /MisoTTS API URL/);
+  assert.match(settingsSource, /Chat model/);
+  assert.match(settingsSource, /Voice foreground model/);
+  assert.match(settingsSource, /Background smart model/);
 });
 
-test("chat read-aloud control surfaces the selected MisoTTS voice", () => {
+test("chat read-aloud control no longer references the removed Miso voice", () => {
   assert.match(chatPanelSource, /READ_ALOUD_VOICE_LABELS/);
-  assert.match(chatPanelSource, /"miso-tts-8b": "MisoTTS 8B"/);
-  assert.match(chatPanelSource, /Read aloud with/);
-  assert.match(chatPanelSource, /misoTtsApiUrl/);
-  assert.match(chatPanelSource, /x-miso-tts-api-url/);
-  assert.match(chatPanelSource, /Deepgram Aura streaming TTS when configured/);
+  assert.doesNotMatch(chatPanelSource, /"miso-tts-8b": "MisoTTS 8B"/);
+  assert.doesNotMatch(chatPanelSource, /x-miso-tts-api-url/);
 });
 
 test("chat read-aloud keeps text out of URLs and cancels superseded playback", () => {

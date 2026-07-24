@@ -137,7 +137,6 @@ const resetAdminStore = () => {
     animationsEnabled: false,
     betaProofTrafficApproval: null,
     brainRuntimeSettings: { ...DEFAULT_BRAIN_RUNTIME_SETTINGS },
-    misoTtsApiUrl: "",
     voiceAgentEvents: [],
     webSearchEvents: [],
   });
@@ -239,9 +238,8 @@ describe("rendered AdminView page flows", () => {
     expect(screen.getByText("Offline")).toBeInTheDocument();
   });
 
-  it("adds the local debug token and Miso endpoint to activity requests", async () => {
+  it("adds the local debug token to activity requests", async () => {
     localStorage.setItem("tutor_debug_token", "rendered-debug-token");
-    useStore.setState({ misoTtsApiUrl: "http://127.0.0.1:8080/" });
 
     renderAdmin();
 
@@ -250,7 +248,6 @@ describe("rendered AdminView page flows", () => {
     const headers = new Headers(request?.[1]?.headers);
 
     expect(headers.get("X-Debug-Token")).toBe("rendered-debug-token");
-    expect(headers.get("x-miso-tts-api-url")).toBe("http://127.0.0.1:8080/");
     expect(String(request?.[0])).toMatch(/\/api\/debug\/system-activity$/);
   });
 
