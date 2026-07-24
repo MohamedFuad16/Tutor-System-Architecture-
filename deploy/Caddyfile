@@ -1,0 +1,14 @@
+# Caddy reverse proxy for the Tutor voice/signaling server.
+#
+# Caddy auto-provisions a Let's Encrypt certificate and proxies WebSocket
+# upgrades transparently, so this is all that's needed to expose wss:// to an
+# HTTPS web app. Replace voice.example.com with the subdomain whose A/AAAA
+# record points at this VM, then:
+#
+#   sudo caddy run --config /opt/tutor-system/deploy/Caddyfile
+#   # or install as a service: sudo cp deploy/Caddyfile /etc/caddy/Caddyfile && sudo systemctl reload caddy
+
+voice.example.com {
+	encode gzip
+	reverse_proxy 127.0.0.1:3000
+}

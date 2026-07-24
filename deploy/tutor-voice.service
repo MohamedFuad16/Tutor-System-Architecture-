@@ -1,0 +1,26 @@
+# systemd unit for the Tutor voice/signaling server.
+# Install:
+#   sudo cp deploy/tutor-voice.service /etc/systemd/system/tutor-voice.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now tutor-voice
+# Logs: journalctl -u tutor-voice -f
+
+[Unit]
+Description=Tutor voice/signaling server (WebSocket broker)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=tutor
+WorkingDirectory=/opt/tutor-system
+EnvironmentFile=/opt/tutor-system/.env
+ExecStart=/usr/bin/node dist/server.cjs
+Restart=always
+RestartSec=3
+# Reasonable hardening.
+NoNewPrivileges=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
