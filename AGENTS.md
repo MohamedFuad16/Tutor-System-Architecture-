@@ -24,7 +24,7 @@ knowledge graph generation, and active recall revision.
   controls.
 - `ChatPanel`: streaming tutor chat, source-aware reasoning, tool output, TTS,
   and voice interactions.
-- `BrainView` / learner graph surfaces: the user-facing study concept graph.
+- `AnalyticsView` / learner graph surfaces: the user-facing study concept graph.
 - `RevisionView`: paper-style review, generated learning books, notes, and
   active recall.
 
@@ -34,7 +34,7 @@ architecture graph. The repository architecture graph is Graphify.
 # Graphify-First Development
 
 Graphify is the repository architecture cognition layer for agents in this
-repo. The old custom architecture runtime has been removed.
+repo. It maps source code for maintainers; it is not the learner brain.
 
 ## Required Navigation Habit
 
@@ -117,15 +117,18 @@ chat turn, local file change, commit, checkout, or GitHub push.
 
 ## Standard Verification
 
-For ordinary source changes, run:
+Run the same gate the README documents, before pushing:
 
 ```bash
+npm run format:check
 npm run lint
+npm test
 npm run build
 ```
 
-For visual changes, also verify the live app in the browser at relevant mobile
-and desktop viewports.
+Note that `npm run lint` runs the TypeScript compiler (`tsc --noEmit`), not
+ESLint. For visual changes, also verify the live app in the browser at relevant
+mobile and desktop viewports.
 
 ## Architecture Boundaries
 

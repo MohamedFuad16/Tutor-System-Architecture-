@@ -1,6 +1,14 @@
-# Voice Mode MisoTTS Latency Book
+# Voice Mode MisoTTS Latency Book (Historical Post-Mortem)
 
 Date: 2026-06-07
+
+> **Status: historical.** MisoTTS has been removed from the product. This
+> document is kept only as a record of why the self-hosted GPU TTS path was
+> abandoned and what was measured. Nothing here describes the current system:
+> voice now runs the `deepgram-duplex` mode (Deepgram Nova STT + Aura TTS around
+> the interaction/background model split), with an `openai-realtime` test path.
+> The host addresses and tunnel commands below refer to a machine that no longer
+> exists and must not be reused.
 
 ## Chapter 1: What We Tried To Build
 

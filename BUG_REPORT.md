@@ -29,7 +29,8 @@ and `build` all green, with `pymupdf`/`pymupdf4llm` installed.
 5. **Oversized-body DoS (Med).** `express.urlencoded` limit lowered from 100mb
    to 1mb.
 6. **MisoTTS localhost probing (Low).** `MISO_TTS_ALLOW_HEADER_URL=false` lets
-   deployments ignore the client-supplied Miso URL header.
+   deployments ignore the client-supplied Miso URL header. (MisoTTS has since
+   been removed from the client entirely; the server routes are dormant.)
 
 ## Memory leaks — fixed
 
@@ -89,7 +90,7 @@ and `build` all green, with `pymupdf`/`pymupdf4llm` installed.
 ## Deployment notes
 
 - Vercel serverless still cannot host the persistent voice-broker WebSocket, so
-  `deepgram-duplex` / `deepgram-agent` need a long-running Node host (or the
+  `deepgram-duplex` needs a long-running Node host (or the
   separate voice server via `VITE_VOICE_WS_URL`). The `openai-realtime` test
   mode is the one voice path that works on serverless (browser↔OpenAI WebRTC +
   the tiny `/api/realtime/token` endpoint).

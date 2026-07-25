@@ -87,7 +87,7 @@ repository architecture graph for developers and agents.
 | Backend            | Node.js, Express, Server-Sent Events, WebSocket routes                     |
 | Learner store      | Per-user local folders, SQLite, document/extracted-text/artifact files     |
 | AI routes          | OpenRouter-compatible chat/vision routes, tool contracts, background jobs  |
-| Voice              | Deepgram STT/TTS, custom local broker, optional MisoTTS read-aloud path    |
+| Voice              | Deepgram STT/TTS duplex broker, plus an OpenAI Realtime test path          |
 | Search             | Serper for explicit web/freshness requests                                 |
 | Architecture graph | Graphify artifacts in `graphify-out/`                                      |
 
@@ -116,7 +116,7 @@ repository architecture graph for developers and agents.
   <tr>
     <td width="50%" valign="top">
       <h3>Voice Mode</h3>
-      <p>Deepgram or custom local broker voice sessions. The foreground tutor keeps the conversation moving while slow work is delegated into background tasks.</p>
+      <p>A Deepgram full-duplex session where a fast interaction tutor keeps the conversation moving while a smarter background model handles slow work. An OpenAI Realtime path is available for comparison testing.</p>
     </td>
     <td width="50%" valign="top">
       <h3>Learner Brain</h3>
@@ -233,6 +233,21 @@ Voice mode is a **runtime setting** in Settings (no rebuild required):
   inbound `X-Forwarded-Host` header so the same-origin broker check can't be
   spoofed.
 
+## Models
+
+Three model selectors in Settings share one OpenRouter key:
+
+| Selector               | Role                                                                             | Default                      |
+| ---------------------- | -------------------------------------------------------------------------------- | ---------------------------- |
+| Chat model             | The everyday typed-study model.                                                  | `deepseek/deepseek-v4-flash` |
+| Voice foreground model | The "interaction tutor" that holds the live spoken conversation. Keep it fast.   | `deepseek/deepseek-v4-flash` |
+| Background smart model | The stronger model both surfaces delegate heavy reasoning, web, and PDF work to. | `openai/gpt-5.5`             |
+
+Typed chat reaches the background model through a `delegate_to_background` tool,
+so the two-model split is not voice-only. The `VOICE_FOREGROUND_MODEL` and
+`VOICE_BACKGROUND_MODEL` environment variables are the server-side defaults used
+when a session does not supply its own selection.
+
 ## Getting Started
 
 Requirements:
@@ -272,12 +287,12 @@ npm run dev -- --host 127.0.0.1 --port 3100
 | `DEEPGRAM_API_KEY`                 | Deepgram STT/TTS key.                                                                           |
 | `ALLOW_SERVER_DEEPGRAM_FALLBACK`   | Must be `true` before browser requests may use the server Deepgram key.                         |
 | `SERPER_API_KEY`                   | Legacy typed-chat web search key. Custom voice background search uses OpenRouter tools instead. |
-| `VITE_VOICE_BROKER_MODE`           | `deepgram` or `custom`.                                                                         |
-| `VOICE_FOREGROUND_MODEL`           | Fast teaching model, for example `openai/gpt-4o-mini`.                                          |
-| `VOICE_BACKGROUND_MODEL`           | Provider-valid background model id for web/search/code/PDF/tool work.                           |
+| `VOICE_FOREGROUND_MODEL`           | Server default for the voice interaction tutor; the Settings selector overrides it per session. |
+| `VOICE_BACKGROUND_MODEL`           | Server default for the background smart model; the Settings selector overrides it per session.  |
 | `VOICE_BROKER_STT_MODEL`           | Deepgram STT model, default `nova-3`.                                                           |
 | `VOICE_BROKER_TTS_MODEL`           | Deepgram Aura TTS model.                                                                        |
-| `MISO_TTS_API_URL`                 | Optional loopback-only local Miso endpoint.                                                     |
+| `VITE_VOICE_WS_URL`                | Voice server URL (e.g. `wss://voice.example.com`) when the app host cannot serve WebSockets.    |
+| `VOICE_ALLOWED_ORIGINS`            | On the voice server: web app origins allowed to open cross-origin voice WebSockets.             |
 
 ## Architecture Docs
 
