@@ -713,7 +713,9 @@ test("local voice broker stages brain context and background jobs without provid
   const assistant = await assistantTurn;
   assert.equal(assistant.role, "assistant");
   assert.match(assistant.content, /local learning book/i);
-  assert.match(assistant.content, /GPT-5\.5 background layer/i);
+  // Model-agnostic: the background model is configurable in Settings, so the
+  // spoken fallback names the layer, not a specific model id.
+  assert.match(assistant.content, /background layer/i);
 
   const genericBackgroundStarted = waitForMessageType(
     "BackgroundJobStarted",

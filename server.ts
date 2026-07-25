@@ -120,7 +120,7 @@ const VOICE_BACKGROUND_TOOL_DEFINITIONS = [
   {
     name: "openrouter:web_search",
     description:
-      "Delegate current web research to the GPT-5.5 background model through OpenRouter's hosted web search tool.",
+      "Delegate current web research to the background model through OpenRouter's hosted web search tool.",
     parameters: {
       type: "object",
       properties: {
@@ -136,7 +136,7 @@ const VOICE_BACKGROUND_TOOL_DEFINITIONS = [
   {
     name: "create_pdf",
     description:
-      "Delegate PDF creation or extraction work to the GPT-5.5 background model.",
+      "Delegate PDF creation or extraction work to the background model.",
     parameters: {
       type: "object",
       properties: {
@@ -151,7 +151,7 @@ const VOICE_BACKGROUND_TOOL_DEFINITIONS = [
   {
     name: "inspect_code",
     description:
-      "Delegate code reading, bug fixing, or analysis work to the GPT-5.5 background model.",
+      "Delegate code reading, bug fixing, or analysis work to the background model.",
     parameters: {
       type: "object",
       properties: {
@@ -4182,9 +4182,12 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
         let backgroundJobChain: Promise<void> = Promise.resolve();
         let brokerClosed = false;
         const activeBrokerControllers = new Set<AbortController>();
-        const foregroundModel = VOICE_FOREGROUND_MODEL;
-        const backgroundModel = VOICE_BACKGROUND_MODEL;
-        const ttsModel = VOICE_BROKER_TTS_MODEL;
+        // Model ids come from the browser's Settings selectors (voice_auth) and
+        // fall back to the server env defaults. These are `let` because
+        // startBrokerSession overwrites them once the auth frame arrives.
+        let foregroundModel = VOICE_FOREGROUND_MODEL;
+        let backgroundModel = VOICE_BACKGROUND_MODEL;
+        let ttsModel = VOICE_BROKER_TTS_MODEL;
 
         const brokerProofActivityMetadata = () => ({
           proofAttemptId: voiceProofAttemptId || undefined,
@@ -5069,7 +5072,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
           backgroundQueued: boolean,
         ) => {
           if (!brokerOpenRouterApiKey) {
-            return "I have the local learning book, previous context, and document memory loaded. I can answer the live part now, and any web, PDF, code, or pricing work is staged for the GPT-5.5 background layer once the provider key is connected.";
+            return "I have the local learning book, previous context, and document memory loaded. I can answer the live part now, and any web, PDF, code, or pricing work is staged for the background layer once the provider key is connected.";
           }
           const startedAt = Date.now();
           const fgProvider = resolveBrokerLlmProvider(
@@ -5133,7 +5136,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
               name: "openrouter:web_search",
               status: "delegated",
               summary:
-                "GPT-5.5 background model received OpenRouter's hosted web search server tool.",
+                "The background model received OpenRouter's hosted web search server tool.",
             },
           ];
           try {
@@ -5152,7 +5155,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
             });
             if (!brokerBackgroundApiKey) {
               throw new Error(
-                "Background GPT-5.5 provider key is missing; OpenRouter web search cannot run.",
+                "Background provider key is missing; OpenRouter web search cannot run.",
               );
             }
 
@@ -5172,7 +5175,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
                 {
                   role: "system",
                   content:
-                    "You are Tutor's asynchronous GPT-5.5 background layer. You handle every slow, current, search, stock-price, code, file, PDF, and analysis task that the low-latency foreground teacher delegates. Use OpenRouter web search when the answer needs current public information. Return only a concise spoken follow-up that can be stitched naturally into the same live lesson after the foreground reply. Start as a smooth aside, such as 'Also,', 'By the way,', 'Quick update:', 'One more thing:', or 'I found it:'. Include concrete facts, timestamps or caveats for prices/current data, and source names when available. Do not return JSON, tool-call syntax, markdown tables, code fences, bullet lists, raw citations, bold or italic markdown, or labels like 'summary:'.",
+                    "You are Tutor's asynchronous background layer. You handle every slow, current, search, stock-price, code, file, PDF, and analysis task that the low-latency foreground teacher delegates. Use OpenRouter web search when the answer needs current public information. Return only a concise spoken follow-up that can be stitched naturally into the same live lesson after the foreground reply. Start as a smooth aside, such as 'Also,', 'By the way,', 'Quick update:', 'One more thing:', or 'I found it:'. Include concrete facts, timestamps or caveats for prices/current data, and source names when available. Do not return JSON, tool-call syntax, markdown tables, code fences, bullet lists, raw citations, bold or italic markdown, or labels like 'summary:'.",
                 },
                 {
                   role: "user",
@@ -5203,7 +5206,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
             );
             const summary =
               normalizeBackgroundSpokenInsertion(rawSummary) ||
-              "By the way, the GPT-5.5 background layer finished, but it did not return a spoken summary.";
+              "By the way, the background layer finished, but it did not return a spoken summary.";
             sources = extractOpenRouterWebSources(responseMessage).slice(0, 8);
             learnerStore.recordBackgroundTask({
               userId: voiceUserId,
@@ -5355,6 +5358,17 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
           brokerDeepgramApiKey =
             authString(authPayload, "deepgramKey", "sttApiKey") ||
             getDeepgramServerFallbackKey();
+          // Honor the browser's Settings model selectors (voice foreground =
+          // the interaction tutor, background = the smart worker), falling back
+          // to the server env defaults when the client sends nothing.
+          foregroundModel =
+            authString(authPayload, "foregroundModel") ||
+            VOICE_FOREGROUND_MODEL;
+          backgroundModel =
+            authString(authPayload, "backgroundModel") ||
+            VOICE_BACKGROUND_MODEL;
+          ttsModel =
+            authString(authPayload, "ttsModel") || VOICE_BROKER_TTS_MODEL;
           brokerMisoTtsApiUrl = authString(authPayload, "misoTtsApiUrl");
           brokerBrowserTtsEnabled = Boolean(authPayload.browserTts);
           brokerTtsProvider = brokerDeepgramApiKey
@@ -5427,7 +5441,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
             status: "started",
             title: "Local voice broker accepted",
             detail:
-              "Custom voice broker accepted local auth and is ready for Deepgram STT/TTS, GPT-4o-mini, and GPT-5.5 adapters.",
+              "Voice broker accepted auth and is ready for Deepgram STT/TTS plus the selected foreground and background models.",
             requestId: voiceRequestId,
             phase: "broker_auth",
             metadata: {
@@ -5473,8 +5487,8 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
             status: brokerBackgroundApiKey ? "started" : "blocked",
             title: "Voice broker background queue staged",
             detail: brokerBackgroundApiKey
-              ? "Background GPT-5.5 queue is ready to use OpenRouter hosted web search plus delegated background analysis."
-              : "Background GPT-5.5 queue is staged for web/search/PDF/code tasks and waiting for the OpenRouter provider key.",
+              ? "Background queue is ready to use OpenRouter hosted web search plus delegated background analysis."
+              : "Background queue is staged for web/search/PDF/code tasks and waiting for the OpenRouter provider key.",
             requestId: voiceRequestId,
             model: backgroundModel,
             phase: "background_ready",
@@ -5522,7 +5536,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
               status: "blocked",
               title: "Voice broker background job waiting for provider key",
               detail:
-                "GPT-5.5 background execution is staged locally and will run after the OpenRouter provider key is supplied.",
+                "Background execution is staged locally and will run after the OpenRouter provider key is supplied.",
               requestId: voiceRequestId,
               model: backgroundModel,
               phase: "background_job",
@@ -5537,7 +5551,7 @@ IMPORTANT TOOL USAGE INSTRUCTIONS:
               jobId,
               status: "pending_provider_key",
               summary:
-                "Background GPT-5.5 execution is staged locally and waiting for the OpenRouter provider key.",
+                "Background execution is staged locally and waiting for the OpenRouter provider key.",
             });
           }, 25);
         };

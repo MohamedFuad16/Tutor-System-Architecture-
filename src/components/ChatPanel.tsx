@@ -25,8 +25,6 @@ import {
   Check,
   Folder,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Volume2,
   Square,
   Zap,
@@ -5703,9 +5701,12 @@ export function ChatPanel({
       await startRealtimeVoice();
       return;
     }
-    if (!usesCustomVoiceBroker && !hasDeepgramRuntimeKey) {
+    // The Deepgram duplex path needs a Deepgram key for STT/TTS (or a server
+    // fallback). Check it directly — the old `!usesCustomVoiceBroker` guard is
+    // unreachable now that duplex is the only non-realtime mode.
+    if (!hasDeepgramRuntimeKey) {
       alert(
-        "Please configure your Deepgram API Key in settings or expose the local server fallback before using Voice features.",
+        "Please configure your Deepgram API Key in settings, or enable the server fallback, before using Voice features.",
       );
       return;
     }
@@ -5713,9 +5714,18 @@ export function ChatPanel({
       alertProofTrafficApprovalNeeded();
       return;
     }
-    if (window.location.hostname.endsWith(".vercel.app")) {
+    // Vercel's serverless runtime cannot hold the voice WebSocket, but a
+    // dedicated voice server (VITE_VOICE_WS_URL, e.g. the Azure VM) can — only
+    // block when the app is on Vercel with no remote voice host configured.
+    const hasRemoteVoiceServer = Boolean(
+      String(import.meta.env.VITE_VOICE_WS_URL || "").trim(),
+    );
+    if (
+      window.location.hostname.endsWith(".vercel.app") &&
+      !hasRemoteVoiceServer
+    ) {
       alert(
-        "Live Voice uses a WebSocket backend, which cannot run inside this Vercel deployment. Read Aloud still works through the HTTP TTS route; deploy the Node server separately for live voice.",
+        "Live Voice needs a WebSocket backend, which this Vercel deployment cannot host. Set VITE_VOICE_WS_URL to your voice server (see docs/azure-voice-server.md). Read Aloud still works through the HTTP TTS route.",
       );
       return;
     }
@@ -6004,10 +6014,9 @@ export function ChatPanel({
         });
       }
 
-      const voiceSocketPath = usesCustomVoiceBroker
-        ? "/api/voice-broker"
-        : "/api/voice-agent";
-      const wsUrl = `${voiceServerWsUrl()}${voiceSocketPath}?language=${encodeURIComponent(language)}`;
+      // Deepgram duplex is the only WebSocket voice mode (OpenAI Realtime uses
+      // WebRTC and returns earlier), so this always targets the broker.
+      const wsUrl = `${voiceServerWsUrl()}/api/voice-broker?language=${encodeURIComponent(language)}`;
       ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
