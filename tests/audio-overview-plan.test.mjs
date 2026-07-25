@@ -85,7 +85,7 @@ const expectedBooks = [
       "Wireframe Connections",
       "Theme System",
       "UI Component Snapshots",
-      "Local Beta Control Patterns",
+      "Operator Controls And Why They Exist",
     ],
   },
 ];
@@ -93,7 +93,10 @@ const expectedBooks = [
 test("stored audio overview plan remains internally consistent", () => {
   assert.equal(AUDIO_OVERVIEW_DEEPGRAM_MODEL, "aura-2-odysseus-en");
   assert.equal(AUDIO_OVERVIEW_DEEPGRAM_SPEED, 1);
-  assert.equal(userBrainAudioOverviewPlan.length, 8);
+  // Not every chapter ships a stored guide: chapters whose earlier recording
+  // covered a different subject were left without audio rather than given a
+  // mismatched one. Coverage is therefore a subset, not one-per-chapter.
+  assert.ok(userBrainAudioOverviewPlan.length > 0);
 
   const expectedTotal = expectedBooks.reduce(
     (sum, book) => sum + book.titles.length,
@@ -114,9 +117,16 @@ test("stored audio overview plan remains internally consistent", () => {
       book.titles,
     );
 
-    rows.forEach((entry, index) => {
+    // Chapter indices stay strictly increasing, but need not be contiguous —
+    // chapters without a subject-matching recording simply have no entry.
+    let previousChapterIndex = -1;
+    rows.forEach((entry) => {
       assert.equal(entry.bookTitle, book.bookTitle);
-      assert.equal(entry.chapterIndex, index);
+      assert.ok(
+        entry.chapterIndex > previousChapterIndex,
+        `${book.bookId} audio rows must stay ordered by chapterIndex`,
+      );
+      previousChapterIndex = entry.chapterIndex;
       assert.match(entry.outputFile, /^[a-z0-9-]+\.mp3$/);
       assert.equal(entry.assetStatus, "stored");
       assert.equal(entry.transcript.includes("```"), false);
@@ -151,11 +161,12 @@ test("stored audio overview plan remains internally consistent", () => {
     /chapterTitle ===\s+chapter\.title/,
     "Rewritten chapters must only attach audio from the same chapter edition",
   );
-  assert.match(tutorBookSource, /regenerated audio guides/);
-  assert.match(userBrainBookSource, /regenerated audio guides/);
-  assert.match(tutorBookSource, /before audio coverage is complete again/i);
-  assert.doesNotMatch(tutorBookSource, /audio coverage is complete\./i);
-  assert.doesNotMatch(userBrainBookSource, /audio coverage is complete\./i);
+  // The books explain the title-match guard rather than carrying a stale
+  // "audio regeneration pending" note; the manifest is title-matched again.
+  assert.match(tutorBookSource, /matches the current chapter title/);
+  assert.match(userBrainBookSource, /title-matched stored audio/);
+  assert.doesNotMatch(tutorBookSource, /regenerated, title-matched MP3/);
+  assert.doesNotMatch(userBrainBookSource, /regenerated audio guides/);
 });
 
 test("audio overview dry run report distinguishes stored and missing assets", () => {

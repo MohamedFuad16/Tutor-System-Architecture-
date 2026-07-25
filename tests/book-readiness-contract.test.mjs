@@ -51,7 +51,8 @@ test("built-in architecture books stay arranged as reader-first guides", () => {
     "Chapter 5: Learning Books And Revision Material",
     "Chapter 6: Voice And Asynchronous Tools",
     "Chapter 7: Admin And Multi-Learner Oversight",
-    "Chapter 8: Current Status, Glossary, And References",
+    "Chapter 8: Current Status And What Is Not Claimed",
+    "Chapter 9: Glossary And References",
   ]);
 
   assert.match(revisionViewSource, /Wireframe Connections/);
@@ -87,7 +88,11 @@ test("Deepgram voice boundary is documented across architecture books", () => {
   assert.match(chapterProviders, /universal sub-200 ms response/);
   assert.match(userBrainBookSource, /Deepgram provides streaming speech/);
   assert.match(userBrainBookSource, /one WebSocket per conversation/);
-  assert.match(userBrainBookSource, /MisoTTS is not treated as the live path/);
+  // MisoTTS was removed from the product, so the books must not describe it.
+  assert.doesNotMatch(userBrainBookSource, /MisoTTS/);
+  // The two runtime voice modes must be documented in the book.
+  assert.match(userBrainBookSource, /deepgram-duplex/);
+  assert.match(userBrainBookSource, /openai-realtime/);
   assert.match(architectureDoc, /Deepgram/i);
 });
 
@@ -102,9 +107,11 @@ test("architecture book text keeps Graphify local and defines the Chapter 2 flow
   assert.match(toolsChapter, /not learner data/);
   assert.match(userBrainLedgerChapter, /Learner identity/);
   assert.match(userBrainLedgerChapter, /flowchart LR/);
-  assert.match(userBrainLedgerChapter, /local profile also has a \\`userId\\`/);
+  assert.match(userBrainLedgerChapter, /local profile has a \\`userId\\`/);
   assert.match(userBrainLedgerChapter, /server-owned learner store/);
   assert.match(userBrainLedgerChapter, /brain\.sqlite/);
+  // The storage boundary must be stated the same way everywhere.
+  assert.match(userBrainLedgerChapter, /system of record/);
 });
 
 test("user brain book keeps artifact and audio control scope accurate", () => {
@@ -114,13 +121,13 @@ test("user brain book keeps artifact and audio control scope accurate", () => {
   const voiceAudioOverview = audioOverviewManifest.find(
     (overview) =>
       overview.bookId === "user-brain-architecture" &&
-      overview.chapterTitle === "Chapter 6: Voice, Audio, And Timing",
+      overview.chapterTitle === "Chapter 6: Voice And Asynchronous Tools",
   );
 
   assert.ok(retrievalChapter, "User Brain artifact chapter should exist");
   assert.match(retrievalChapter, /Artifacts store provenance/);
   assert.match(retrievalChapter, /traceable/);
-  assert.match(retrievalChapter, /semantic claim-to-source entailment/);
+  assert.match(retrievalChapter, /semantic claim-to-source entailment/i);
   assert.ok(voiceAudioOverview, "User Brain voice audio overview should exist");
   assert.match(voiceAudioOverview.transcript, /custom controls/);
   assert.match(
@@ -133,26 +140,35 @@ test("user brain book keeps artifact and audio control scope accurate", () => {
   );
 });
 
-test("rewritten built-in books do not overclaim stored audio coverage", () => {
+test("every stored audio guide title-matches its current chapter", () => {
   const tutorStatusChapter = tutorBook[11].content;
   const userBrainStatusChapter = userBrainBookSource.match(
-    /title: "Chapter 8: Current Status, Glossary, And References",\n    content: `([\s\S]*?)`,\n  \}/,
+    /title: "Chapter 8: Current Status And What Is Not Claimed",\n    content: `([\s\S]*?)`,\n  \}/,
   )?.[1];
 
   assert.ok(userBrainStatusChapter, "User Brain status chapter should exist");
   assert.match(
     tutorStatusChapter,
-    /play stored audio only when an audio manifest title matches the current chapter title/,
-  );
-  assert.match(
-    tutorStatusChapter,
-    /regenerated, title-matched MP3 audio guides/,
+    /stored audio only when an audio manifest title matches the current chapter title/,
   );
   assert.match(userBrainStatusChapter, /title-matched stored audio/);
-  assert.match(userBrainBookSource, /regenerated audio guides/);
-  assert.match(tutorStatusChapter, /before audio coverage is complete again/i);
-  assert.doesNotMatch(tutorStatusChapter, /audio coverage is complete\./i);
-  assert.doesNotMatch(userBrainStatusChapter, /audio coverage is complete\./i);
+
+  // The guard in RevisionView only attaches audio when the manifest title equals
+  // the chapter title, so a drifted manifest silently drops the guide. Assert
+  // every entry still resolves to a real chapter with the exact title.
+  const bookChapterTitles = {
+    "tutor-book": tutorBook.map((chapter) => chapter.title),
+    "user-brain-architecture": userBrainChapterTitles,
+  };
+  for (const overview of audioOverviewManifest) {
+    const titles = bookChapterTitles[overview.bookId];
+    if (!titles) continue;
+    assert.equal(
+      overview.chapterTitle,
+      titles[overview.chapterIndex],
+      `${overview.outputFile} must title-match ${overview.bookId}[${overview.chapterIndex}]`,
+    );
+  }
 });
 
 test("generated revision-book summaries preserve Markdown structure", () => {
